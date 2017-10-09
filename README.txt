@@ -1,4 +1,6 @@
 
+ALPHA : BEING TESTED
+
 Cpp2Py is the Python-C++ interfacing tool of the TRIQS project, provided
 here as a standalone project.
 
