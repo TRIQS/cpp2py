@@ -1,7 +1,7 @@
 set (CPP2PY_VERSION "1.5")
 
-cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
-project(AllCpp2xx LANGUAGES C CXX)
+cmake_minimum_required(VERSION 2.8.7)
+project(AllCpp2xx C CXX)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
