@@ -31,9 +31,7 @@ message( STATUS "-------- git and hash detection -------------")
 find_package(Git) 
 execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
- RESULT_VARIABLE   GIT_RESULT
  OUTPUT_VARIABLE   GIT_HASH
- ERROR_VARIABLE    GIT_ERROR
  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 

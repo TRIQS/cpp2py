@@ -22,7 +22,7 @@ module.add_preamble("""
 using namespace ${ns};
 %endfor
 %if param_cls_list :
-#include "./${W.modulename.rsplit('.',1)[-1]}_converters.hxx"
+#include "${W.modulename.rsplit('.',1)[-1]}_converters.hxx"
 %endif
 """)
 ##
