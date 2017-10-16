@@ -28,6 +28,7 @@ class Cpp2pyInfoStd(Cpp2pyInfoBase):
     # Which converters to import : syntax is :
     # regex to match the canonical C++ type : full name of the converters
     _table_converters = {
+        'std::.*complex' : 'complex',
         'std::.*map' : 'map',
         'std::.*set' : 'set',
         'std::.*vector' : 'vector',

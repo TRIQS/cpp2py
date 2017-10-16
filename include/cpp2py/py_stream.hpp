@@ -29,7 +29,7 @@ namespace cpp2py {
  */
   class py_stream {
 
-    py_tools::pyref sys, sys_out;
+    pyref sys, sys_out;
     void _write(const char *s) { pyref res = PyObject_CallMethod(sys_out, "write", "s", s); }
 
     public:

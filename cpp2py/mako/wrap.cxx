@@ -641,7 +641,7 @@ template <> struct py_converter<${en.c_name}> {
         ${overload._get_calling_pattern1()}
         %if overload.release_GIL_and_enable_signal :
          PyOS_sighandler_t sig = PyOS_getsig(SIGINT);
-         triqs::signal_handler::start(); // start the C++ signal handler
+         cpp2py::signal_handler::start(); // start the C++ signal handler
          Py_BEGIN_ALLOW_THREADS;
 	 try {
         %endif
@@ -651,12 +651,12 @@ template <> struct py_converter<${en.c_name}> {
 	 catch(...) {
 	   // an error has occurred : clean GIL, handler and rethrow
            Py_BLOCK_THREADS; // cf python include, ceval.h, line 72 comments and below.
-           triqs::signal_handler::stop(); // stop the C++ signal handler
+           cpp2py::signal_handler::stop(); // stop the C++ signal handler
            PyOS_setsig(SIGINT, sig);
            throw; //
 	 }
          Py_END_ALLOW_THREADS;
-         triqs::signal_handler::stop();
+         cpp2py::signal_handler::stop();
          PyOS_setsig(SIGINT, sig);
         %endif
         %if not overload.is_constructor :

@@ -2,6 +2,7 @@
 set(CPP2PY_VERSION                      @CPP2PY_VERSION@)
 set(CPP2PY_GIT_HASH                     @GIT_HASH@)
 
+set(CPP2PY_CXX_COMPILER                 @CMAKE_CXX_COMPILER@)
 set(CPP2PY_PYTHON_INTERPRETER           @PYTHON_INTERPRETER@)
 set(CPP2PY_PYTHON_LIB_DEST              @PYTHON_LIB_DEST@)
 set(CPP2PY_PYTHON_LIB_DEST_ROOT         @PYTHON_LIB_DEST_ROOT@)
@@ -62,12 +63,11 @@ macro (add_cpp2py_module ModuleName)
  message(STATUS "Adding cpp2py Python module ${ModuleName}")
 
  SET(desc_name  ${CMAKE_CURRENT_SOURCE_DIR}/${ModuleName}_desc.py)    # the desc file
- SET(wrap_name  ${CMAKE_CURRENT_BINARY_DIR}/${ModuleName}_wrap.cpp)   # path to the wrapping code
+ SET(wrap_name  ${CMAKE_CURRENT_BINARY_DIR}/${ModuleName}_wrap.cxx)   # path to the wrapping code
  SET(target_name ${ModuleName})
 
  add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name}
   COMMAND PYTHONPATH=@PYTHON_PATH_ADD@${PROJECT_BINARY_DIR}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_INTERPRETER} ${desc_name} ${wrap_name}) 
-  # FIXME : remove this wrap_name --> sys.argv in module generation
  
  add_library(${target_name} MODULE ${wrap_name}) 
  target_link_libraries(${target_name} python_and_numpy cpp2py)
