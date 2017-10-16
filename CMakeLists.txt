@@ -1,15 +1,15 @@
 set (CPP2PY_VERSION "1.5")
 
+# Check CMAKE_INSTALL_PREFIX : must be provided and absolute
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
+ message(FATAL_ERROR "CMAKE_INSTALL_PREFIX must be specified and must be an absolute path.\n There is no default.\n Current value : ${CMAKE_INSTALL_PREFIX}\n.  e.g. ... -DCMAKE_INSTALL_PREFIX=$HOME/triqs_install")
+endif()
+message(STATUS "Installation directory will be ${CMAKE_INSTALL_PREFIX}")
+
 cmake_minimum_required(VERSION 2.8.7)
 project(AllCpp2xx C CXX)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
-
-# Check CMAKE_INSTALL_PREFIX : must be provided and absolute
-if ((NOT CMAKE_INSTALL_PREFIX) OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
- message(FATAL_ERROR "CMAKE_INSTALL_PREFIX must be specified and must be an absolute path.\n There is no default.\n Current value : ${CMAKE_INSTALL_PREFIX}\n.  e.g. ... -DCMAKE_INSTALL_PREFIX=$HOME/triqs_install")
-endif()
-message(STATUS "Installation directory will be ${CMAKE_INSTALL_PREFIX}")
 
 # shared library. no option, use shared.
 set(BUILD_SHARED_LIBS ON)
