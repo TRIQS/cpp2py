@@ -29,9 +29,9 @@ def execute(command, message):
        raise RuntimeError, "Error"
     #if verbosity>0: 
     #print_out(message, out)
-    print message
+    #print message
 
-def make_desc_and_compile(code, verbosity =0, only=(), modules = ()):
+def compile(code, verbosity =0, only=(), modules = ()):
     """
     Takes the c++ code, call c++2py on it and compile the whole thing into a module.
     """
@@ -64,7 +64,7 @@ def make_desc_and_compile(code, verbosity =0, only=(), modules = ()):
 
         # Call make
         execute ("make -j2  ", "make")
-    
+ 
         print "Done"
 
     finally:

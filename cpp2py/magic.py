@@ -64,7 +64,7 @@ class Cpp2pyMagics(Magics):
 
         args = magic_arguments.parse_argstring(self.cpp2py, line)
         code = cell if cell.endswith('\n') else cell + '\n'
-        module = make_desc_and_compile(code, args.verbosity, args.only)
+        module = compile(code, args.verbosity, args.only)
 
         # import all object and function in the main namespace
         imported = []
