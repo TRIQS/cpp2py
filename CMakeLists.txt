@@ -71,6 +71,17 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INS
 #   Remind the user how to set up his/her variables
 #
 ###############################################################
+if (NOT LIBCLANG_LOCATION)
+ MESSAGE(STATUS "**************************************************************************************")
+ MESSAGE(STATUS "**************************          WARNING           ********************************")
+ MESSAGE(STATUS "   ")
+ MESSAGE(STATUS "    Can not find libclang                                                           ")
+ MESSAGE(STATUS "    You can use cpp2py to compile a code, but c++2py, c++2rst, c++2cxx will not work")
+ MESSAGE(STATUS "   ")
+ MESSAGE(STATUS "**************************          WARNING           ********************************")
+ MESSAGE(STATUS "**************************************************************************************")
+endif()
+
 MESSAGE(STATUS "***************************************************************")
 MESSAGE(STATUS "* Use :                                                        ")
 MESSAGE(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")

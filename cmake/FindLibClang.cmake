@@ -33,22 +33,11 @@ SET(TRIAL_LIBRARY_PATHS
  /usr/lib 
  /usr/lib/x86_64-linux-gnu
  /usr/lib/llvm-4.0/lib
- /usr/lib/llvm-3.9/lib
- /usr/lib/llvm-3.8/lib
- /usr/lib/llvm-3.6/lib
- /usr/lib/llvm-3.5/lib
- /usr/lib/llvm-3.4/lib
  /usr/lib64/llvm
- /usr/local/install/clang-3.4/lib
 )
 if (NOT LIBCLANG_LOCATION)
 FIND_LIBRARY(LIBCLANG_LOCATION NAMES libclang.so PATHS ${TRIAL_LIBRARY_PATHS} DOC "Location of the libclang library")
 endif()
-
-if (NOT LIBCLANG_LOCATION)
- MESSAGE(STATUS "Can not find libclang")
-endif()
-
 
 SET(LIBCLANG_CXX_ADDITIONAL_FLAGS "${LIBCLANG_CXX_ADDITIONAL_FLAGS}")
 #SET(LIBCLANG_CXX_ADDITIONAL_FLAGS "-DADD_MAX_ALIGN_T_WORKAROUND ${LIBCLANG_CXX_ADDITIONAL_FLAGS}")
@@ -59,7 +48,7 @@ if (NOT CLANG_COMPILER)
   ENV PATH
   /usr/bin 
  )
-FIND_PROGRAM(CLANG_COMPILER names clang++ clang++-4.0 clang++-3.9 clang++-3.8 clang++-3.7 clang++-3.6 clang++-3.5 PATHS ${TRIAL_CLANG_PATHS} DOC "Clang compiler (for libclang option)")
+FIND_PROGRAM(CLANG_COMPILER names clang++ clang++-5.0 clang++-4.0 PATHS ${TRIAL_CLANG_PATHS} DOC "Clang compiler (for libclang option)")
 endif()
 
 if (NOT CLANG_COMPILER)
