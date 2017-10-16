@@ -17,8 +17,8 @@ parser.add_argument('--namespace', '-N', action='append',  help='namespaces to d
 parser.add_argument('--parse-all-comments',  action='store_true', help="Grab all comments, including non doxygen like [FALSE]")
 
 args = parser.parse_args()
-args.includes = (args.includes or []) +  config.TRIQS_INCLUDE_DEPS.split(';')
-args.includes.append(config.TRIQS_INCLUDE) 
+args.includes = (args.includes or []) #+  config.TRIQS_INCLUDE_DEPS.split(';')
+#args.includes.append(config.TRIQS_INCLUDE) 
 
 # ---------------------------------------------------------
 # Create the worker. It parses the file       
