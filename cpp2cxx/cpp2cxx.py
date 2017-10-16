@@ -27,7 +27,7 @@ class Cpp2Cxx:
                       Absolute path to libclang. By default, the detected one.
         """
         self.filename, self.namespaces = filename, namespaces
-        self.root = CL.parse(filename, compiler_options, includes, libclang_location, parse_all_comments)
+        self.root = CL.parse(filename, compiler_options, includes, libclang_location, parse_all_comments, skip_function_bodies = False)
 
     # FIXME : pass the 3 functions to run functions ?? 
     # default : namespace, filelocation, ?

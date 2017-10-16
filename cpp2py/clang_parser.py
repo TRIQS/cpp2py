@@ -300,7 +300,7 @@ def get_namespace_list(node):
     
 #--------------------  PARSE
 
-def parse(filename, compiler_options, includes, libclang_location, parse_all_comments):
+def parse(filename, compiler_options, includes, libclang_location, parse_all_comments, skip_function_bodies = True):
     """
     filename           : name of the file to parse
     compiler_options   : options to pass to clang to compile the file 
@@ -319,7 +319,11 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     
     # Parse the file
     print "Parsing the C++ file (may take a few seconds) ..."
-    translation_unit = index.parse(filename, ['-x', 'c++'] + compiler_options)
+    if skip_function_bodies:
+        translation_unit = clang.cindex.TranslationUnit.from_source(filename, args =  ['-x', 'c++'] + compiler_options,
+                                                                    options = clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
+    else:
+        translation_unit = index.parse(filename, ['-x', 'c++'] + compiler_options)
 
     # If clang encounters errors, we report and stop
     errors = [d for d in translation_unit.diagnostics if d.severity >= 3]
