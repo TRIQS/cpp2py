@@ -15,16 +15,6 @@
 - TESTS
 - upgrade skeleton
 
-- python ess_desc.py : no second argument
-
-- check libclang : if not present : 
-
-   - install in degraded mode : 
-   - c++2py and co should raise and explain.
-   - cmake also should warn.
-
-- doc building : macro ---> cpp2rst  
-
 - gf : regular converters
 
 - pip -r pip-requirements.txt for cpp2py or TRIQS ??

@@ -85,7 +85,7 @@ class cfunction :
       assert isinstance(signature, str) or isinstance(signature, dict), "Signature must be a string of a dict: cf doc"
       self.c_name = c_name # Not none for internal call only
       ## Analyse signature.
-      self.args = []
+      self.args, self.namespace = [], ''
       if isinstance(signature, str) : # it is a string, we analyse it to get the rtype, and args
         signature = re.sub('operator\(\s*\)','__operator_call',signature) # temp. replacement, to make the regex easier
         m = re.match(r"\s*(.*?)\s*\((.*)\)",signature)
@@ -94,7 +94,8 @@ class cfunction :
         if self.rtype :
             spl = self.rtype.strip().rsplit(' ',1)
             if not is_constructor and len(spl)> 1 and '>' not in spl[-1] :
-                self.rtype, self.c_name = spl
+                self.rtype, c_name_fully_qualified = spl
+                self.namespace, self.c_name = c_name_fully_qualified.rsplit('::',1 ) if ':' in c_name_fully_qualified else ('', c_name_fully_qualified)
                 if self.c_name == '__operator_call' : self.c_name = "operator()"
         if args.strip().startswith("**") : # special case : dict call
             assert calling_pattern is None, "When ** is given as argument, no calling pattern can be provided"
@@ -115,7 +116,8 @@ class cfunction :
               return a.rsplit(' ',1)
         #args = [ re.sub('=',' ',x).split() for x in f() if x] # list of (type, name, default) or (type, name)
         args = [ g(x) for x in f() if x] # list of (type, name, default) or (type, name)
-      else :
+      else:
+          # mostly internal use, give signature as a dict 
           self.rtype = signature.pop("rtype", None)
           args = signature.pop('args',())
           self.c_name = signature.pop("c_name", '')
@@ -158,7 +160,7 @@ class cfunction :
         # the wrapped types are called by pointer
         args = ",".join( n for t,n,d in self.args)
         args = args if self._dict_call is None else "dict_transcript" 
-        return "%s %s%s(%s)"%(s,self_c, self.c_name , args)
+        return "%s %s%s(%s)"%(s,self_c, (self.namespace + '::' if self.namespace else '') + self.c_name, args)
 
     def _get_signature (self):
         """Signature for the python doc"""

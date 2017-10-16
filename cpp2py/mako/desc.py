@@ -30,7 +30,7 @@ using namespace ${ns};
 # The class ${c.spelling}
 c = class_(
         py_type = "${util.deduce_normalized_python_class_name(c.spelling)}",  # name of the python class
-        c_type = "${c.spelling}",   # name of the C++ class
+        c_type = "${c.type.get_canonical().spelling}",   # name of the C++ class
         doc = """${doc.make_doc(c)}""",   # doc of the C++ class
 )
 <%
@@ -73,7 +73,7 @@ module.add_class(c)
 %endfor
 ##
 %for f in W.all_functions_gen():
-module.add_function ("${W.make_signature_for_desc(f)}", doc = """${doc.make_doc(f)}""")
+module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}", doc = """${doc.make_doc(f)}""")
 
 %endfor
 ##

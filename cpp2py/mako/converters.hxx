@@ -1,13 +1,14 @@
 // DO NOT EDIT
-// --- C++ Python converter for ${c.spelling}
+<% c_can_spelling = c.type.get_canonical().spelling %>
+// --- C++ Python converter for ${c_can_spelling}
 #include <cpp2py/converters/vector.hpp>
 #include <cpp2py/converters/string.hpp>
 #include <algorithm>
 
 namespace cpp2py { 
 
-template <> struct py_converter<${c.spelling}> {
- static PyObject *c2py(${c.spelling} const & x) {
+template <> struct py_converter<${c_can_spelling}> {
+ static PyObject *c2py(${c_can_spelling} const & x) {
   PyObject * d = PyDict_New(); 
   %for m in c_members :
   PyDict_SetItemString( d, ${name_format('"%s"'%m.spelling)}, convert_to_python(x.${m.spelling}));
@@ -29,8 +30,8 @@ template <> struct py_converter<${c.spelling}> {
    r = T{};
  }
 
- static ${c.spelling} py2c(PyObject *dic) {
-  ${c.spelling} res;
+ static ${c_can_spelling} py2c(PyObject *dic) {
+  ${c_can_spelling} res;
   %for m, m_initializer in [(m,CL.get_member_initializer(m)) for m in  c_members]:
   %if m_initializer == '' : 
   res.${m.spelling} = convert_from_python<${m.type.spelling}>(PyDict_GetItemString(dic, "${m.spelling}"));
@@ -91,7 +92,7 @@ template <> struct py_converter<${c.spelling}> {
   return true;
   
  _error: 
-   fs2 << "\n---- There " << (err > 1 ? "are " : "is ") << err<< " error"<<(err >1 ?"s" : "")<< " in Python -> C++ transcription for the class ${c.spelling}\n" <<fs.str();
+   fs2 << "\n---- There " << (err > 1 ? "are " : "is ") << err<< " error"<<(err >1 ?"s" : "")<< " in Python -> C++ transcription for the class ${c_can_spelling}\n" <<fs.str();
    if (raise_exception) PyErr_SetString(PyExc_TypeError, fs2.str().c_str());
   return false;
  }

@@ -184,7 +184,7 @@ class Cpp2Desc:
 
         return mlist, plist
   
-    def make_signature_for_desc(self, f, is_constructor = False):
+    def make_signature_for_desc(self, f, is_constructor = False, is_free_function = False):
         """Given a node of a function/methods, it makes the signature for desc file"""
         # first format the arguments
         def cls(t) :
@@ -203,7 +203,8 @@ class Cpp2Desc:
         if is_constructor:
             return "(%s)"%r
         else :
-            return ("%s %s (%s)"%(cls(f.result_type.spelling), f.spelling, r)).strip()
+            f_name = f.spelling if not is_free_function else CL.fully_qualified(f)
+            return ("%s %s (%s)"%(cls(f.result_type.spelling), f_name, r)).strip()
 
     def generate_desc_file(self, output_filename, verbose  = True):
         """ Makes the desc file"""
