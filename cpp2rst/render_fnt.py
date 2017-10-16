@@ -16,8 +16,8 @@ rst_start = """
 # The hidden toc for RST reference
 toctree_hidden ="""
 .. toctree::
-  :hidden:
-
+   :hidden:
+      
 """
 
 def head(s): return '\n' + s + '\n' + '-'*len(s)  + '\n\n'
