@@ -1,5 +1,4 @@
 
-- Fix namespace for function
 - doc:
 
   - make doc dir

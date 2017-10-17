@@ -153,7 +153,5 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
  # Installation : Final destination of the python modules
  string(REGEX REPLACE ".*/lib" "lib" PYTHON_LIB_DEST_ROOT ${PYTHON_SITE_PKG} )
- set(PYTHON_LIB_DEST ${PYTHON_LIB_DEST_ROOT}/pytriqs )
- message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST}")
-
+ message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST_ROOT}")
 
