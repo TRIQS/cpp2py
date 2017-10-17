@@ -13,8 +13,8 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/converters.py              DESTINATION
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cpp2py_info_base.py        DESTINATION  ${DEST})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc.py                     DESTINATION  ${DEST})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/util.py                    DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/onfly.py                    DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/magic.py                    DESTINATION  ${DEST})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/compiler.py                DESTINATION  ${DEST})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/magic.py                   DESTINATION  ${DEST})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mako                   DESTINATION  ${DEST})
 
 

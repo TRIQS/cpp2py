@@ -890,7 +890,7 @@ static int ${c.py_type}___setitem__(PyObject *self, PyObject *key, PyObject *v) 
 //
  static PyObject* ${c.py_type}___reduce_reconstructor__ (PyObject *self, PyObject *args, PyObject *keywds) {
   try {
-    triqs::regular_type_if_view_else_type_t<${c.c_type}> result;
+    cpp2py::regular_type_if_view_else_type_t<${c.c_type}> result;
     auto r = reconstructor{args};
     result.serialize(r,0);// make sure reconstructor is a friend as boost::serialization::access
     return convert_to_python(std::move(result));
@@ -1078,7 +1078,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject* v, PyObject *w){
   if (convertible_from_python<${overload.args[0][0]}>(v,false) && convertible_from_python<${overload.args[1][0]}>(w,false)) {
    try {
     %if not op_name.startswith("inplace") and not getattr(op, 'treat_as_inplace', False) :
-     triqs::regular_type_if_view_else_type_t<${overload.rtype}> r = 
+     cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r = 
            convert_from_python<${overload.args[0][0]}>(v) ${overload._get_calling_pattern()} convert_from_python<${overload.args[1][0]}>(w);
      return convert_to_python(std::move(r)); // in two steps to force type for expression templates in C++
     %else:
@@ -1101,7 +1101,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject *v){
   %for overload in op.overloads :
   if (py_converter<${overload.args[0][0]}>::is_convertible(v,false)) {
    try {
-    triqs::regular_type_if_view_else_type_t<${overload.rtype}> r =
+    cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r =
          ${overload._get_calling_pattern()}(convert_from_python<${overload.args[0][0]}>(v));
     return convert_to_python(std::move(r)); // in two steps to force type for expression templates in C++
    }

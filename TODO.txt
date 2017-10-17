@@ -19,6 +19,5 @@
 - pip -r pip-requirements.txt for cpp2py or TRIQS ??
 
 - triqs_set_rpath_of_all_targets(PATH)
-- triqs_get_git_hash_of_source()
 
 

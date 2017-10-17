@@ -63,7 +63,7 @@ class cfunction :
           - For long functions in pure C++.
           - If True, the GIL is released in the call of the C++ function and restored after the call.
           - It also saves the signal handler of python and restores it after the call,
-            and enables the C++ triqs signal_handler.
+            and enables the C++ signal_handler.
           - This allows e.g. to intercept Ctrl-C during the long C++ function.
           - **Requirement** :
              The function wrapped must be pure C++, i.e.  no call whatsoever to the python C API, directly or indirectly.
@@ -515,7 +515,7 @@ class class_ :
          - For long functions in pure C++.
          - If True, the GIL is released in the call of the C++ function and restored after the call.
          - It also saves the signal handler of python and restores it after the call,
-           and enables the C++ triqs signal_handler.
+           and enables the C++ signal_handler.
          - This allows e.g. to intercept Ctrl-C during the long C++ function.
          - **Requirement** :
             The function wrapped must be pure C++, i.e.  no call whatsoever to the python C API, directly or indirectly.
@@ -670,7 +670,7 @@ class class_ :
         """
         self.add_method(name = "__setitem__impl", calling_pattern = calling_pattern or "self_c[i] = v", doc = doc, signature = signature, **d)
 
-    def add_method_copy(self, clone_function = "triqs::make_clone") :
+    def add_method_copy(self, clone_function = "cpp2py::make_clone") :
         """Add a method copy, that make a **deep** copy, using the clone function"""
         self.add_method(name = "copy", calling_pattern = self.c_type + " result = %s(self_c)"%clone_function, 
                         signature = self.c_type +"()", doc = "Make a copy (clone) of self")
@@ -762,7 +762,7 @@ class module_ :
          - For long functions in pure C++.
          - If True, the GIL is released in the call of the C++ function and restored after the call.
          - It also saves the signal handler of python and restores it after the call,
-           and enables the C++ triqs signal_handler.
+           and enables the C++ signal_handler.
          - This allows e.g. to intercept Ctrl-C during the long C++ function.
          - **Requirement** :
             The function wrapped MUST be pure C++, i.e.  no call whatsoever to the python C API, directly or indirectly.

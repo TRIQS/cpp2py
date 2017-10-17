@@ -5,15 +5,15 @@ cxx_compiler = Config.CXX_COMPILER
 
 cmakelist = """
 cmake_minimum_required(VERSION 2.8)
-project(triqs_magic CXX)
+project(cpp2py_magic CXX)
 set(CMAKE_BUILD_TYPE Release)
 set(BUILD_SHARED_LIBS ON)
 add_compile_options( -std=c++14 )
-find_package(TRIQS REQUIRED)
+find_package(CPP2PY REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR})
 add_cpp2py_module(ext)
+find_package(TRIQS REQUIRED)
 target_link_libraries(ext triqs)
-triqs_set_rpath_for_target(ext)
 """
 
 def print_out (m, out) : 
@@ -29,16 +29,16 @@ def execute(command, message):
        raise RuntimeError, "Error"
     #if verbosity>0: 
     #print_out(message, out)
-    #print message
+    print message
 
 def compile(code, verbosity =0, only=(), modules = ()):
     """
     Takes the c++ code, call c++2py on it and compile the whole thing into a module.
     """
     use_GIL = False
-    #if not GIL, we replace std::cout by triqs::py_out for capture in the notebook
+    #if not GIL, we replace std::cout by py_stream for capture in the notebook
     if not use_GIL :
-        code = re.sub("std::cout", "triqs::py_stream()", code)
+        code = re.sub("std::cout", "cpp2py::py_stream()", code)
 
     key = code, sys.version_info, sys.executable
     module_dirname = tempfile.mkdtemp("cpp2py_onfly_" + hashlib.md5(str(key).encode('utf-8')).hexdigest())
