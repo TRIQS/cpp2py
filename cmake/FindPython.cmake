@@ -12,6 +12,8 @@
 #
 #  This module defines the variables
 #  - PYTHON_INTERPRETER : name of the python interpreter
+#  - PYTHON_VERSION_MAJOR : Python major version found e.g. 2
+#  - PYTHON_VERSION_MINOR : Python version found e.g. 7
 #  - PYTHON_INCLUDE_DIRS : include for compilation
 #  - PYTHON_NUMPY_INCLUDE_DIR : include for compilation with numpy
 #  - PYTHON_LIBRARY : link flags
@@ -25,10 +27,10 @@ include(FindPackageHandleStandardArgs)
 MESSAGE( STATUS "-------- Python detection -------------")
 
 # IF PYTHON_INTERPRETER is not defined, try to find a python
-if (NOT PYTHON_INTERPRETER )
+if(NOT PYTHON_INTERPRETER)
  find_program(PYTHON_INTERPRETER python PATHS $ENV{PATH})
-endif (NOT PYTHON_INTERPRETER)
-if (NOT PYTHON_INTERPRETER)
+endif(NOT PYTHON_INTERPRETER)
+if(NOT PYTHON_INTERPRETER)
  MESSAGE(FATAL_ERROR "No python interpreter found")
 endif(NOT PYTHON_INTERPRETER)
 
@@ -40,9 +42,9 @@ MESSAGE (STATUS "Python interpreter ${PYTHON_INTERPRETER}")
 FUNCTION ( EXEC_PYTHON_SCRIPT the_script output_var_name)
  EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}"
   OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
- IF (NOT returncode EQUAL 0)
+ if (NOT returncode EQUAL 0)
   MESSAGE(FATAL_ERROR "The script : ${the_script} \n did not run properly in the Python interpreter. Check your python installation.")
- ENDIF (NOT returncode EQUAL 0)
+ endif (NOT returncode EQUAL 0)
  SET( ${output_var_name} ${res} PARENT_SCOPE)
 ENDFUNCTION (EXEC_PYTHON_SCRIPT)
 
@@ -50,10 +52,11 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  # Check the interpreter and its version
  #
  EXEC_PYTHON_SCRIPT ("import sys, string; print sys.version.split()[0]" PYTHON_VERSION)
- STRING(COMPARE GREATER ${PYTHON_MINIMAL_VERSION} ${PYTHON_VERSION} PYTHON_VERSION_NOT_OK)
- IF (PYTHON_VERSION_NOT_OK)
+ if(${PYTHON_VERSION} VERSION_LESS ${PYTHON_MINIMAL_VERSION})
   MESSAGE(FATAL_ERROR "Python intepreter version is ${PYTHON_VERSION} . It should be >= ${PYTHON_MINIMAL_VERSION}")
- ENDIF (PYTHON_VERSION_NOT_OK)
+ endif ()
+ EXEC_PYTHON_SCRIPT ("import sys; print sys.version_info[0]" PYTHON_VERSION_MAJOR)
+ EXEC_PYTHON_SCRIPT ("import sys; print sys.version_info[1]" PYTHON_VERSION_MINOR)
  
  EXEC_PYTHON_SCRIPT ("import mako.template" nulle) # check that Mako is there...
  EXEC_PYTHON_SCRIPT ("import distutils " nulle) # check that distutils is there...
@@ -64,8 +67,8 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  #EXEC_PYTHON_SCRIPT ("import mpi4py" nulle) # check that mpi4py is there...
  
  # Adjust this
-  if(Build_Documentation)
- EXEC_PYTHON_SCRIPT ("import clang.cindex" nulle) # check that libclang is there...
+ if(Build_Documentation)
+  EXEC_PYTHON_SCRIPT ("import clang.cindex" nulle) # check that libclang is there...
  endif(Build_Documentation)
  MESSAGE(STATUS "Python interpreter and modules are ok : version ${PYTHON_VERSION}" )
  
@@ -76,9 +79,9 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  message(STATUS "PYTHON_INCLUDE_DIRS =  ${PYTHON_INCLUDE_DIRS}" )
  mark_as_advanced(PYTHON_INCLUDE_DIRS)
  FIND_PATH(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
- if (NOT TEST_PYTHON_INCLUDE)
+ if(NOT TEST_PYTHON_INCLUDE)
   message (ERROR "The Python herader files have not been found. Please check that you installed the Python headers and not only the interpreter.")
- endif (NOT TEST_PYTHON_INCLUDE)
+ endif(NOT TEST_PYTHON_INCLUDE)
  mark_as_advanced(TEST_PYTHON_INCLUDE)
  
  #
@@ -102,7 +105,7 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  mark_as_advanced(PYTHON_NUMPY_VERSION)
  
  # The C API of numpy has changed with 1.7.0, the macro is a version switch in a few files of the libs.
- if (PYTHON_NUMPY_VERSION VERSION_LESS "1.7.0")
+ if(PYTHON_NUMPY_VERSION VERSION_LESS "1.7.0")
   set(PYTHON_NUMPY_VERSION_LT_17 1)
  endif()
 
@@ -120,18 +123,18 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s/config' % get_python_lib(0,1)" PYTHON_LIBRARY_BASE_PATH)
  EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print 'libpython%s' % string.join(get_config_vars('VERSION'))" PYTHON_LIBRARY_BASE_FILE)
  set( PYTHON_LIBRARY_SEARCH_PATH ${PYTHON_LIBRARY_BASE_PATH} /usr/lib/python2.7/config-x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/)
- IF(BUILD_SHARED_LIBS)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.dylib" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
- else()
-  FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
- endif()
- IF(NOT PYTHON_LIBRARY)
+ if(BUILD_SHARED_LIBS)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.dylib" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
+  else()
+   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
+  endif()
+  if(NOT PYTHON_LIBRARY)
    FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
-  ENDIF(NOT PYTHON_LIBRARY)
- ELSE(BUILD_SHARED_LIBS)
+  endif(NOT PYTHON_LIBRARY)
+ else(BUILD_SHARED_LIBS)
   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
- ENDIF(BUILD_SHARED_LIBS)
+ endif(BUILD_SHARED_LIBS)
  MESSAGE(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}" )
  mark_as_advanced(PYTHON_LIBRARY)
 
@@ -152,6 +155,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
  set (PYTHONLIBS_FOUND TRUE) 
 
  # Installation : Final destination of the python modules
- string(REGEX REPLACE ".*/lib" "lib" PYTHON_LIB_DEST_ROOT ${PYTHON_SITE_PKG} )
+ set(PYTHON_LIB_DEST_ROOT lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages)
  message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST_ROOT}")
 

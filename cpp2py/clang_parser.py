@@ -319,6 +319,7 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     index = clang.cindex.Index.create()
     
     # Parse the file
+    assert os.path.exists(filename), " File %s does not exist "%filename
     print "Parsing the C++ file (may take a few seconds) ..."
     if skip_function_bodies:
         translation_unit = clang.cindex.TranslationUnit.from_source(filename, args =  ['-x', 'c++'] + compiler_options,

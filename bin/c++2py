@@ -44,7 +44,7 @@ if args.regenerate :
     assert not (args.cxxflags or args.includes or args.converter or args.namespace or args.only or args.properties), "-r option must be alone"
     f= open(args.filename)
     f.readline()
-    shell_command = f.readline()[2:]
+    shell_command = f.readline()[2:].strip()
     args = parser.parse_args(args = shlex.split(shell_command)[1:]) # reparse now that the arguments are changed.
 else:
     # the instruction that created this file
