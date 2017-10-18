@@ -60,7 +60,7 @@ def compile(code, verbosity =0, only=(), modules = ()):
         # Call cpp2py
         only_list = ','.join(only)
         only_list = (" --only " + only_list) if only_list else '' 
-        execute("c++2py ./ext.cpp -p -m ext -o ext "  + ''.join('-C %s'%x for x in modules) + only_list, "c++2py")
+        execute("c++2py ./ext.cpp --cxxflags='-std=c++14' -p -m ext -o ext "  + ''.join('-C %s'%x for x in modules) + only_list, "c++2py")
 
         # Call make
         execute ("make -j2  ", "make")

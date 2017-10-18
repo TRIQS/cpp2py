@@ -35,8 +35,8 @@ parser.add_argument('--only_converters',  action='store_true', help="[Experts on
 parser.add_argument('--parse-all-comments',  action='store_true', help="Grab all comments, including non doxygen like")
 
 parser.add_argument('--libclang_location', help='Location of the libclang', default = config.LIBCLANG_LOCATION)
-parser.add_argument('--compiler_options', nargs ='*', help='Options to pass to clang')
 parser.add_argument('--includes', '-I', action='append',  help='Includes to pass to clang')
+parser.add_argument('--cxxflags', default = '', help='Options to pass to clang')
 
 args = parser.parse_args()
 
@@ -46,6 +46,8 @@ if args.regenerate :
     sys.argv[1:] = f.readline().split()[2:] # the second line is the shell command
     args = parser.parse_args() # reparse now that the arguments are changed.
 
+    assert not (args.cxxflags or args.includes or args.converter or args.namespace or args.only or args.properties), "-r option must be alone"
+
 args.includes = (args.includes or []) # +  config.TRIQS_INCLUDE_DEPS.split(';')
 #args.includes.append(config.TRIQS_INCLUDE)
 
@@ -53,6 +55,9 @@ args.includes = (args.includes or []) # +  config.TRIQS_INCLUDE_DEPS.split(';')
 # the instruction that created this file
 shell_command = ' '.join([ sys.argv[0].rsplit('/')[-1]] + [x if ' ' not in x else '"%s"'%x for x in sys.argv[1:]])
 filename_1 = os.path.split(args.filename)[1].split('.',1)[0]
+
+# Add the environment variables
+cxx_env = os.getenv('CXXFLAGS').split() if os.getenv('CXXFLAGS') else []
 
 # ---------------------------------------------------------
 # Create the worker. It parses the file       
@@ -66,7 +71,7 @@ W= Cpp2Desc(filename = args.filename,
             moduledoc = args.moduledoc,
             members_read_only = args.members_read_only,
             includes = args.includes or (), 
-            compiler_options = args.compiler_options,
+            compiler_options = args.cxxflags.split() + cxx_env,
             libclang_location = args.libclang_location,
             shell_command = shell_command,
             parse_all_comments = args.parse_all_comments,

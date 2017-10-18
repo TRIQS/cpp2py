@@ -308,7 +308,7 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     return : the root of the AST tree
     """
     # compiler options
-    compiler_options = (compiler_options or []) + ["-std=c++14"]
+    compiler_options = (compiler_options or []) 
     if platform.system() == 'Darwin': compiler_options.append("-stdlib=libc++") 
     if parse_all_comments : compiler_options.append("-fparse-all-comments")
     compiler_options += ['-I%s'%x for x in includes] + libclang_config.LIBCLANG_CXX_ADDITIONAL_FLAGS
