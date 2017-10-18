@@ -313,6 +313,7 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     if parse_all_comments : compiler_options.append("-fparse-all-comments")
     compiler_options += ['-I%s'%x for x in includes] + libclang_config.LIBCLANG_CXX_ADDITIONAL_FLAGS
 
+    # print compiler_options
     # Initialising libclang
     clang.cindex.Config.set_library_file(libclang_location or libclang_config.LIBCLANG_LOCATION)
     index = clang.cindex.Index.create()
