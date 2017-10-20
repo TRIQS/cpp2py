@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys, argparse, shlex
-from cpp2py import Cpp2Desc
+from cpp2py.cpp2desc import Cpp2Desc
 import cpp2py.libclang_config as config
 
 #
