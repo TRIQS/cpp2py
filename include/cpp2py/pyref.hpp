@@ -80,6 +80,10 @@ namespace cpp2py {
     /// Make a Python string from the C++ string
     static pyref string(std::string const &s) { return PyString_FromString(s.c_str()); }
 
+    /// Make a Python Tuple from the C++ objects
+    template<typename ... T>
+    static pyref make_tuple(T const & ...x) { return PyTuple_Pack(sizeof...(T), static_cast<PyObject*>(x)...);}
+
     /// gets a reference to the class cls_name in module_name
     static pyref get_class(const char *module_name, const char *cls_name, bool raise_exception) {
       pyref cls = pyref::module(module_name).attr(cls_name);
