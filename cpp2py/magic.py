@@ -16,7 +16,7 @@ from IPython.paths import get_ipython_cache_dir
 
 __version__ = '0.3.0'
 
-from onfly import make_desc_and_compile, print_out
+from compiler import compile, print_out
 
 @magics_class
 class Cpp2pyMagics(Magics):

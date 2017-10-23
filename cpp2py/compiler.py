@@ -41,7 +41,7 @@ def compile(code, verbosity =0, only=(), modules = ()):
         code = re.sub("std::cout", "cpp2py::py_stream()", code)
 
     key = code, sys.version_info, sys.executable
-    module_dirname = tempfile.mkdtemp("cpp2py_onfly_" + hashlib.md5(str(key).encode('utf-8')).hexdigest())
+    module_dirname = tempfile.mkdtemp("cpp2py_compiler_" + hashlib.md5(str(key).encode('utf-8')).hexdigest())
     module_name = "ext"
     module_path = os.path.join(module_dirname, 'ext.so')
 

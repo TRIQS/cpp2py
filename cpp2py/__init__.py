@@ -22,4 +22,4 @@
 
 #from cpp2desc import Cpp2Desc
 from cpp2py_info_base import Cpp2pyInfoBase
-__all__ = ['cpp2desc', Cpp2pyInfoBase, 'onfly', 'magic']
+__all__ = ['cpp2desc', Cpp2pyInfoBase, 'compiler', 'magic']
