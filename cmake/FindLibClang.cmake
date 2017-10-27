@@ -32,6 +32,7 @@ SET(TRIAL_LIBRARY_PATHS
  ENV LD_INCLUDE_PATH
  /usr/lib 
  /usr/lib/x86_64-linux-gnu
+ /usr/lib/llvm-5.0/lib
  /usr/lib/llvm-4.0/lib
  /usr/lib64/llvm
 )
