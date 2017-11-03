@@ -269,6 +269,53 @@ class pyfunction :
         s=s.replace('@{','').replace('@}','')
         return repr(s)[1:-1] # remove the ' ' made by repr
 
+
+class converter_:
+    """
+    Representation of a simple converter for a struct
+    """
+    def __init__(self, c_type, doc=''):
+        """
+        Parameters
+        ----------
+
+        c_type : string
+                C++ type to be converted.
+        """
+        self.c_type = c_type
+        self.doc = doc
+        self.members = []
+
+    class member_:
+        pass
+
+    def add_member(self, c_name, c_type, initializer = '', doc = ''):
+        """
+        Add a class member
+        
+        Parameters
+        ----------
+        c_name : string
+                 name of the variable in C++
+        c_type : string
+                 type of the C++ variable
+        initializer : string
+                  Default value
+        doc : string
+              the doc string.
+        """
+        m = self.member_()
+        m.c_name, m.c_type, m.initializer, m.doc = (c_name, c_type, initializer.strip(), doc) # the strip is crucial for empty string
+        self.members.append(m)
+
+    def generate(self):
+        """ Generate the C code"""
+        # generate the code for the converters
+        script_path = os.path.dirname(os.path.abspath( __file__ ))
+        tpl = Template(filename=script_path + '/mako/converters.cxx', strict_undefined=True)
+        rendered = tpl.render(c=self)
+        return rendered
+
 class class_ :
     """
        Representation of a wrapped type
@@ -710,6 +757,7 @@ class module_ :
         self.doc = doc
         self.app_name = app_name
         self.classes = {}    # dict : string -> class_. Key is the Python type
+        self.converters = {} # dict : string -> converter
         self.functions = {}  # functions : dict : string -> function_. Modules functions. Key is the python name.
         self.include_list = []
         self.enums = []
@@ -725,6 +773,14 @@ class module_ :
         """
         if cls.py_type in self.classes : raise IndexError, "The class %s already exists"%cls.py_type
         self.classes[cls.py_type] = cls
+
+    def add_converter(self, conv):
+        """
+          Add a converter into the module.
+          It should not exist in the module already.
+        """
+        if conv.c_type in self.converters : raise IndexError, "The class %s already exists"%conv.c_type
+        self.converters[conv.c_type] = conv
 
     def add_function(self, signature, name =None, calling_pattern = None,  doc = '', release_GIL_and_enable_signal = False):
         """
@@ -851,7 +907,7 @@ class module_ :
         # prepare generation
         for c in self.classes.values() : c._prepare_for_generation()
         for n,f in class_.hidden_python_function.items() : self.add_python_function(f,name = n, hidden=True)
-
+           
         # call mako
         tpl = Template(filename=mako_template, strict_undefined=True)
         rendered = tpl.render(module=self, 

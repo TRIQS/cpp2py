@@ -6,8 +6,14 @@ using dcomplex = std::complex<double>;
 // first the basic stuff
 #include <cpp2py.hpp>
 #include <cpp2py/converters/string.hpp>
+
 // needed for h5 mechanism below
 #include <cpp2py/converters/function.hpp>
+
+// for converters
+#include <cpp2py/converters/vector.hpp>
+#include <cpp2py/converters/string.hpp>
+#include <algorithm>
 
 //------------------------------------------------------------------------------------------------------
 //---------------------   includes and using  -------------------
@@ -143,7 +149,6 @@ template <> struct py_converter<${c_name_absolute}> {
 } // namespace cpp2py
 %endfor
 ## END LOOP ON IMPORTED MODULES
-
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 
@@ -164,6 +169,13 @@ using ${ns};
 using namespace cpp2py;
 
 ${module._preamble}
+
+//--------------------- Generated converters --------------------------
+ 
+%for conv in module.converters.values():
+ ${conv.generate()}
+%endfor
+
 
 //--------------------- a dict of python function used in the module but not exposed to user (cf init function) ----------------
 

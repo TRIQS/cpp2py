@@ -2,7 +2,7 @@ import os, re, sys, itertools
 from mako.template import Template
 
 import cpp2py.clang_parser as CL
-import util, doc, dependency_analyzer, converters
+import util, doc, dependency_analyzer
 
 class Cpp2Desc: 
     """ """
@@ -59,29 +59,33 @@ class Cpp2Desc:
         self.root = CL.parse(filename, compiler_options, includes, libclang_location, parse_all_comments)
 
     # ---------- Generate the AST nodes for every classes, functions, functions and methods
-    
+   
+    namespaces_to_skip = ['std', 'boost', 'detail', 'impl']
+
     def keep_ns(self, n):
-        #if n.location.file.name != self.filename: return False
-        return len(self.namespaces) == 0 or n.spelling in self.namespaces
+        ns = CL.fully_qualified(n) 
+        if any((x in ns) for x in self.namespaces_to_skip) : return False
+        return len(self.namespaces) == 0 or any((ns in x) for x in self.namespaces)
     
     def keep_cls(self, c):
         """ 
            The filter to keep a class/struct or an enum : 
-           If   we have an explicit self.classes : c must be into it
-           Elif we a namespace list, it must be in it. 
-                Warning: it is the exact namespace, e.g. A::B::cls will be considered NOT in A:: but in A::B::
-           Else It is the file given to c++2py 
+            if we a namespace list, it must be in it. 
+            if we have an explicit self.classes : c must be into it
+            else it has to be in the file given to c++2py 
         """
+        if CL.is_template(c) or ("ignore_in_python" in CL.get_annotations(c)): return False
+        if self.namespaces:
+            ns = CL.get_namespace(c) 
+            if not any((x in ns) for x in self.namespaces) : return False
         if self.classes: 
             return c.spelling in self.classes or CL.fully_qualified(c) in self.classes
-        if self.namespaces:
-            ign = c.type.get_canonical().spelling.rsplit('::',1) in self.namespaces
-            return not(ign or CL.is_template(c) or ("ignore_in_python" in CL.get_annotations(c)))
         return c.location.file.name == self.filename
         
-    def keep_fnt(self, f) :
-        ign = f.spelling.startswith('operator') or f.spelling in ['begin','end']
-        return self.keep_cls(f) and not(ign)
+    def keep_fnt(self, f):
+        # Same as class, but eliminate operator, begin, end.
+        if f.spelling.startswith('operator') or f.spelling in ['begin','end'] : return False
+        return self.keep_cls(f)
     
     def all_functions_gen(self):
         """Generates all the AST nodes of functions"""
@@ -229,13 +233,6 @@ class Cpp2Desc:
         # First treat the parameter class if any (classes passed by dictionnary that MUST be converted)
         param_cls_list = list(self.get_all_param_classes())
         if param_cls_list : 
-            if verbose : 
-                print "Generating Python-C++ converters for : "
-                for c in param_cls_list:
-                    print "   ", c.spelling
-            # CXX file
-            open("%s_converters.hxx"%self.modulename, "w").write('\n'.join(converters.make_converter_cxx(c) for c in param_cls_list))
-            # Doc
             open('parameters.rst', 'w').write('\n'.join(doc.doc_param_dict_format(CL.get_members(c, True)) for c in param_cls_list))
 
         # Precompute
@@ -243,7 +240,12 @@ class Cpp2Desc:
         self.all_classes   = list(self.all_classes_gen())
         self.all_functions = list(self.all_functions_gen())
         self.param_cls_list = param_cls_list
-        
+       
+        # checks
+        for c in param_cls_list:
+            for m in CL.get_members(c, True):
+                assert CL.is_public(m), "Parameter class : all members must be public. %s::%s is not"%(c.spelling, m.spelling) 
+
         # analyse the modules and converters that need to be added
         print "Analysing dependencies"
         types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums 
@@ -271,6 +273,6 @@ class Cpp2Desc:
         print "Generating " + output_filename
         tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True)
         rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,  
-                              import_list = import_list, converters_list = converters_list, using_list = self.namespace_to_factor)
+                              import_list = import_list, converters_list = converters_list, using_list = list(self.namespaces) + list(self.namespace_to_factor))
         open(output_filename, "w").write(util.clean_end_and_while_char(rendered))
 

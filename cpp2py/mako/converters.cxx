@@ -1,17 +1,10 @@
-// DO NOT EDIT
-<% c_can_spelling = c.type.get_canonical().spelling %>
-// --- C++ Python converter for ${c_can_spelling}
-#include <cpp2py/converters/vector.hpp>
-#include <cpp2py/converters/string.hpp>
-#include <algorithm>
-
 namespace cpp2py { 
 
-template <> struct py_converter<${c_can_spelling}> {
- static PyObject *c2py(${c_can_spelling} const & x) {
+template <> struct py_converter<${c.c_type}> {
+ static PyObject *c2py(${c.c_type} const & x) {
   PyObject * d = PyDict_New(); 
-  %for m in c_members :
-  PyDict_SetItemString( d, ${name_format('"%s"'%m.spelling)}, convert_to_python(x.${m.spelling}));
+  %for m in c.members :
+  PyDict_SetItemString( d, ${'"%s"'%m.c_name}, convert_to_python(x.${m.c_name}));
   %endfor
   return d;
  }
@@ -30,13 +23,13 @@ template <> struct py_converter<${c_can_spelling}> {
    r = T{};
  }
 
- static ${c_can_spelling} py2c(PyObject *dic) {
-  ${c_can_spelling} res;
-  %for m, m_initializer in [(m,CL.get_member_initializer(m)) for m in  c_members]:
-  %if m_initializer == '' : 
-  res.${m.spelling} = convert_from_python<${m.type.spelling}>(PyDict_GetItemString(dic, "${m.spelling}"));
+ static ${c.c_type} py2c(PyObject *dic) {
+  ${c.c_type} res;
+  %for m in c.members:
+  %if m.initializer == '' : 
+  res.${m.c_name} = convert_from_python<${m.c_type}>(PyDict_GetItemString(dic, "${m.c_name}"));
   %else:
-  _get_optional(dic, ${name_format_q(m.spelling)}, res.${name_format(m.spelling)} ${',' + m_initializer if m_initializer !="{}" else ''});
+  _get_optional(dic, "${m.c_name}", res.${m.c_name} ${',' + m.initializer if m.initializer !="{}" else ''});
   %endif
   %endfor
   return res;
@@ -69,7 +62,7 @@ template <> struct py_converter<${c_can_spelling}> {
   std::stringstream fs, fs2; int err=0;
 
 #ifndef TRIQS_ALLOW_UNUSED_PARAMETERS
-  std::vector<std::string> ks, all_keys = {${','.join('"%s"'%m.spelling for m in c_members)}};
+  std::vector<std::string> ks, all_keys = {${','.join('"%s"'%m.c_name for m in c.members)}};
   pyref keys = PyDict_Keys(dic);
   if (!convertible_from_python<std::vector<std::string>>(keys, true)) {
    fs << "\nThe dict keys are not strings";
@@ -81,18 +74,18 @@ template <> struct py_converter<${c_can_spelling}> {
     fs << "\n"<< ++err << " The parameter '" << k << "' is not recognized.";
 #endif
 
-  %for m in c_members :
-  %if CL.get_member_initializer(m) == '' : 
-  _check_mandatory<${type_format(m.type.spelling)}>(dic, fs, err, ${name_format_q(m.spelling)}, "${m.type.spelling}"); 
+  %for m in c.members :
+  %if m.initializer:
+  _check_optional <${m.c_type}>(dic, fs, err, "${m.c_name}", "${m.c_type}");
   %else:
-  _check_optional <${type_format(m.type.spelling)}>(dic, fs, err, ${name_format_q(m.spelling)}, "${m.type.spelling}");
+  _check_mandatory<${m.c_type}>(dic, fs, err, "${m.c_name}", "${m.c_type}"); 
   %endif
   %endfor
   if (err) goto _error;
   return true;
   
  _error: 
-   fs2 << "\n---- There " << (err > 1 ? "are " : "is ") << err<< " error"<<(err >1 ?"s" : "")<< " in Python -> C++ transcription for the class ${c_can_spelling}\n" <<fs.str();
+   fs2 << "\n---- There " << (err > 1 ? "are " : "is ") << err<< " error"<<(err >1 ?"s" : "")<< " in Python -> C++ transcription for the class ${c.c_type}\n" <<fs.str();
    if (raise_exception) PyErr_SetString(PyExc_TypeError, fs2.str().c_str());
   return false;
  }

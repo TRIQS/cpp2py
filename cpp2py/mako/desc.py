@@ -18,12 +18,10 @@ module.add_preamble("""
 %for conv in converters_list :
 #include <${conv}>
 %endfor
+
 %for ns in using_list :
 using namespace ${ns};
 %endfor
-%if W.param_cls_list :
-#include "${W.modulename.rsplit('.',1)[-1]}_converters.hxx"
-%endif
 """)
 ##
 
@@ -82,6 +80,25 @@ module.add_class(c)
 module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}", doc = """${doc.make_doc(f)}""")
 
 %endfor
+
+## converters
+%for c in W.param_cls_list:
+# Converter for ${c.spelling}
+c = converter_(    
+        c_type = "${c.type.spelling}", 
+        doc = """${doc.make_doc(c)}""",  
+)
+%for m in CL.get_members(c, True):
+c.add_member(c_name = "${m.spelling}",
+             c_type = "${m.type.spelling}",
+             initializer = """ ${CL.get_member_initializer(m)} """,
+             doc = """${doc.make_doc(m)}""")
+
+%endfor
+module.add_converter(c)
+
+%endfor
+
 ##
 module.generate_code()
 
