@@ -19,7 +19,7 @@ parser.add_argument('--regenerate', '-r',  action='store_true', help="Rebuild th
 parser.add_argument('--converter', '-C',   action='append',  help='Path to the converter DIRS')
 
 parser.add_argument('--namespace', '-N', action='append',  help="Specify the namespace to explore for classes and function to wrap", default= [])
-parser.add_argument('--only', action='append',  help="Specify functions or class to be wrapped", default= [])
+parser.add_argument('--only', default = '',  help="Specify functions or class to be wrapped")
 parser.add_argument('--outputname', '-o',  help="Name of the xxx_desc.py file [default is same as the filename]", default = '')
 parser.add_argument('--modulename', '-m',  help="Name of the Python module [default ='', it will be modulename", default = '')
 parser.add_argument('--appname', '-a',  help="Name of the Python module [default ='', it will take the name of file", default = '')
@@ -29,10 +29,8 @@ parser.add_argument('--properties', '-p',  action='store_true',
                 ii) every method get_X into read-only property
                 iii) every couple of methods get_X, set_X into rw property
               """)
-parser.add_argument('--members_read_only',  action='store_true',
-        help="""Makes members read only (only the getter, not the setter) """)
-parser.add_argument('--only_converters',  action='store_true', help="[Experts only] Do not generate the desc file, just the converters if there are")
-parser.add_argument('--parse-all-comments',  action='store_true', help="Grab all comments, including non doxygen like")
+parser.add_argument('--members_read_only',  action='store_true', help="""Makes members read only [default = True]""")
+parser.add_argument('--parse-all-comments',  action='store_true', help="Grab all comments, including non doxygen like [default = True]")
 
 parser.add_argument('--libclang_location', help='Location of the libclang', default = config.LIBCLANG_LOCATION)
 parser.add_argument('--includes', '-I', action='append',  help='Includes to pass to clang')
@@ -65,7 +63,7 @@ cxx_env = os.getenv('CXXFLAGS').split() if os.getenv('CXXFLAGS') else []
 W= Cpp2Desc(filename = args.filename, 
             converters = args.converter or (),  
             namespaces= args.namespace, 
-            classes= args.only, 
+            classes= args.only.split(), 
             use_properties = args.properties,
             modulename = args.modulename or filename_1,
             appname = args.appname or args.modulename or filename_1,

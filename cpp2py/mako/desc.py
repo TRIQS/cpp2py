@@ -21,18 +21,18 @@ module.add_preamble("""
 %for ns in using_list :
 using namespace ${ns};
 %endfor
-%if param_cls_list :
+%if W.param_cls_list :
 #include "${W.modulename.rsplit('.',1)[-1]}_converters.hxx"
 %endif
 """)
 ##
 
-%for e in W.all_enums_gen():
+%for e in W.all_enums:
 module.add_enum("${e.spelling}", ${["%s::%s"%(e.spelling, x.spelling) for x in e.get_children()]}, "${CL.get_namespace(e)}", """${doc.make_doc(e)}""")
 %endfor
 
 ##
-%for c in W.all_classes_gen():
+%for c in W.all_classes:
 # The class ${c.spelling}
 c = class_(
         py_type = "${util.deduce_normalized_python_class_name(c.spelling)}",  # name of the python class
@@ -78,7 +78,7 @@ module.add_class(c)
 
 %endfor
 ##
-%for f in W.all_functions_gen():
+%for f in W.all_functions:
 module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}", doc = """${doc.make_doc(f)}""")
 
 %endfor

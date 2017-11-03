@@ -61,15 +61,24 @@ class Cpp2Desc:
     # ---------- Generate the AST nodes for every classes, functions, functions and methods
     
     def keep_ns(self, n):
-        if n.location.file.name != self.filename: return False
+        #if n.location.file.name != self.filename: return False
         return len(self.namespaces) == 0 or n.spelling in self.namespaces
     
     def keep_cls(self, c):
-        if c.location.file.name != self.filename: return False
-        if self.classes : return c.spelling in self.classes
-        ign = len(self.namespaces)>0 and c.type.get_canonical().spelling.rsplit('::',1) in self.namespaces
-        return not(ign or CL.is_template(c) or ("ignore_in_python" in CL.get_annotations(c)))
-    
+        """ 
+           The filter to keep a class/struct or an enum : 
+           If   we have an explicit self.classes : c must be into it
+           Elif we a namespace list, it must be in it. 
+                Warning: it is the exact namespace, e.g. A::B::cls will be considered NOT in A:: but in A::B::
+           Else It is the file given to c++2py 
+        """
+        if self.classes: 
+            return c.spelling in self.classes or CL.fully_qualified(c) in self.classes
+        if self.namespaces:
+            ign = c.type.get_canonical().spelling.rsplit('::',1) in self.namespaces
+            return not(ign or CL.is_template(c) or ("ignore_in_python" in CL.get_annotations(c)))
+        return c.location.file.name == self.filename
+        
     def keep_fnt(self, f) :
         ign = f.spelling.startswith('operator') or f.spelling in ['begin','end']
         return self.keep_cls(f) and not(ign)
@@ -164,7 +173,8 @@ class Cpp2Desc:
         plist1 = [m for m in method_list if maybe_prop(m)]
         mlist =  [m for m in method_list if not maybe_prop(m)]
         plist = []
-
+    
+        OUT, SEP = '', '        '   
         for m in plist1:
             n, set_m = m.spelling, None
             if n.startswith('set_') : continue # do nothing, will be treated with the get_
@@ -176,15 +186,18 @@ class Cpp2Desc:
                     p = list(CL.get_params(set_m)) 
                     if set_m.result_type.spelling == "void" and len(p) ==1 :
                         if not util.decay(p[0].spelling) == m.result_type.spelling :
-                            print "Warning :"
-                            print "   in get_%s/set_%s" %(X,X)
-                            print "     The type taken from set_%s is not the return type of get_%s"%(X,X)
-                            print "    Expected ",m.result_type.spelling
-                            print "    Got ", decay(p[0].spelling)
-                            print "     I am not adding the setter to the property"
+                            OUT += SEP + "Warning :\n"
+                            OUT += SEP + "    in get_%s/set_%s\n" %(X,X)
+                            OUT += SEP + "    The type taken from set_%s is not the return type of get_%s\n"%(X,X)
+                            OUT += SEP + "    Expected %s\n"%m.result_type.spelling
+                            OUT += SEP + "    Got %s\n"% decay(p[0].spelling)
+                            OUT += SEP + "    I am not adding the setter to the property\n"
                             set_m = None
-            print "Transforming to property : ", m.spelling, set_m.spelling if set_m else ''
+            OUT += SEP + "%s %s\n" %(m.spelling, set_m.spelling if set_m else '')
             plist.append(property_(name= n, doc = doc.make_doc(m), getter = m, setter = set_m))
+
+        if OUT: 
+            print "   Class %s : transforming to property : \n%s"%(c.spelling, OUT)
 
         return mlist, plist
   
@@ -225,16 +238,39 @@ class Cpp2Desc:
             # Doc
             open('parameters.rst', 'w').write('\n'.join(doc.doc_param_dict_format(CL.get_members(c, True)) for c in param_cls_list))
 
+        # Precompute
+        self.all_enums     = list(self.all_enums_gen())
+        self.all_classes   = list(self.all_classes_gen())
+        self.all_functions = list(self.all_functions_gen())
+        self.param_cls_list = param_cls_list
+        
         # analyse the modules and converters that need to be added
         print "Analysing dependencies"
-        types_being_wrapped_or_converted = param_cls_list + list(self.all_classes_gen()) + list(self.all_enums_gen())
+        types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums 
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
-    
+   
+        # Reporting 
+        if self.all_classes:
+            print "Wrapping classes:"
+            for c in self.all_classes: 
+                print "   ", c.spelling
+        if self.all_enums:
+            print "Wrapping enums:"
+            for c in self.all_enums: 
+                print "   ", c.spelling
+        if self.all_functions:
+            print "Wrapping functions:"
+            for c in self.all_functions: 
+                print "   ", c.spelling
+        if param_cls_list:
+            print "Generating converters for :"
+            for c in param_cls_list: 
+                print "   ", c.spelling
+
         # Render mako
         print "Generating " + output_filename
         tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True)
         rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,  
-                              param_cls_list = param_cls_list, 
                               import_list = import_list, converters_list = converters_list, using_list = self.namespace_to_factor)
         open(output_filename, "w").write(util.clean_end_and_while_char(rendered))
 
