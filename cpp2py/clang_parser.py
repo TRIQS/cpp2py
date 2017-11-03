@@ -249,6 +249,22 @@ def print_cls(c):
 
 #--------------------  namespace components : class, function ---------------------------------------------------------
 
+def get_enums(node, keep = keep_all, traverse_namespaces = False, keep_ns = keep_all):
+    """
+    node is a namespace or root.
+    keep(m) : predicate
+    keep_ns : predicate
+    traverse_namespaces : traverse the namespaces, with keep_ns
+    yields the classes/struct in node
+    """
+    for c in node.get_children():
+        if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
+            for x in get_enums(c, keep, traverse_namespaces, keep_ns) :
+                yield x
+        else :
+          if c and c.kind == CursorKind.ENUM_DECL and keep(c):
+            yield c
+
 _class_types = [CursorKind.CLASS_DECL, CursorKind.STRUCT_DECL, CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION, CursorKind.CLASS_TEMPLATE]
 
 def get_classes(node, keep = keep_all, traverse_namespaces = False, keep_ns = keep_all):
@@ -297,6 +313,9 @@ def fully_qualified(c):
 
 def get_namespace_list(node):
     return fully_qualified(node.referenced).split('::')[:-1]
+
+def get_namespace(node):
+    return fully_qualified(node.referenced).rsplit('::',1)[0]
     
 #--------------------  PARSE
 

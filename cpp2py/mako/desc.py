@@ -26,6 +26,12 @@ using namespace ${ns};
 %endif
 """)
 ##
+
+%for e in W.all_enums_gen():
+module.add_enum("${e.spelling}", ${["%s::%s"%(e.spelling, x.spelling) for x in e.get_children()]}, "${CL.get_namespace(e)}", """${doc.make_doc(e)}""")
+%endfor
+
+##
 %for c in W.all_classes_gen():
 # The class ${c.spelling}
 c = class_(

@@ -75,12 +75,16 @@ class Cpp2Desc:
         return self.keep_cls(f) and not(ign)
     
     def all_functions_gen(self):
-        """Generates all the AST nodes of classes (mode = 'C') or functions (mode = 'F')"""
+        """Generates all the AST nodes of functions"""
         return CL.get_functions(self.root, self.keep_fnt, traverse_namespaces = True, keep_ns = self.keep_ns)
 
     def all_classes_gen(self):
-        """Generates all the AST nodes of classes (mode = 'C') or functions (mode = 'F')"""
+        """Generates all the AST nodes of classes"""
         return CL.get_classes(self.root, self.keep_cls, traverse_namespaces = True, keep_ns = self.keep_ns)
+
+    def all_enums_gen(self):
+        """Generates all the AST nodes of enums"""
+        return CL.get_enums(self.root, self.keep_cls, traverse_namespaces = True, keep_ns = self.keep_ns)
 
     def get_all_functions_and_methods(self):
         """ AST nodes for every function, class methods and constructors"""
@@ -167,7 +171,7 @@ class Cpp2Desc:
             if n.startswith('get_') : 
                 # treat the corresponding setter 
                 n = n[4:] 
-                set_m = next( (m for m in plist if m.spelling == 'set_' + n), None)
+                set_m = next( (m for m in plist1 if m.spelling == 'set_' + n), None)
                 if set_m : 
                     p = list(CL.get_params(set_m)) 
                     if set_m.result_type.spelling == "void" and len(p) ==1 :
@@ -223,7 +227,7 @@ class Cpp2Desc:
 
         # analyse the modules and converters that need to be added
         print "Analysing dependencies"
-        types_being_wrapped_or_converted = param_cls_list + list(self.all_classes_gen())
+        types_being_wrapped_or_converted = param_cls_list + list(self.all_classes_gen()) + list(self.all_enums_gen())
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
     
         # Render mako
