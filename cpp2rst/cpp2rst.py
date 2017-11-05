@@ -115,11 +115,16 @@ class Cpp2Rst:
         mkchdir(output_directory)
         classes = list(self.all_classes_gen())
 
+
         # FIXME 
         synopsis.class_list = classes
         synopsis.class_list_name = [n.spelling for n in classes]
 
         for c in classes:
+            if not c.spelling.strip() : 
+                print "Skipping a class with an empty name !"
+                continue
+
             print " ... class :  " + c.spelling, CL.fully_qualified(c.referenced)
 
             # process the doc of the class
