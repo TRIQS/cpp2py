@@ -755,7 +755,6 @@ class module_ :
         self.full_name = full_name if app_name is None or app_name=="triqs" else app_name+"."+full_name
         self.name = full_name.rsplit('.',1)[-1]
         self.doc = doc
-        self.app_name = app_name
         self.classes = {}    # dict : string -> class_. Key is the Python type
         self.converters = {} # dict : string -> converter
         self.functions = {}  # functions : dict : string -> function_. Modules functions. Key is the python name.

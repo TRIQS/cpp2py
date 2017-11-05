@@ -46,7 +46,7 @@ if args.regenerate :
     args = parser.parse_args(args = shlex.split(shell_command)[1:]) # reparse now that the arguments are changed.
 else:
     # the instruction that created this file
-    f = lambda x : x if not x.startswith('--cxxflags') else '%s="%s"'%tuple(x.split('=', 1)) 
+    f = lambda x : x if not (x.startswith('--cxxflags') or x.startswith('--only') or x.startswith('--moduledoc'))  else '%s="%s"'%tuple(x.split('=', 1)) 
     shell_command = 'c++2py ' + ' '.join(f(x) for x in sys.argv[1:]) 
 
 # A few variables    

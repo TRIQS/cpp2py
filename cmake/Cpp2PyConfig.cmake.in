@@ -71,7 +71,7 @@ macro (add_cpp2py_module ModuleName)
  SET(target_name ${ModuleName})
 
  add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name}
-  COMMAND PYTHONPATH=@PYTHON_PATH_ADD@${PROJECT_BINARY_DIR}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_INTERPRETER} ${desc_name} ${wrap_name}) 
+  COMMAND PYTHONPATH=@PYTHON_PATH_ADD@${PROJECT_BINARY_DIR}:@PYTHON_PATH_ADD@${PROJECT_BINARY_DIR}/python:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_INTERPRETER} ${desc_name} ${wrap_name}) 
  
  add_library(${target_name} MODULE ${wrap_name}) 
  target_link_libraries(${target_name} python_and_numpy cpp2py)

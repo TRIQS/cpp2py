@@ -100,7 +100,6 @@ def doc_format_param(member_list):
    l = [(m.spelling,m.ctype, m.initializer, m.doc) for m in member_list2]
    return make_table(h, l)
 
-   
 def make_doc(node):
     """ process doc of node"""
     
