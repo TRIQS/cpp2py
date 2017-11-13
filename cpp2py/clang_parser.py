@@ -111,16 +111,14 @@ def get_params(node):
 def get_param_default_value(node):
     """
     Precondition : node is a parameter of a function/method
-    returns a list of (typename, name, default) or (Type, name, 
+    returns the default value if present or None
+    Defined at the rhs of an = sign.
     """
-    default_value = None
-    for ch in node.get_children() :
-        if ch.kind in [CursorKind.INTEGER_LITERAL, CursorKind.FLOATING_LITERAL,
-                       CursorKind.CHARACTER_LITERAL, CursorKind.STRING_LITERAL,
-                       CursorKind.UNARY_OPERATOR, CursorKind.UNEXPOSED_EXPR,
-                       CursorKind.CXX_BOOL_LITERAL_EXPR, CursorKind.CALL_EXPR ] :
-            default_value =  ''.join([x.spelling for x in ch.get_tokens()]) 
-    return default_value
+    #print [x.spelling for x in node.get_tokens()]
+    sp = ''.join(x.spelling for x in node.get_tokens()).split('=')
+    assert len(sp) == 1 or len(sp) ==2
+    #print "    ---> default =",   None if len(sp)==1 else sp[1]
+    return None if len(sp)==1 else sp[1]
 
 #--------------------  class components ---------------------------------------------------------
 
