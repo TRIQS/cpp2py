@@ -93,7 +93,9 @@ def get_template_params(node):
         if c.kind == CursorKind.TEMPLATE_TYPE_PARAMETER :
             tparams.append(("typename", c.spelling, get_default(c)))
         elif c.kind == CursorKind.TEMPLATE_NON_TYPE_PARAMETER:
-            tparams.append((list(c.get_tokens())[0].spelling, c.spelling, get_default(c)))
+            l = list(c.get_tokens())
+            if l: 
+               tparams.append((l[0].spelling, c.spelling, get_default(c)))
     return tparams
 
 def is_template(node) : 
