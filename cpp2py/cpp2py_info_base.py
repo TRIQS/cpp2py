@@ -37,6 +37,7 @@ class Cpp2pyInfoStd(Cpp2pyInfoBase):
         'std::.*pair' : 'pair',
         'std::.*tuple' : 'tuple',
         'std::.*optional' : 'optional',
+        'std::.*variant' : 'variant',
         }
 
     table_converters = dict ( (k, "cpp2py/converters/%s.hpp"%v) for (k,v) in _table_converters.items())
