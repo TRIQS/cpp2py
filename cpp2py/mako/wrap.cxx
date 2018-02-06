@@ -1061,18 +1061,23 @@ static void register_h5_reader_for_${c.py_type} () {
   auto reader = [] (PyObject * h5_gr, std::string const & name) -> PyObject *{
    auto gr = convert_from_python<triqs::h5::group>(h5_gr);
    // declare the target C++ object, with special case if it is a view...
-   triqs::regular_type_if_view_else_type_t<${c.c_type}> ret;
+   using c_type = triqs::regular_type_if_view_else_type_t<${c.c_type}>;
    try { // now read
-     h5_read (gr, name, ret);
+     return convert_to_python(${c.c_type}( triqs::h5::h5_read<c_type> (gr, name))); // cover the view and value case
    }
    CATCH_AND_RETURN("in h5 reading of object ${c.py_type}", NULL);
-   return convert_to_python(${c.c_type}(std::move(ret))); // cover the view and value case
+   return NULL; // unused
   }; // end reader lambda
 
   pyref h5_reader = convert_to_python(std::function<PyObject*(PyObject *, std::string)> (reader));
   pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
-  auto register_class = module.attr("register_class");
-  pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, NULL);
+  pyref register_class = module.attr("register_class");
+
+  using c_type = triqs::regular_type_if_view_else_type_t<${c.c_type}>;
+  std::string hdf5_scheme = triqs::h5::get_hdf5_scheme<c_type>();
+  pyref ds =convert_to_python(hdf5_scheme);
+
+  pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
   //pyref res = PyObject_CallFunction(register_class, "OOO", (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader);
 }
 

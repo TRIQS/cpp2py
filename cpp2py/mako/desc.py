@@ -36,6 +36,7 @@ c = class_(
         py_type = "${util.deduce_normalized_python_class_name(c.spelling)}",  # name of the python class
         c_type = "${c.type.get_canonical().spelling}",   # name of the C++ class
         doc = """${doc.make_doc(c)}""",   # doc of the C++ class
+        hdf5 = ${'True' if W.has_hdf5_scheme(c) else 'False'},
 )
 <%
   methods, proplist = W.separate_method_and_properties(c)

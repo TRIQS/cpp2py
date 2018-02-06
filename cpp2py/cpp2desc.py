@@ -128,6 +128,7 @@ class Cpp2Desc:
             for m in CL.get_members(x, False): # False : no inherited
                 yield m.type
             for m in itertools.chain(CL.get_constructors(x), CL.get_methods(x)): 
+                if not self.keep_fnt(m): continue
                 yield getattr(m, 'result_type', None)
                 for p in CL.get_params(m) : 
                     yield p.type
@@ -147,7 +148,15 @@ class Cpp2Desc:
         """ 
         keep = lambda m : CL.is_public(m) and not m.spelling.startswith('operator')
         return CL.get_methods(c, True, keep)
-        
+
+    def has_hdf5_scheme(self, c):
+        """True iif the class c has a static method std::string hdf5_scheme()"""
+        keep = lambda m : CL.is_public(m)
+        for m in CL.get_methods(c, True, keep):
+            if m.spelling == "hdf5_scheme" and m.is_static_method() and ('string' in m.result_type.spelling) and len(list(CL.get_params(m))) == 0: 
+               return True
+        return False
+
     def separate_method_and_properties(self, c):
         """
         Treatment of properties
