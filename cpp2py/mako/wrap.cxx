@@ -1263,6 +1263,14 @@ init${module.name}(void)
     register_h5_reader_for_${c.py_type}();
 %endfor
 
+   // Import once all modules to register the class of imported modules.
+<%
+  cpp2py_imported_module_names = [n for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
+%>  
+%for m in cpp2py_imported_module_names:
+   PyImport_ImportModule ("${m}"); // loose the reference, it is ok here.
+%endfor
+
    // write the export table for classes (enums) that have to be exported
 <% classes_to_export =  [c for c in module.classes.values() if c.export] %>
 %if len(classes_to_export) >0 :
