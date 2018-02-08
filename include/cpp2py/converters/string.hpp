@@ -10,7 +10,7 @@ namespace cpp2py {
     static std::string py2c(PyObject *ob) { return PyString_AsString(ob); }
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyString_Check(ob)) return true;
+      if (PyString_Check(ob) or PyUnicode_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
       return false;
     }
@@ -23,7 +23,7 @@ namespace cpp2py {
     static const char *py2c(PyObject *ob) { return PyString_AsString(ob); }
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyString_Check(ob)) return true;
+      if (PyString_Check(ob) or PyUnicode_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
       return false;
     }
