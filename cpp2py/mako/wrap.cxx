@@ -66,6 +66,8 @@ template<> struct py_converter<${c_type_absolute}> {
 
   using is_wrapped_type = void;// to recognize
  
+  static void ** wrapped_convert_fnt;
+
   static void ** init() {
    PyObject * mod =  PyImport_ImportModule("${module_name}");
    if (mod ==NULL) return NULL;
@@ -79,19 +81,16 @@ template<> struct py_converter<${c_type_absolute}> {
  }
  
   static PyObject * c2py(${c_type_absolute} const & x){
-   static void **wrapped_convert_fnt = init();
    if (wrapped_convert_fnt == NULL) return NULL;
    return ((PyObject * (*)(${c_type_absolute} const &)) wrapped_convert_fnt[3*${n}])(x);
  }
  
   static ${c_type_absolute}& py2c(PyObject * ob){
-   static void **wrapped_convert_fnt = init();
    if (wrapped_convert_fnt == NULL) std::terminate(); // It should never happen since py2c is called only is is_convertible is true (py_converter specs) 
    return ((${c_type_absolute}& (*)(PyObject *)) wrapped_convert_fnt[3*${n}+1])(ob);
  }
  
   static bool is_convertible(PyObject *ob, bool raise_exception) {
-   static void **wrapped_convert_fnt = init();
    if (wrapped_convert_fnt == NULL) {
     if (!raise_exception && PyErr_Occurred()) {PyErr_Print();PyErr_Clear();}
     return false;
@@ -99,6 +98,8 @@ template<> struct py_converter<${c_type_absolute}> {
    return ((bool (*)(PyObject *,bool)) wrapped_convert_fnt[3*${n}+2])(ob,raise_exception);
  }
 };
+
+void ** py_converter<${c_type_absolute}>::wrapped_convert_fnt = py_converter<${c_type_absolute}>::init();
 
 %if implement_regular_type_converter : 
  template<> struct py_converter<${c_type_absolute}::regular_type> : 

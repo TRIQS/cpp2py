@@ -52,6 +52,9 @@ namespace cpp2py {
       return ob;
     }
 
+    /// ref counting
+    int refcnt() const { return (ob !=NULL ? ob->ob_refcnt : -100);}
+
     /// True iif the object is not NULL
     explicit operator bool() const { return (ob != NULL); }
 
