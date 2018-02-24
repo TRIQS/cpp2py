@@ -127,8 +127,9 @@ class Cpp2Desc:
         for x in itertools.chain(param_cls_list, self.all_classes_gen()): 
             for m in CL.get_members(x, False): # False : no inherited
                 yield m.type
-            for m in itertools.chain(CL.get_constructors(x), CL.get_methods(x)): 
-                if not self.keep_fnt(m): continue
+            for m in itertools.chain(CL.get_constructors(x), CL.get_methods(x)):
+                # A minimal filter, do not reuse self.keep_fnt here, because the namespace is N1::N2:...::ClassName
+                if CL.is_template(m) or ("ignore_in_python" in CL.get_annotations(m)): continue
                 yield getattr(m, 'result_type', None)
                 for p in CL.get_params(m) : 
                     yield p.type
