@@ -41,8 +41,6 @@ class myclass{
 };
 ```
 
-Note that we have used triple slashes to comment the class. Only classes commented in this way will be wrapped in python.
-
 In the same folder, create a file `CMakeLists.txt`:
 
 ```cmake
