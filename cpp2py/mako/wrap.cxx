@@ -534,7 +534,7 @@ template <> struct py_converter<${c.c_type}> {
 
  static ${c.c_type} & py2c(PyObject * ob){
   auto *_c = ((${c.py_type} *)ob)->_c;
-  if (_c == NULL) TRIQS_RUNTIME_ERROR << "Severe internal error : _c is null in py2c for type ${c.c_type} !";
+  if (_c == NULL) CPP2PY_RUNTIME_ERROR << "Severe internal error : _c is null in py2c for type ${c.c_type} !";
   return *_c;
  }
 
