@@ -10,8 +10,8 @@ module = module_(full_name = "${W.modulename}", doc = "${doc.replace_latex(W.mod
 import ${mod}
 %endfor
 
-# Add here all includes 
-module.add_include("${W.filename.replace("../c++/",'')}")
+# Add here all includes
+module.add_include("${os.path.abspath(W.filename)}")
 
 # Add here anything to add in the C++ code at the start, e.g. namespace using
 module.add_preamble("""
