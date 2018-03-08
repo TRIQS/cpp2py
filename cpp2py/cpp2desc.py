@@ -146,8 +146,8 @@ class Cpp2Desc:
         --------
         A list of cursors to the methods
         return : a tuple (proplist, methodlist) where proplist : a list of property_  and methodlist : the others methods
-        """ 
-        keep = lambda m : CL.is_public(m) and not m.spelling.startswith('operator')
+        """
+        keep = lambda m : CL.is_public(m) and not CL.is_template(m) and not ("ignore_in_python" in CL.get_annotations(m)) and not m.spelling.startswith('operator')
         return CL.get_methods(c, True, keep)
 
     def has_hdf5_scheme(self, c):
