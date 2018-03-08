@@ -491,7 +491,7 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
-    "${c.doc}",                /* tp_doc */
+    "${c.doc.encode('string_escape')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     ${c.py_type + "_richcompare"},  /* tp_richcompare */
