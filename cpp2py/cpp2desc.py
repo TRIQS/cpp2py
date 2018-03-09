@@ -279,8 +279,8 @@ class Cpp2Desc:
 
         # Render mako
         print "Generating " + output_filename
-        tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True, imports = ['import os'])
-        rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,
+        tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True)
+        rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,  
                               import_list = import_list, converters_list = converters_list, using_list = list(self.namespaces) + list(self.namespace_to_factor))
         open(output_filename, "w").write(util.clean_end_and_while_char(rendered))
 
