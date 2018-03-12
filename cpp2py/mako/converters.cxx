@@ -1,13 +1,16 @@
 namespace cpp2py { 
 
 template <> struct py_converter<${c.c_type}> {
- 
- static PyObject *c2py(${c.c_type} & x) { // was const &
-  PyObject * d = PyDict_New(); 
+ static PyObject *c2py(${c.c_type} & x) {
+  PyObject * d = PyDict_New();
   %for m in c.members :
   PyDict_SetItemString( d, ${'"%s"'%m.c_name}, convert_to_python(x.${m.c_name}));
   %endfor
   return d;
+ }
+
+ static PyObject *c2py(${c.c_type} && x) {
+   return c2py(x);
  }
 
  template <typename T, typename U> static void _get_optional(PyObject *dic, const char *name, T &r, U const &init_default) {
