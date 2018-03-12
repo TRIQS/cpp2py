@@ -53,7 +53,11 @@ using dcomplex = std::complex<double>;
   //--------------------- includes of the imported modules
 
  %for inc in includes :
+  %if inc.startswith('<'):
+#include ${inc}
+  %else:
 #include "${inc}"
+  %endif
  %endfor
 
 namespace cpp2py { 
