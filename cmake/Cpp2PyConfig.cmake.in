@@ -2,16 +2,21 @@
 if (NOT CPP2PY_FOUND) 
 set(CPP2PY_FOUND True)
 
-# version 
+# Version
 set(CPP2PY_VERSION                      @CPP2PY_VERSION@)
 set(CPP2PY_GIT_HASH                     @GIT_HASH@)
 
+# The compiler used for cpp2py
 set(CPP2PY_CXX_COMPILER                 @CMAKE_CXX_COMPILER@)
+
+# Python Interpreter
 set(CPP2PY_PYTHON_INTERPRETER           @PYTHON_INTERPRETER@)
 set(CPP2PY_PYTHON_LIB_DEST_ROOT         @PYTHON_LIB_DEST_ROOT@)
 set(CPP2PY_PYTHON_H5PY_HDF5VERSION      @PYTHON_H5PY_HDF5VERSION@)
 set(CPP2PY_PYTHON_NUMPY_VERSION_LT_17   @PYTHON_NUMPY_VERSION_LT_17@)
 
+# Root of the Cpp2Py installation
+set(CPP2PY_ROOT  @CMAKE_INSTALL_PREFIX@)
 
 MESSAGE(STATUS "Found Cpp2pyConfig.cmake with version ${CPP2PY_VERSION}, hash = ${CPP2PY_GIT_HASH}")
 
