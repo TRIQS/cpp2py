@@ -31,7 +31,7 @@ def make_synopsis_template_decl(node) :
     tparams = CL.get_template_params(node)
     if not tparams: return ''
     targs = ', '.join("%s %s"%(pp[0],pp[1]) + (" = %s"%pp[2] if (len(pp)==3 and pp[2]) else '') for pp in tparams)
-    return "template<%s>"%targs
+    return "template<%s> "%targs
 
 def make_synopsis(m, pdoc, decal):
     #assert not m.tparams, "template functions "

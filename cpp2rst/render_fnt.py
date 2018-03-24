@@ -16,7 +16,7 @@ rst_start = """
 # The hidden toc for RST reference
 toctree_hidden ="""
 .. toctree::
-   :hidden:
+    :hidden:
       
 """
 
@@ -34,7 +34,7 @@ def render_list(item, header):
 
 def render_note(name, doc_elem) :
     note = doc_elem['note']
-    return ".. note::\n"  +note + '\n' if note else ''
+    return ".. note::\n\n    " + note + '\n\n' if note else ''
 
 def render_fig(doc_elem) : 
     figs = doc_elem['figure']
@@ -126,7 +126,7 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
 
 .. code-block:: c
 
-     {templ_synop} class {cls.spelling};
+    {templ_synop}class {cls.spelling};
     """.format(cls = cls, separator = '=' * (len(cls.spelling)+2), templ_synop = make_synopsis_template_decl(cls))
 
     # doc, note, warning, figure
@@ -153,7 +153,7 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
 
         R += toctree_hidden
         for m_name in all_m:
-           R += "   {cls.spelling}/{m_name}\n".format(cls = cls, m_name = m_name)
+           R += "    {cls.spelling}/{m_name}\n".format(cls = cls, m_name = m_name)
 
     if len(all_friend_functions) > 0:
         R += head('Non Member functions') 
@@ -162,7 +162,7 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
  
         R += toctree_hidden
         for f_name in all_friend_functions:
-           R += "   {cls.spelling}/{f_name}\n".format(cls = cls, f_name = f_name)
+           R += "    {cls.spelling}/{f_name}\n".format(cls = cls, f_name = f_name)
 
     code,d1,d2, s,e = prepare_example(cls.spelling, 4)
     if code is not None:

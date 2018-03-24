@@ -369,7 +369,7 @@ class class_ :
 
         is_printable : boolean
              If true, generate the str, repr from the C++ << stream operator
-        comparisons : boolean 
+        comparisons : string
              a chain with all operators separated by space, e.g. "== != < >"
         export : boolean [True]
              if True, the class converter are exported to modules that import this module.

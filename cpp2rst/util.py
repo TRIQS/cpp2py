@@ -51,7 +51,7 @@ def make_table(head_list, list_of_list):
     sep1 = sep.replace('-','=')
     r = [sep, header, sep1]
     for li in list_of_list: r += [form.format(*li), sep] 
-    return '\n'.join(r)
+    return '\n'.join(r) + '\n'
 
 def process_doc(doc):
     if not doc : return ""

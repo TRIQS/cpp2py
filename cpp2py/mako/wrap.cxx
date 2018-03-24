@@ -1036,7 +1036,7 @@ static PyObject* ${c.py_type}_richcompare (PyObject *a, PyObject *b, int op) {
  return NULL;
 }
 
-//--------------------- hdf5 : write part -----------------------------
+//--------------------- hdf5 part -----------------------------
 %if not c.hdf5 :
 
 /// hdf5 is not defined for this object, we still but a function + exception for a clear and early error message.

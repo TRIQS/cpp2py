@@ -93,7 +93,7 @@ class Cpp2Rst:
         d = OrderedDict()
         def decay(name):
             if 'operator' not in name : return name
-            a, ca, c, co = '+ - * /',  '+= -= *= /=',  "== !=",  r" comparison"
+            a, ca, c, co = '+ - * /',  '+= -= \*= /=',  "== !=",  r" comparison"
             d = {'*=' : ca,'+=' : ca,'/=' : ca,'-=' : ca,'*' : a,'+' : a,'/' : a,'-' : a, '==': c, '!=' : c, '<': co, '>' : co, '<=' : co, '>=' : co}
             n = name.replace('operator','').strip()
             return 'operator' + d[n] if n in d else name
