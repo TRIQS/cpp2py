@@ -258,6 +258,8 @@ class Cpp2Desc:
         print "Analysing dependencies"
         types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums 
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
+        if any(map(self.has_hdf5_scheme, self.all_classes)):
+            converters_list.append("triqs/cpp2py_converters/h5.hpp")
    
         # Reporting 
         if self.all_classes:
