@@ -20,7 +20,7 @@ toctree_hidden ="""
       
 """
 
-def head(s): return '\n' + s + '\n' + '-'*len(s)  + '\n\n'
+def head(s): return '\n\n' + s + '\n' + '-'*len(s)  + '\n\n'
 
 def escape_lg(s):
     return s.replace('>','\>').replace('<','\<')
@@ -33,8 +33,17 @@ def render_list(item, header):
     else : return ''
 
 def render_note(name, doc_elem) :
-    note = doc_elem['note']
-    return ".. note::\n\n    " + note + '\n\n' if note else ''
+    """
+    @param name warning or note
+    """
+    note = doc_elem[name]
+    if note:
+       return """
+.. %s::
+    %s"""%(name, note)
+    else:
+       return ''
+    
 
 def render_fig(doc_elem) : 
     figs = doc_elem['figure']
@@ -72,14 +81,14 @@ def render_fnt(f_name, doc_methods, parent_class, f_overloads):
         num = '(%s)'%(n+1) if len(f_overloads)>1 else ''
         R += num + doc.brief_doc + '\n'
 
-        R += render_note('note', doc_elem)
-        R += render_note('warning', doc_elem)
+        R += replace_latex(render_note('note', doc_elem))
+        R += replace_latex(render_note('warning', doc_elem))
         R += render_fig(doc_elem)
         R += render_list(doc_elem['tparam'], 'Template parameters')
         R += render_list(doc_elem['param'], 'Parameters')
 
         if doc_elem['return']: R += head('Return value') + doc_elem['return']
-        if doc.processed_doc: R += head('Documentation') + doc.processed_doc
+        if doc.processed_doc: R += head('Documentation') + replace_latex(doc.processed_doc)
         R += '\n\n' 
 
     # any example from the overloads
@@ -130,21 +139,21 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
     """.format(cls = cls, separator = '=' * (len(cls.spelling)+2), templ_synop = make_synopsis_template_decl(cls))
 
     # doc, note, warning, figure
-    R += doc_class.processed_doc
-    R += render_note('note', doc_elem)
-    R += render_note('warning', doc_elem)
+    R += replace_latex(doc_class.processed_doc)
+    R += replace_latex(render_note('note', doc_elem))
+    R += replace_latex(render_note('warning', doc_elem))
     R += render_fig(doc_elem)
     R += render_list(doc_elem['tparam'], 'Template parameters')
 
     c_members = list(CL.get_members(cls, True)) 
     if len(c_members) > 0:
         R += head('Public members') 
-        R += make_table(['Member','Type','Comment'], [(t.spelling,t.type.spelling, t.raw_comment if t.raw_comment else '') for t in c_members])
+        R += make_table(['Member','Type','Comment'], [(t.spelling,t.type.spelling, replace_latex(t.raw_comment) if t.raw_comment else '') for t in c_members])
 
     c_usings = list(CL.get_usings(cls)) 
     if len(c_usings) > 0:
         R += head('Member types') 
-        R += make_table(['Member type','Comment'], [(t.spelling, t.raw_comment if t.raw_comment else '') for t in c_usings])
+        R += make_table(['Member type','Comment'], [(t.spelling, replace_latex(t.raw_comment) if t.raw_comment else '') for t in c_usings])
 
     if len(all_m) > 0:
         R += head('Member functions') 
@@ -158,7 +167,7 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
     if len(all_friend_functions) > 0:
         R += head('Non Member functions') 
         R += make_table(['Non member function','Comment'],
-           [(":ref:`%s <%s_%s>`"%(name,escape_lg(cls.spelling), escape_lg(name)), doc_methods[name][0].brief_doc) for name in all_friend_functions])
+           [(":ref:`%s <%s_%s>`"%(name,escape_lg(cls.spelling), escape_lg(name)), replace_latex(doc_methods[name][0].brief_doc)) for name in all_friend_functions])
  
         R += toctree_hidden
         for f_name in all_friend_functions:
