@@ -2,7 +2,7 @@ import os, re, sys, itertools
 from mako.template import Template
 
 import cpp2py.clang_parser as CL
-import util, doc, dependency_analyzer
+from . import util, doc, dependency_analyzer
 
 class Cpp2Desc: 
     """ """
@@ -220,7 +220,7 @@ class Cpp2Desc:
             plist.append(property_(name= n, doc = doc.make_doc(m), getter = m, setter = set_m))
 
         if OUT: 
-            print "   Class %s : transforming to property : \n%s"%(c.spelling, OUT)
+            print("   Class %s : transforming to property : \n%s"%(c.spelling, OUT))
 
         return mlist, plist
   
@@ -266,7 +266,7 @@ class Cpp2Desc:
                 assert CL.is_public(m), "Parameter class : all members must be public. %s::%s is not"%(c.spelling, m.spelling) 
 
         # analyse the modules and converters that need to be added
-        print "Analysing dependencies"
+        print("Analysing dependencies")
         types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums 
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
         if any(map(self.has_hdf5_scheme, self.all_classes)):
@@ -274,24 +274,24 @@ class Cpp2Desc:
    
         # Reporting 
         if self.all_classes:
-            print "Wrapping classes:"
+            print("Wrapping classes:")
             for c in self.all_classes: 
-                print "   ", c.spelling
+                print("   ", c.spelling)
         if self.all_enums:
-            print "Wrapping enums:"
+            print("Wrapping enums:")
             for c in self.all_enums: 
-                print "   ", c.spelling
+                print("   ", c.spelling)
         if self.all_functions:
-            print "Wrapping functions:"
+            print("Wrapping functions:")
             for c in self.all_functions: 
-                print "   ", c.spelling
+                print("   ", c.spelling)
         if param_cls_list:
-            print "Generating converters for :"
+            print("Generating converters for :")
             for c in param_cls_list: 
-                print "   ", c.spelling
+                print("   ", c.spelling)
 
         # Render mako
-        print "Generating " + output_filename
+        print("Generating " + output_filename)
         tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True)
         rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,  
                               import_list = import_list, converters_list = converters_list, using_list = list(self.namespaces) + list(self.namespace_to_factor))

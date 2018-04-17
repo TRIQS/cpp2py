@@ -14,7 +14,7 @@ code = """
 M = compile(code, modules = "pytriqs", cxxflags = '-O2 ')
 
 
-print M.f(2)
+print(M.f(2))
 g = M.ma(100)
 
 

@@ -4,7 +4,7 @@ from cpp2cxx import Cpp2Cxx
 import cpp2py.libclang_config as config
 
 #
-print "Welcome to C++2cxx"
+print("Welcome to C++2cxx")
 
 # --- Parsing the arguments of the script and options
 

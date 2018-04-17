@@ -26,4 +26,4 @@ if 0:
     from pytriqs.gf import *
     gw = GfImFreq(indices = [1], beta = 50)
 
-    print m2.f(gw)
+    print(m2.f(gw))

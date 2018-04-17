@@ -81,7 +81,7 @@ namespace cpp2py {
     static pyref module(std::string const &module_name) { return PyImport_ImportModule(module_name.c_str()); }
 
     /// Make a Python string from the C++ string
-    static pyref string(std::string const &s) { return PyString_FromString(s.c_str()); }
+    static pyref string(std::string const &s) { return PyUnicode_FromString(s.c_str()); }
 
     /// Make a Python Tuple from the C++ objects
     template<typename ... T>

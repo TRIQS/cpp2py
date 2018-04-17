@@ -3,7 +3,7 @@ import os, sys, argparse
 from cpp2rst import Cpp2Rst
 import cpp2py.libclang_config as config
 
-print "Welcome to the C++ doc generator !"
+print("Welcome to the C++ doc generator !")
 
 # --- Parsing the arguments of the script and options
 parser = argparse.ArgumentParser(description=""" Generate the rst doc file from C++ header code """)

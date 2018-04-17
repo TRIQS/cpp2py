@@ -55,7 +55,7 @@ class Cpp2Cxx:
 
     def make_h5(self, cls):
 
-        print CL.get_annotations(cls)
+        print(CL.get_annotations(cls))
         """cls : AST node for a class. Returns the h5_read/write code"""
         # FIXME : treat template !
         h5w = '\n'.join('h5_write(gr, "%s", %s);'%(x.spelling, x.spelling) for x in CL.get_members(cls, False))

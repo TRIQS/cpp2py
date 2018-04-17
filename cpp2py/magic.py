@@ -52,7 +52,7 @@ class Cpp2pyMagics(Magics):
         """Compile and import everything from a Cpp2py code cell.
 
         Takes the c++ code, call c++2py on it and compile the whole thing
-        into a module which is then loaded and 
+        into a module which is then loaded and
         all of its symbols are injected into the user's namespace.
 
         Usage
@@ -83,7 +83,7 @@ class Cpp2pyMagics(Magics):
 
         # import all object and function in the main namespace
         imported = []
-        for k, v in module.__dict__.items():
+        for k, v in list(module.__dict__.items()):
             if not k.startswith('_'):
                 self.shell.push({k: v})
                 imported.append(k)
@@ -95,4 +95,3 @@ __doc__ = __doc__.format(CPP2PY_DOC=' ' * 8 + Cpp2pyMagics.cpp2py.__doc__)
 def load_ipython_extension(ip):
     """Load the extension in IPython."""
     ip.register_magics(Cpp2pyMagics)
-

@@ -3,6 +3,7 @@ import re
 import os
 from mako.template import Template
 import importlib
+import collections
 
 # the correspondance c type -> py_type
 c_to_py_type = {'void' : 'None', 'int' : 'int', 'long' : 'int', 'double' : "float", "std::string" : "str"}
@@ -53,11 +54,11 @@ class cfunction :
               assuming the C++ function has exactly the signature given by the signature parameter of this function
               including the c_name in it (which is then mandatory).
 
-        no_self_c : boolean. 
+        no_self_c : boolean.
                     Do not generate self_c reference in C++ code, in some rare calling_pattern. Avoid a compiler warning.
         is_constructor : boolean
         is_method : boolean
-        is_static : boolean. 
+        is_static : boolean.
                     If True, it is a static method
         release_GIL_and_enable_signal : boolean, expert only
           - For long functions in pure C++.
@@ -70,7 +71,7 @@ class cfunction :
              otherwise the behaviour is undefined.
         doc : string
             the doc string.
-        
+
       """
       #c_name : internal use only
       self._calling_pattern = calling_pattern
@@ -117,7 +118,7 @@ class cfunction :
         #args = [ re.sub('=',' ',x).split() for x in f() if x] # list of (type, name, default) or (type, name)
         args = [ g(x) for x in f() if x] # list of (type, name, default) or (type, name)
       else:
-          # mostly internal use, give signature as a dict 
+          # mostly internal use, give signature as a dict
           self.rtype = signature.pop("rtype", None)
           args = signature.pop('args',())
           self.c_name = signature.pop("c_name", '')
@@ -129,12 +130,12 @@ class cfunction :
         if a[1] == '*' : a = [' '.join(a[:2])] + list(a[2:])
         if len(a) == 2 : (t,n),d = a,None
         elif len(a) == 3 : t,n,d = a
-        else : raise RuntimeError, "Syntax error in overload: args = %s"%args
+        else : raise RuntimeError("Syntax error in overload: args = %s"%args)
         self.args.append([t.strip(),n.strip(),d])
       # end analyze signature
 
       # ensure no variable starts with __
-      for t,n,d in self.args : 
+      for t,n,d in self.args :
           assert not n.startswith('__'), "Variables names starting with __ are reserved for internal use"
       #
       assert self.c_name or self._calling_pattern or self.is_constructor, "You must specify a calling_pattern or the signature must contain the name of the function"
@@ -159,7 +160,7 @@ class cfunction :
             self_c = "self_c." if not self.is_static else "self_class::"
         # the wrapped types are called by pointer
         args = ",".join( n for t,n,d in self.args)
-        args = args if self._dict_call is None else "dict_transcript" 
+        args = args if self._dict_call is None else "dict_transcript"
         return "%s %s%s(%s)"%(s,self_c, (self.namespace + '::' if self.namespace else '') + self.c_name, args)
 
     def _get_signature (self):
@@ -255,7 +256,7 @@ class converter_:
     def add_member(self, c_name, c_type, initializer = '', doc = ''):
         """
         Add a class member
-        
+
         Parameters
         ----------
         c_name : string
@@ -283,7 +284,7 @@ class class_ :
     """
        Representation of a wrapped type
     """
-    def __init__(self, py_type, c_type, c_type_absolute = None, hdf5 = False, arithmetic = None, serializable = None, 
+    def __init__(self, py_type, c_type, c_type_absolute = None, hdf5 = False, arithmetic = None, serializable = None,
             export = True, is_printable = False, doc = '', comparisons ='') :
       """
         Parameters
@@ -351,14 +352,14 @@ class class_ :
       self.constructor = None # a pyfunction  for the constructors.
       self.members= [] # a list of _member
       self.properties= [] # a list of _property
-      self.export = export 
+      self.export = export
 
       # If hdf5 is True, wrap the C++.
       # We cannot generate a default implementation with error message as triqs::h5::group might not be available.
       # FIXME Remove triqs dependence
       if hdf5:
           self.add_method("void __write_hdf5__(triqs::h5::group gr, std::string key)", calling_pattern = "h5_write(gr, key, self_c);", doc = "hdf5 writing")
-    
+
       # Init arithmetic
       # expect a tuple : "algebra", "scalar1", "scalar2", etc...
       self.number_protocol = {}
@@ -420,7 +421,7 @@ class class_ :
 
           if with_inplace_operators : self.deduce_inplace_arithmetic()
 
-    def add_regular_type_converter(self): 
+    def add_regular_type_converter(self):
         self.implement_regular_type_converter = True
 
     def deduce_inplace_arithmetic(self) :
@@ -453,15 +454,15 @@ class class_ :
                - a dict : rtype -> string , args -> list of tuples [ (c_type, variable_name, default_value)]
                - rtype : the C++ type returned by the function. None for constructor
             default_value is None when there is no default.
-        
+
         calling_pattern : string, expert only
             - Pattern to rewrite the call of the c++ constructor.
             - It is a string, argument name and defining a result of the c_type
               e.g., the default pattern is ::
               auto result = c_type (a,b,c)
-        
+
         intermediate_type : string
-          - Name of a C++ type to be used for constructing the object   
+          - Name of a C++ type to be used for constructing the object
             which is then constructed as c_type { intermediate_type {....}}
             E.g. Put a regular_type here when wrapping a view.
 
@@ -474,7 +475,7 @@ class class_ :
         f._calling_pattern = '' if f._dict_call is None else "if (!convertible_from_python<%s>(keywds,true)) goto error_return;\n"%f._dict_call
         if calling_pattern is not None :
           f._calling_pattern, all_args = calling_pattern + ';\n', "std::move(result)"
-        if intermediate_type: 
+        if intermediate_type:
           f._calling_pattern += "((%s *)self)->_c = new %s(%s (%s));"%(self.py_type, self.c_type, intermediate_type, all_args)
         else :
           f._calling_pattern += "((%s *)self)->_c = new %s (%s);"%(self.py_type, self.c_type,all_args)
@@ -502,21 +503,21 @@ class class_ :
               - a dict : rtype -> string , args -> list of tuples [ (c_type, variable_name, default_value)]
               - rtype : the C++ type returned by the function. None for constructor
             default_value is None when there is no default.
-        
+
         name : string
                name given in Python
 
         c_name : string
                name given in C++
                If None, the C++ name extracted from the signature is used.
-        
+
         calling_pattern : string
           - Pattern to rewrite the call of the c++ function,
           - It is a string, using self_c, argument name and defining result at the end if rtype != void
             e.g., the default pattern is :
             auto result = self_c.method_name(a,b,c).
           - If None, the signature must contain c_name
-        no_self_c : boolean. 
+        no_self_c : boolean.
                     do not generate self_c reference in C++ code, in
                     some rare calling_pattern. Avoid a compiler warning.
         is_method : boolean
@@ -524,7 +525,7 @@ class class_ :
                     Is is a static method
         doc : string
               the doc string.
-        
+
         release_GIL_and_enable_signal : boolean, expert only
          - For long functions in pure C++.
          - If True, the GIL is released in the call of the C++ function and restored after the call.
@@ -560,7 +561,7 @@ class class_ :
     def add_iterator(self, c_type = "const_iterator", c_cast_type = None, begin = "std::begin", end = "std::end") :
         """
         Add an iterator, wrapping a C++ iterator.
-        
+
         Parameters
         ----------
 
@@ -597,7 +598,7 @@ class class_ :
     def add_member(self, c_name, c_type, py_name = None, read_only = False, doc = ''):
         """
         Add a class member
-        
+
         Parameters
         ----------
         c_name : string
@@ -626,7 +627,7 @@ class class_ :
     def add_property(self,  getter, setter = None, name = None, doc = ''):
         """
         Add a property
-        
+
         Parameters
         ----------
          - getter : the cfunction representing the get part
@@ -659,7 +660,7 @@ class class_ :
 
     def add_method_copy(self, clone_function = "cpp2py::make_clone") :
         """Add a method copy, that make a **deep** copy, using the clone function"""
-        self.add_method(name = "copy", calling_pattern = self.c_type + " result = %s(self_c)"%clone_function, 
+        self.add_method(name = "copy", calling_pattern = self.c_type + " result = %s(self_c)"%clone_function,
                         signature = self.c_type +"()", doc = "Make a copy (clone) of self")
 
     def add_method_cpp_copy(self) :
@@ -674,7 +675,7 @@ class class_ :
     def _prepare_for_generation(self) :
         """Internal :  Called just before the code generation"""
         self.has_mapping_protocol = '__getitem__impl' in self.methods or '__len__impl' in self.methods
-        if '__setitem__impl' in self.methods and not  '__getitem__impl' in self.methods : raise RuntimeError, "Cannot generate a class with a setter and no getter"
+        if '__setitem__impl' in self.methods and not  '__getitem__impl' in self.methods : raise RuntimeError("Cannot generate a class with a setter and no getter")
 
 class module_ :
     """
@@ -688,7 +689,7 @@ class module_ :
         full_name : string
                     complete name of the module (after install, e.g.  pytriqs.gf.local.gf)
 
-        doc : string 
+        doc : string
               doc string
 
         """
@@ -709,7 +710,7 @@ class module_ :
           Add a class into the module.
           It should not exist in the module already.
         """
-        if cls.py_type in self.classes : raise IndexError, "The class %s already exists"%cls.py_type
+        if cls.py_type in self.classes : raise IndexError("The class %s already exists"%cls.py_type)
         self.classes[cls.py_type] = cls
 
     def add_converter(self, conv):
@@ -717,7 +718,7 @@ class module_ :
           Add a converter into the module.
           It should not exist in the module already.
         """
-        if conv.c_type in self.converters : raise IndexError, "The class %s already exists"%conv.c_type
+        if conv.c_type in self.converters : raise IndexError("The class %s already exists"%conv.c_type)
         self.converters[conv.c_type] = conv
 
     def add_function(self, signature, name =None, calling_pattern = None,  doc = '', release_GIL_and_enable_signal = False, c_name = None):
@@ -737,8 +738,8 @@ class module_ :
               - a dict : rtype -> string , args -> list of tuples [ (c_type, variable_name, default_value)]
               - rtype : the C++ type returned by the function. None for constructor
            default_value is None when there is no default.
-        
-        name : string 
+
+        name : string
                name given in Python
 
         c_name : string
@@ -751,10 +752,10 @@ class module_ :
             e.g., the default pattern is :
             auto result = self_c.method_name(a,b,c).
           - If None, the signature must contain c_name
-        
+
         doc : string
               the doc string.
-        
+
         release_GIL_and_enable_signal : boolean, expert only
          - For long functions in pure C++.
          - If True, the GIL is released in the call of the C++ function and restored after the call.
@@ -803,7 +804,7 @@ class module_ :
     def add_enum(self, c_name, values, c_namespace ="", doc = '') :
         """
           Add an enum into the module.
-    
+
           Parameters
           ----------
 
@@ -811,7 +812,7 @@ class module_ :
                   name in C++
           c_namespace: string
                      namespace of the enum
-          values : list of string 
+          values : list of string
                   represents the C++ enum values
           doc : string
                 the doc string.
@@ -819,9 +820,9 @@ class module_ :
         self.enums.append( self._enum(c_name, values, c_namespace, doc))
 
     def _all_args_kw_functions(self) :
-        l = [ (f, self.name, None) for f in self.functions.values()]
-        for c in self.classes.values() :
-            l += [(m,c.py_type, c.c_type) for m in c.methods.values() if m.do_implement]
+        l = [ (f, self.name, None) for f in list(self.functions.values())]
+        for c in list(self.classes.values()) :
+            l += [(m,c.py_type, c.c_type) for m in list(c.methods.values()) if m.do_implement]
             if c.constructor :
                 l.append( (c.constructor,c.py_type, c.c_type))
         # Check before generation
@@ -843,17 +844,14 @@ class module_ :
         script_path = os.path.dirname(os.path.abspath( __file__ ))
         mako_template = script_path + '/mako/wrap.cxx'
         wrap_file = sys.argv[1]
- 
+
         # prepare generation
         for c in self.classes.values() : c._prepare_for_generation()
-           
+
         # call mako
         tpl = Template(filename=mako_template, strict_undefined=True)
-        rendered = tpl.render(module=self, 
+        rendered = tpl.render(module=self,
                    sys_modules = sys.modules)
-       
+
         with open(wrap_file,'w') as f:
            f.write(rendered)
-
-
-

@@ -1,19 +1,19 @@
 # This module defines the function parse that
 # call libclang to parse a C++ file, and retrieve
 # A few helper functions for libclang
-import sys,re,os, itertools, platform
+import re,os, itertools, platform
 import clang.cindex
 from mako.template import Template
 from clang.cindex import CursorKind, LibclangError
 import libclang_config
 
-def pretty_print(x, keep= None, s='...') : 
-   print x
+def pretty_print(x, keep= None, s='...') :
+   print(x)
    for y in x.get_children():
-        if keep and not keep(y) : continue 
-        print s, y.spelling
-        print s, y.kind
-        print s, [z.spelling for z in y.get_tokens()]
+        if keep and not keep(y) : continue
+        print(s, y.spelling)
+        print(s, y.kind)
+        print(s, [z.spelling for z in y.get_tokens()])
         pretty_print(y, keep, s + '...')
 
 def decay(s) :
@@ -24,10 +24,10 @@ def decay(s) :
 def get_annotations(node):
     return [c.displayname for c in node.get_children() if c.kind == CursorKind.ANNOTATE_ATTR]
 
-def get_tokens(node): 
+def get_tokens(node):
     return [t.spelling for t in node.get_tokens()]
 
-def get_type_alias_value(node) : 
+def get_type_alias_value(node) :
     """ node is a using, get the rhs"""
     return list(node.get_tokens())[3].spelling
 
@@ -45,8 +45,8 @@ def is_deprecated(node):
     tokens = get_tokens(node)
     return len(tokens)>3 and tokens[0] =='__attribute__' and tokens[3] =='deprecated'
 
-def is_public(node): 
-    return node.access_specifier == clang.cindex.AccessSpecifier.PUBLIC 
+def is_public(node):
+    return node.access_specifier == clang.cindex.AccessSpecifier.PUBLIC
 
 def jump_to_declaration(node):
     """
@@ -63,11 +63,11 @@ def keep_all(x) : return is_public(x) #True
 
 def is_explicit(node) : # for a constructor
     return 'explicit' in get_tokens(node)
-   
-def is_noexcept(node): 
+
+def is_noexcept(node):
     return 'noexcept' in get_tokens(node)[-2:]
 
-def get_method_qualification(node): 
+def get_method_qualification(node):
     """
     Detects from the tokens the trailing const, const &, &, &&, etc ...
     It is just after a ) if it exists (a type can not end with a ) )
@@ -85,20 +85,20 @@ def get_template_params(node):
     returns [] is not a template
     """
     tparams = []
-    def get_default(c) : 
+    def get_default(c) :
         tokens = get_tokens(c)
         return ''.join(tokens[tokens.index('=') + 1:-1]) if '=' in tokens else None
-          
+
     for c in node.get_children():
         if c.kind == CursorKind.TEMPLATE_TYPE_PARAMETER :
             tparams.append(("typename", c.spelling, get_default(c)))
         elif c.kind == CursorKind.TEMPLATE_NON_TYPE_PARAMETER:
             l = list(c.get_tokens())
-            if l: 
+            if l:
                tparams.append((l[0].spelling, c.spelling, get_default(c)))
     return tparams
 
-def is_template(node) : 
+def is_template(node) :
     return len(get_template_params(node))>0 # optimize ?
 
 def get_params(node):
@@ -107,7 +107,7 @@ def get_params(node):
     Yields the node of the parameters of the function
     """
     for c in node.get_children():
-        if c.kind == CursorKind.PARM_DECL : 
+        if c.kind == CursorKind.PARM_DECL :
             yield c
 
 def get_param_default_value(node):
@@ -137,16 +137,16 @@ def get_name_with_template_specialization(node):
        if t and t[0] == '<': name = name + ''.join(extract_bracketed(t))
     return name
 
-def get_base_classes(node, keep = keep_all): 
+def get_base_classes(node, keep = keep_all):
     """
     node is a class
     yields the nodes to the public base class.
     """
     for c in node.get_children():
-        if c.kind == CursorKind.CXX_BASE_SPECIFIER and keep(c): 
+        if c.kind == CursorKind.CXX_BASE_SPECIFIER and keep(c):
                 yield jump_to_declaration(c.type)
 
-def get_members(node, with_inherited, keep = keep_all): 
+def get_members(node, with_inherited, keep = keep_all):
     """
     node is a class
     yields the nodes to the public members
@@ -155,9 +155,9 @@ def get_members(node, with_inherited, keep = keep_all):
     for b in get_base_classes(node):
         for m in get_members(b, with_inherited, keep):
             yield m
-    
+
     for c in node.get_children():
-       if c.kind == CursorKind.FIELD_DECL and keep(c): 
+       if c.kind == CursorKind.FIELD_DECL and keep(c):
             yield c
 
 def get_member_initializer(node):
@@ -181,7 +181,7 @@ def is_copy_or_move_constructor(cls, m) :
     p = list(get_params(m)) # all the parameters
     return len(p) == 1 and decay(p[0].type.get_canonical().spelling) ==  cls.type.get_canonical().spelling
 
-def get_methods(node, with_inherited = True, keep = keep_all): 
+def get_methods(node, with_inherited = True, keep = keep_all):
     """
     node is a class
     yields the nodes to the members
@@ -196,7 +196,7 @@ def get_methods(node, with_inherited = True, keep = keep_all):
         if ok and keep(c):
            yield c
 
-def get_constructors(cls, keep = keep_all, with_copy_and_move_constructors = False): 
+def get_constructors(cls, keep = keep_all, with_copy_and_move_constructors = False):
     """
     cls is a class
     yields the clss to the public constructors
@@ -208,14 +208,14 @@ def get_constructors(cls, keep = keep_all, with_copy_and_move_constructors = Fal
             if with_copy_and_move_constructors or not(is_copy_or_move_constructor(cls, c)):
                     yield c
 
-def get_friend_functions(node, keep = keep_all): 
+def get_friend_functions(node, keep = keep_all):
     """
     node is a class
-    yields the nodes to the friend functions 
+    yields the nodes to the friend functions
     """
     for c in node.get_children():
-        if c.kind == CursorKind.FRIEND_DECL and keep(c): 
-            yield c.get_children().next()
+        if c.kind == CursorKind.FRIEND_DECL and keep(c):
+            yield next(c.get_children())
 
 #--------------------  print -----------------------------------
 
@@ -294,10 +294,10 @@ def get_functions(node, keep = keep_all, traverse_namespaces = False, keep_ns = 
           if c and c.kind in _fnt_types and keep(c):
             yield c
 
-def get_usings(node, keep = keep_all, traverse_namespaces = False, keep_ns = keep_all): 
+def get_usings(node, keep = keep_all, traverse_namespaces = False, keep_ns = keep_all):
     """
     node is a class, or a namespace or root
-    yields the nodes to the usings 
+    yields the nodes to the usings
     """
     for c in node.get_children():
         if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
@@ -326,19 +326,19 @@ def get_namespace_list(node):
 
 def get_namespace(node):
     return fully_qualified(node.referenced).rsplit('::',1)[0]
-    
+
 #--------------------  PARSE
 
 def parse(filename, compiler_options, includes, system_includes, libclang_location, parse_all_comments, skip_function_bodies = True):
     """
     filename           : name of the file to parse
-    compiler_options   : options to pass to clang to compile the file 
+    compiler_options   : options to pass to clang to compile the file
     where_is_libclang  : location (absolute path) of libclang
     return : the root of the AST tree
     """
     # compiler options
-    compiler_options = (compiler_options or []) 
-    if platform.system() == 'Darwin': compiler_options.append("-stdlib=libc++") 
+    compiler_options = (compiler_options or [])
+    if platform.system() == 'Darwin': compiler_options.append("-stdlib=libc++")
     if parse_all_comments : compiler_options.append("-fparse-all-comments")
     includes = set(includes)
     system_includes = set(system_includes)
@@ -357,10 +357,10 @@ def parse(filename, compiler_options, includes, system_includes, libclang_locati
     except LibclangError as err:
         print "ERROR creating libclang parser! Be sure to install libclang before installing c++2py."
         raise err
-    
+
     # Parse the file
     assert os.path.exists(filename), " File %s does not exist "%filename
-    print "Parsing the C++ file (may take a few seconds) ..."
+    print("Parsing the C++ file (may take a few seconds) ...")
     if skip_function_bodies:
         translation_unit = clang.cindex.TranslationUnit.from_source(filename, args =  ['-x', 'c++'] + compiler_options,
                                                                     options = clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
@@ -374,8 +374,7 @@ def parse(filename, compiler_options, includes, system_includes, libclang_locati
       for err in errors :
         loc = err.location
         s += '\n'.join([" file %s line %s col %s"%(loc.file, loc.line, loc.column), err.spelling])
-      raise RuntimeError, s + "\n... Your code must compile before using clang-parser !"
+      raise RuntimeError(s + "\n... Your code must compile before using clang-parser !")
 
-    print "... done. \n"
-    return translation_unit.cursor 
-
+    print("... done. \n")
+    return translation_unit.cursor

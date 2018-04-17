@@ -41,18 +41,18 @@ ${module._preamble}
 
 
 //------------------------------------------------------------------------------------------------------
-// Second all the classes and enums wrapped by imported modules 
+// Second all the classes and enums wrapped by imported modules
 // Most converters will be automatically included
 //------------------------------------------------------------------------------------------------------
 
 <%
   cpp2py_imported_modules = [m for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
   cpp2py_imported_modules = dict((m.__name__.split('.')[-1], m) for m in cpp2py_imported_modules).values()
-%>  
+%>
 
 %for M in cpp2py_imported_modules:
- <% 
-   d = M._get_cpp2py_wrapped_class_enums() 
+ <%
+   d = M._get_cpp2py_wrapped_class_enums()
    wrapped_ens = eval(d.get('enums',"()"))
    includes = eval(d['includes'])
  %>
@@ -67,32 +67,32 @@ ${module._preamble}
   %endif
  %endfor
 
-namespace cpp2py { 
+namespace cpp2py {
 
 //--------------------- Converters of enums --------------------------
 
-%for (c_name_absolute, c_namespace, values) in wrapped_ens: 
+%for (c_name_absolute, c_namespace, values) in wrapped_ens:
 
 template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
-    if (x == ${c_namespace}${val}) return PyString_FromString("${val}");
+    if (x == ${c_namespace}${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s=PyString_AsString(ob);
+   std::string s=PyUnicode_AsString(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
    return ${c_namespace}${values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob))  {
+   if (!PyUnicode_Check(ob))  {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s=PyString_AsString(ob);
+   std::string s=PyUnicode_AsString(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -114,7 +114,7 @@ template <> struct py_converter<${c_name_absolute}> {
 //------------------------------------------------------------------------------------------------------
 
 //--------------------- Generated converters --------------------------
- 
+
 %for conv in module.converters.values():
  ${conv.generate()}
 %endfor
@@ -411,7 +411,7 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
-    "${c.doc.encode('string_escape')}", /* tp_doc */
+    "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     ${c.py_type + "_richcompare"},  /* tp_richcompare */
@@ -450,23 +450,23 @@ namespace cpp2py {
 template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
-    if (x == ${val}) return PyString_FromString("${val}");
+    if (x == ${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s=PyString_AsString(ob);
+   std::string s=PyUnicode_AsString(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
    return ${en.values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob))  {
+   if (!PyUnicode_Check(ob))  {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s=PyString_AsString(ob);
+   std::string s=PyUnicode_AsString(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -516,8 +516,8 @@ template <> struct py_converter<${en.c_name}> {
        static_assert(std::is_reference<decltype(${n})>::value || std::is_pointer<decltype(${n})>::value, "internal error");
        %endfor
       %endif
-     
-      // FIXME : calling_pattern ---> lambda -> auto , plus de self. 
+
+      // FIXME : calling_pattern ---> lambda -> auto , plus de self.
       %if overload.is_method and not overload.is_constructor and not overload.is_static :
       auto & self_c = convert_from_python<${self_c_type}>(self);
       %endif
@@ -579,7 +579,7 @@ template <> struct py_converter<${en.c_name}> {
    // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
    {
     std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
-    for (int i =0; i < errors.size(); ++i) { 
+    for (int i =0; i < errors.size(); ++i) {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
       if (errors[i]) err_list += PyString_AsString((PyObject*)errors[i]);
       err_list +="\n";
@@ -699,7 +699,7 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 }
 %endif
 
-//--------------------- 
+//---------------------
 
 %if c.serializable == "tuple" :
 
@@ -727,7 +727,7 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
  }
 %endif
 
-//--------------------- 
+//---------------------
 
 %if c.serializable == "repr" :
  static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObject *keywds) {
@@ -747,12 +747,12 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
       return NULL;
     }
     PyObject* global_dict = PyModule_GetDict(this_module); //borrowed
-    PyObject* s = PyTuple_GetItem(args,0); //borrowed 
-    if (!PyString_Check(s)) {
+    PyObject* s = PyTuple_GetItem(args,0); //borrowed
+    if (!PyUnicode_Check(s)) {
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-    pyref code1 = Py_CompileString(PyString_AsString (s), "nofile", Py_eval_input);
+    pyref code1 = Py_CompileString(PyUnicode_AsString (s), "nofile", Py_eval_input);
     PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
@@ -766,13 +766,13 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 static PyObject* ${c.py_type}___repr__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 static PyObject* ${c.py_type}___str__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 %endif
@@ -886,7 +886,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject* v, PyObject *w){
   if (convertible_from_python<${overload.args[0][0]}>(v,false) && convertible_from_python<${overload.args[1][0]}>(w,false)) {
    try {
     %if not op_name.startswith("inplace") and not getattr(op, 'treat_as_inplace', False) :
-     cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r = 
+     cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r =
            convert_from_python<${overload.args[0][0]}>(v) ${overload._get_calling_pattern()} convert_from_python<${overload.args[1][0]}>(w);
      return convert_to_python(std::move(r)); // in two steps to force type for expression templates in C++
     %else:
@@ -971,17 +971,17 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   PyObject * d = PyDict_New();
 
   static const char * cls = "${repr( [ (c.c_type_absolute, c.implement_regular_type_converter) for c in module.classes.values() if c.export])}";
-  static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}"; 
-  static const char * inclu = "${repr( module.include_list)}"; 
-  
-  PyDict_SetItemString(d, "classes", pyref(PyString_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyString_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyString_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyString_FromString(inclu)));
+  static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
+  static const char * inclu = "${repr( module.include_list)}";
+
+  PyDict_SetItemString(d, "classes", pyref(PyUnicode_FromString(cls)));
+  PyDict_SetItemString(d, "enums", pyref(PyUnicode_FromString(ens)));
+  PyDict_SetItemString(d, "module_name", pyref(PyUnicode_FromString("${module.full_name}")));
+  PyDict_SetItemString(d, "includes", pyref(PyUnicode_FromString(inclu)));
 
   return d;
  }
- 
+
 //--------------------- module function table  -----------------------------
 
 // the table of the function of the module...
@@ -1043,7 +1043,7 @@ init${module.name}(void)
   pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
   pyref register_class = module.attr("register_class");
 %for c in [c for c in module.classes.values() if c.hdf5]:
-  {   
+  {
    pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
    pyref ds =convert_to_python(triqs::h5::get_hdf5_scheme<${c.c_type}>());
    pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
@@ -1058,4 +1058,3 @@ init${module.name}(void)
 %endfor
 
 }
-

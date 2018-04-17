@@ -1,5 +1,5 @@
-import util, importlib
-from cpp2py_info_base import Cpp2pyInfoStd
+import cpp2py.util as util, importlib
+from .cpp2py_info_base import Cpp2pyInfoStd
   
 class DependencyAnalyzer:
     """
@@ -22,7 +22,7 @@ class DependencyAnalyzer:
                 C = importlib.import_module(f)
                 self.get_imp_conv.append(C.Cpp2pyInfo)
             except AttributeError:
-                raise RuntimeError, "%s is not a proper converter.\nThis Python module does not exist or does not have the Cpp2pyInfo class"%f
+                raise RuntimeError("%s is not a proper converter.\nThis Python module does not exist or does not have the Cpp2pyInfo class"%f)
 
     def __call__(self, type_node_list, types_being_wrapped_or_converted): 
         """
@@ -51,9 +51,9 @@ class DependencyAnalyzer:
             c |= c1
             m |= m1
         if unknown_types:
-            print 20*'=' + "\nError : The following types can not be converted: \n"
-            for can, x in unknown_types.items() : 
-                print "%s (%s)"%(x, can)
-            raise TypeError, ""
+            print(20*'=' + "\nError : The following types can not be converted: \n")
+            for can, x in list(unknown_types.items()) : 
+                print("%s (%s)"%(x, can))
+            raise TypeError("")
         return sorted(list(m)), sorted(list(c))
 
