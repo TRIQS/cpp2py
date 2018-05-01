@@ -23,7 +23,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
     Takes the c++ code, call c++2py on it and compile the whole thing into a module.
     """
     # Add standard
-    cxxflags = "  -std=c++14 " + cxxflags
+    cxxflags = "  -std=c++17 " + cxxflags
     
     modules = modules.strip().split(' ')
     #print modules
