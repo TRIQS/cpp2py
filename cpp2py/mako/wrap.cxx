@@ -39,8 +39,13 @@ using dcomplex = std::complex<double>;
 
 <%
   cpp2py_imported_modules = [m for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
-  cpp2py_imported_modules = dict((m.__name__, m) for m in cpp2py_imported_modules).values()
+  cpp2py_imported_modules = dict((m.__name__.split('.')[-1], m) for m in cpp2py_imported_modules).values()
+  #cpp2py_imported_modules = dict(((m.__file__, m.__name__), m) for m in cpp2py_imported_modules).values()
 %>  
+
+%for M in cpp2py_imported_modules:
+ // Module ${M.__file__}  ${M.__name__}
+%endfor
 
 %for M in cpp2py_imported_modules:
  <% 
