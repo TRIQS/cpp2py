@@ -187,13 +187,6 @@ ${module._preamble}
  ${conv.generate()}
 %endfor
 
-
-//--------------------- a dict of python function used in the module but not exposed to user (cf init function) ----------------
-
-%if len(module.python_functions) + len(module.hidden_python_functions) > 0 :
-static PyObject * _module_hidden_python_function = NULL;
-%endif
-
 // We use the order, in the following order (which is necessary for compilation : we need the converters in the implementations)
 // - function/method declaration
 // - implement type, and all tables
@@ -217,12 +210,6 @@ static PyObject * _module_hidden_python_function = NULL;
 // ----------------------------
 // start class : ${c.py_type}
 // ----------------------------
-//--------------------- all pure python methods  -----------------------------
-
-%for f_name, (f,ty,doc) in c.pure_python_methods.items():
-static PyObject* ${c.py_type}_${f_name} (PyObject *self, PyObject *args, PyObject *keywds);
-%endfor
-
 //--------------------- all members  -----------------------------
 
 %for m in c.members:
@@ -464,16 +451,6 @@ static PyMethodDef ${c.py_type}_methods[] = {
     %endif
    %endfor
     {"__reduce__", (PyCFunction)${c.py_type}___reduce__, METH_VARARGS, "Internal  " },
-##%if c.serializable == "tuple" :
-##    {"__reduce_reconstructor__", (PyCFunction)${c.py_type}___reduce_reconstructor__, METH_VARARGS|METH_STATIC, "Internal " },
-##%endif
-##%if c.hdf5:
-    {"__write_hdf5__", (PyCFunction)${c.py_type}___write_hdf5__, METH_VARARGS, "Internal : hdf5 writing via C++ " },
-##%endif
- %for meth_name, (meth,ty,doc) in c.pure_python_methods.items():
-    {"${meth_name}", (PyCFunction)${c.py_type}_${meth_name}, METH_VARARGS| METH_KEYWORDS, "${doc}" },
- %endfor
-
 {NULL}  /* Sentinel */
 };
 
@@ -735,36 +712,6 @@ template <> struct py_converter<${en.c_name}> {
 // ------------------------------- Loop on all classes ----------------------------------------------------
 
 %for c in module.classes.values() :
-
-//--------------------- define all pure python methods  -----------------------------
-
-// The methods called from an external module
-%for f_name, (f,ty,doc) in c.pure_python_methods.items():
- %if ty=='module':
-static PyObject* ${c.py_type}_${f_name} (PyObject *self, PyObject *args, PyObject *keywds) {
-  static pyref module = pyref::module("${f.module}");
-  if (module.is_null()) {
-     PyErr_SetString(PyExc_ImportError,"Cannot import module ${f.module}");
-     return NULL;
-  }
-  static pyref py_fnt = module.attr("${f.py_name}");
-  if (py_fnt.is_null()) {
-     PyErr_SetString(PyExc_ImportError,"Cannot import function ${f.py_name} in module ${f.module}");
-     return NULL;
-  }
-  pyref args2 = PySequence_Concat(PyTuple_Pack(1,self),args);
-  PyObject * ret = PyObject_Call(py_fnt, args2,keywds);
-  return ret;
-}
- %else :
-  // The methods with inline code in the module
-static PyObject* ${c.py_type}_${f_name} (PyObject *self, PyObject *args, PyObject *keywds) {
-  pyref args2 = PySequence_Concat(PyTuple_Pack(1,self),args);
-  PyObject * ret = PyObject_Call(PyDict_GetItemString(PyModule_GetDict(_module_hidden_python_function),"${f}"), args2, keywds);
-  return ret;
-}
-%endif
-%endfor
 
 //--------------------- define all members  -----------------------------
 
@@ -1225,17 +1172,6 @@ static PyMethodDef module_methods[] = {
 
 //--------------------- module init function -----------------------------
 
-// The code of all module python functions
-%for f in module.python_functions.values() :
- static const char * _module_python_function_code_${f.name} =
-${f.code};
-%endfor
-
-%for f in module.hidden_python_functions.values() :
- static const char * _module_hidden_python_function_code_${f.name} =
-${f.code};
-%endfor
-
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -1300,28 +1236,5 @@ init${module.name}(void)
     if (c_api_object != NULL) PyModule_AddObject(m, "_exported_wrapper_convert_fnt", c_api_object);
 %endif
 
-   // add eventually the python function 
-   %if len(module.python_functions) + len(module.hidden_python_functions) > 0 :
-
-    PyObject* main_module = PyImport_AddModule("__main__"); //borrowed
-    PyObject* global_dict = PyModule_GetDict(main_module); //borrowed
-
-    // load and compile the module function defined in pure python
-   %for f in module.python_functions.values() :
-    if (!PyRun_String( _module_python_function_code_${f.name},Py_file_input, global_dict, PyModule_GetDict(m) )) return;
-   %endfor
-
-    // now the hidden python function ...
-    _module_hidden_python_function = PyModule_New("hidden_functions");
-    // if we wish to still see the functions...
-    PyModule_AddObject(m, "__hidden_fnt", _module_hidden_python_function);
-
-    PyObject * d = PyModule_GetDict(_module_hidden_python_function); //borrowed
-    %for f in module.hidden_python_functions.values() :
-     if (!PyRun_String( _module_hidden_python_function_code_${f.name}, Py_file_input, global_dict ,d)) return;
-    %endfor
-   %endif
-   // END
 }
-
 
