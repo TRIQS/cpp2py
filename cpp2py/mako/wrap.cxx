@@ -109,16 +109,6 @@ template <> struct py_converter<${c_name_absolute}> {
 using ${ns};
 %endfor
 
-<% include_serialization=0 %>
-%for c in module.classes.values() :
-%if c.serializable == "h5" :
-<% include_serialization=1 %>
-<% break %>
-%endif
-%endfor
-%if include_serialization==1 :
-#include <triqs/utility/serialization.hpp>
-%endif
 using namespace cpp2py;
 
 ${module._preamble}
@@ -712,41 +702,17 @@ static int ${c.py_type}___setitem__(PyObject *self, PyObject *key, PyObject *v) 
 }
 %endif
 
-//--------------------- reduce : default case -----------------------------
+//--------------------- reduce  -----------------------------
 
 %if c.serializable is None:
- static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObject *keywds) {
+
+static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObject *keywds) {
   PyErr_SetString(PyExc_NotImplementedError, "__reduce__ not implemented");
   return NULL;
 }
 %endif
-//--------------------- reduce  -----------------------------
 
-%if c.serializable == "h5" :
- static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObject *keywds) {
-  auto & self_c = convert_from_python<${c.c_type}>(self);
-  pyref r = pyref::module("${module.full_name}").attr("__reduce_reconstructor__${c.py_type}");
-  if (r.is_null()) {
-   PyErr_SetString(PyExc_ImportError,
-                   "Cannot find the reconstruction function ${module.full_name}.__reduce_reconstructor__${c.py_type}");
-   return NULL;
-  }
-  return Py_BuildValue("(NN)", r.new_ref() , Py_BuildValue("(N)", convert_to_python(triqs::serialize(self_c))));
- }
-
- //
- static PyObject* ${c.py_type}___reduce_reconstructor__ (PyObject *self, PyObject *args, PyObject *keywds) {
-    PyObject* a1 = PyTuple_GetItem(args,0); // 
-    auto a = convert_from_python<triqs::arrays::array_const_view<triqs::h5::h5_serialization_char_t,1>>(a1);
-    try {
-      return convert_to_python( triqs::deserialize<${c.c_type}>(a));
-    }
-    CATCH_AND_RETURN("in unserialization of object ${c.py_type}",NULL);
-  }
-
-%endif
-
-//--------------------- reduce version 2 -----------------------------
+//--------------------- 
 
 %if c.serializable == "tuple" :
 
@@ -774,7 +740,7 @@ static int ${c.py_type}___setitem__(PyObject *self, PyObject *key, PyObject *v) 
  }
 %endif
 
-//--------------------- reduce version 3 -----------------------------
+//--------------------- 
 
 %if c.serializable == "repr" :
  static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObject *keywds) {
