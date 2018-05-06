@@ -1,3 +1,4 @@
+#include<array>
 #include<complex>
 #include<string>
 #include<iostream> //for std::cout...
@@ -487,19 +488,11 @@ template <> struct py_converter<${en.c_name}> {
 
  static ${'PyObject*' if not py_meth.is_constructor else 'int'} ${module_or_class_name}_${py_meth.py_name}(PyObject *self, PyObject *args, PyObject *keywds) {
 
-  <%
-     n_overload = len(py_meth.overloads)
-     has_overloads = (n_overload>1)
-  %>
-  %if not py_meth.is_constructor :
-  PyObject * py_result; //final result
-  %endif
+  static constexpr int n_overloads = ${len(py_meth.overloads)};
 
-  //FIXME std::array<pyref> or one can leak !!
+  [[maybe_unused]] PyObject * py_result; //final result, except for constructor
 
-  %if has_overloads :
-  PyObject * errors[${n_overload}] = {${",".join(n_overload*['NULL'])}}; //errors of the parsing attempts...
-  %endif
+  std::array<pyref,n_overloads> errors;
 
   // If no overload, we avoid the err_list and let the error go through (to save some code).
   %for n_overload, overload in enumerate(py_meth.overloads) :
@@ -526,7 +519,7 @@ template <> struct py_converter<${en.c_name}> {
       %endif
      
       // FIXME : calling_pattern ---> lambda -> auto , plus de self. 
-      %if overload.is_method and not overload.is_constructor and not overload.no_self_c and not overload.is_static :
+      %if overload.is_method and not overload.is_constructor and not overload.is_static :
       auto & self_c = convert_from_python<${self_c_type}>(self);
       %endif
       %if overload.is_static :
@@ -562,7 +555,7 @@ template <> struct py_converter<${en.c_name}> {
          py_result = Py_None;
          %endif
         %endif
-        goto post_treatment; // eject, computation is done
+        return ${'py_result' if not py_meth.is_constructor else '0'};
       }
       %if not py_meth.is_constructor:
       CATCH_AND_RETURN(".. calling C++ overload \n.. ${overload._get_c_signature()} \n.. in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}", NULL);
@@ -570,36 +563,28 @@ template <> struct py_converter<${en.c_name}> {
       CATCH_AND_RETURN (".. in calling C++ overload of constructor :\n.. ${overload._get_c_signature()}",-1);
       %endif
      }
-  %if has_overloads :
      else { // the overload does not parse the arguments. Keep the error set by python, for later use, and clear it.
-      PyObject * ptype,  *ptraceback; // unused.
-      PyErr_Fetch(&ptype, &errors[${n_overload}], &ptraceback);
+      PyObject * ptype,  *ptraceback, *err; // unused.
+      PyErr_Fetch(&ptype, &err, &ptraceback);
+      errors[${n_overload}] = pyref{err};
       Py_XDECREF(ptype); Py_XDECREF(ptraceback);
      }
-  %endif
     } // end overload ${overload._get_c_signature()}
   %endfor # overload
 
-  %if has_overloads :
-   // finally, no overload was successful. Composing a detailed error message, with the reason of failure of all overload !
+   static const char * overloads_signatures[] = {${'"' + ','.join(ov._get_c_signature() for ov in py_meth.overloads) + '"'}};
+
+   // FIXME Factorize this
+   // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
    {
     std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
-    %for n_overload, overload in enumerate(py_meth.overloads) :
-      err_list += "\n ${overload._get_c_signature()} \n failed with the error : \n  ";
-      if (errors[${n_overload}])err_list += PyString_AsString(errors[${n_overload}]);
+    for (int i =0; i < errors.size(); ++i) { 
+      err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
+      if (errors[i]) err_list += PyString_AsString((PyObject*)errors[i]);
       err_list +="\n";
-      Py_XDECREF(errors[${n_overload}]);
-    %endfor
+    }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
    }
-  %endif
-   goto error_return;
-
-  post_treatment:
-
-   return ${'py_result' if not py_meth.is_constructor else '0'};
-
-  error_return :
    return ${'NULL' if not py_meth.is_constructor else '-1'};
  }
 %endfor
