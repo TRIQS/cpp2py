@@ -40,18 +40,11 @@ using dcomplex = std::complex<double>;
 <%
   cpp2py_imported_modules = [m for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
   cpp2py_imported_modules = dict((m.__name__.split('.')[-1], m) for m in cpp2py_imported_modules).values()
-  #cpp2py_imported_modules = dict(((m.__file__, m.__name__), m) for m in cpp2py_imported_modules).values()
 %>  
-
-%for M in cpp2py_imported_modules:
- // Module ${M.__file__}  ${M.__name__}
-%endfor
 
 %for M in cpp2py_imported_modules:
  <% 
    d = M._get_cpp2py_wrapped_class_enums() 
-   module_name = d['module_name']
-   wrapped_cls = eval(d.get('classes',"()"))
    wrapped_ens = eval(d.get('enums',"()"))
    includes = eval(d['includes'])
  %>
@@ -67,57 +60,6 @@ using dcomplex = std::complex<double>;
  %endfor
 
 namespace cpp2py { 
-
-//--------------------- Converters of classes --------------------------
- 
-%for n,(c_type_absolute, implement_regular_type_converter) in enumerate(wrapped_cls) :
-
-template<> struct py_converter<${c_type_absolute}> { 
-
-  using is_wrapped_type = void;// to recognize
- 
-  static void ** wrapped_convert_fnt;
-
-  static void ** init() {
-   PyObject * mod =  PyImport_ImportModule("${module_name}");
-   if (mod ==NULL) return NULL;
-   pyref capsule =  PyObject_GetAttrString(mod,  "_exported_wrapper_convert_fnt");
-   if (capsule.is_null()) {
-     PyErr_SetString(PyExc_RuntimeError, "TRIQS: can not find _exported_wrapper_convert_fnt in the module ${module_name}");
-     return NULL;
-   }
-   void ** table = (void**) PyCapsule_GetPointer(capsule, "${module_name}._exported_wrapper_convert_fnt");
-   return table;
- }
- 
-  static PyObject * c2py(${c_type_absolute} const & x){
-   if (wrapped_convert_fnt == NULL) return NULL;
-   return ((PyObject * (*)(${c_type_absolute} const &)) wrapped_convert_fnt[3*${n}])(x);
- }
- 
-  static ${c_type_absolute}& py2c(PyObject * ob){
-   if (wrapped_convert_fnt == NULL) std::terminate(); // It should never happen since py2c is called only is is_convertible is true (py_converter specs) 
-   return ((${c_type_absolute}& (*)(PyObject *)) wrapped_convert_fnt[3*${n}+1])(ob);
- }
- 
-  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (wrapped_convert_fnt == NULL) {
-    if (!raise_exception && PyErr_Occurred()) {PyErr_Print();PyErr_Clear();}
-    return false;
-   }
-   return ((bool (*)(PyObject *,bool)) wrapped_convert_fnt[3*${n}+2])(ob,raise_exception);
- }
-};
-
-void ** py_converter<${c_type_absolute}>::wrapped_convert_fnt = py_converter<${c_type_absolute}>::init();
-
-%if implement_regular_type_converter : 
- template<> struct py_converter<${c_type_absolute}::regular_type> : 
- 	py_converter_generic_cross_construction<${c_type_absolute}::regular_type, ${c_type_absolute}> {};
-%endif
-
-%endfor
-## end loop on classes
 
 //--------------------- Converters of enums --------------------------
 
@@ -451,6 +393,7 @@ static PyMethodDef ${c.py_type}_methods[] = {
     %endif
    %endfor
     {"__reduce__", (PyCFunction)${c.py_type}___reduce__, METH_VARARGS, "Internal  " },
+    {"__write_hdf5__", (PyCFunction)${c.py_type}___write_hdf5__, METH_VARARGS, "Internal : hdf5 writing via C++ " },
 {NULL}  /* Sentinel */
 };
 
@@ -501,48 +444,6 @@ static PyTypeObject ${c.py_type}Type = {
  0,                          /* tp_new */
 %endif
 };
-
-//--------------------- converters for the class c -----------------------------
-
-namespace cpp2py { 
-
-template <> struct py_converter<${c.c_type}> {
-
- using is_wrapped_type = void;// to recognize
-
- template<typename U> static PyObject * c2py(U&& x){
-  ${c.py_type} *self;
-  self = (${c.py_type} *)${c.py_type}Type.tp_alloc(&${c.py_type}Type, 0);
-  if (self != NULL) {
-   self->_c = new ${c.c_type}{std::forward<U>(x)};
-  }
-  return (PyObject *)self;
- }
-
- static ${c.c_type} & py2c(PyObject * ob){
-  auto *_c = ((${c.py_type} *)ob)->_c;
-  if (_c == NULL) CPP2PY_RUNTIME_ERROR << "Severe internal error : _c is null in py2c for type ${c.c_type} !";
-  return *_c;
- }
-
- static bool is_convertible(PyObject *ob, bool raise_exception){
-  if (PyObject_TypeCheck(ob, & ${c.py_type}Type)) {
-   if (((${c.py_type} *)ob)->_c != NULL) return true;
-   if (raise_exception) PyErr_SetString(PyExc_TypeError, "Severe internal error : Python object of ${c.py_type} has a _c NULL pointer !!");
-   return false;
-  }
-  if (raise_exception) PyErr_SetString(PyExc_TypeError, "Python object is not a ${c.py_type}");
-  return false;
- }
-};
-
-// TO BE MOVED IN GENERAL HPP
-%if c.implement_regular_type_converter :
- // ${c.py_type} is wrapping a view, we are also implementing the converter of the associated regular type
- template<> struct py_converter<${c.c_type}::regular_type> : py_converter_generic_cross_construction<${c.c_type}::regular_type, ${c.c_type}> {};
-%endif
-
-} // namespace cpp2py
 
 // ----------------------------
 // stop class : ${c.py_type}
@@ -603,6 +504,9 @@ template <> struct py_converter<${en.c_name}> {
   %if not py_meth.is_constructor :
   PyObject * py_result; //final result
   %endif
+
+  //FIXME std::array<pyref> or one can leak !!
+
   %if has_overloads :
   PyObject * errors[${n_overload}] = {${",".join(n_overload*['NULL'])}}; //errors of the parsing attempts...
   %endif
@@ -630,7 +534,8 @@ template <> struct py_converter<${en.c_name}> {
        static_assert(std::is_reference<decltype(${n})>::value || std::is_pointer<decltype(${n})>::value, "internal error");
        %endfor
       %endif
-      
+     
+      // FIXME : calling_pattern ---> lambda -> auto , plus de self. 
       %if overload.is_method and not overload.is_constructor and not overload.no_self_c and not overload.is_static :
       auto & self_c = convert_from_python<${self_c_type}>(self);
       %endif
@@ -1000,6 +905,8 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
 
 %else:
 
+// FIXME pass by the ordinary calls....
+// FIXME Py_RETURN_NONE : in the usual call.
 static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
   triqs::h5::group gr;
   const char * key;
@@ -1012,6 +919,11 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
   Py_RETURN_NONE;
  }
 
+
+// FIXME : only one loop in the module init !
+
+// FIXME : pull out : function template + pas the type
+// and rewrite this into the module python load
 // Make the reader function for the type and register it in the hdf archive module
 // This function is called once in the module init function
 static void register_h5_reader_for_${c.py_type} () {
@@ -1148,10 +1060,6 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   return d;
  }
  
-//------------------------------------------------------------------------
-//---------------------    MODULE  --------- -----------------------------
-//------------------------------------------------------------------------
-
 //--------------------- module function table  -----------------------------
 
 // the table of the function of the module...
@@ -1186,7 +1094,6 @@ init${module.name}(void)
     PyObject* m;
 
 %for c in module.classes.values() :
-
     if (PyType_Ready(&${c.py_type}Type) < 0) return;
 
     %if c.iterator :
@@ -1210,31 +1117,11 @@ init${module.name}(void)
     register_h5_reader_for_${c.py_type}();
 %endfor
 
-   // Import once all modules to register the class of imported modules.
-<%
-  cpp2py_imported_module_names = [n for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
-%>  
-%for m in cpp2py_imported_module_names:
-   PyImport_ImportModule ("${m}"); // loose the reference, it is ok here.
+    // register all the types
+    auto *table  = get_pytypeobject_table();
+%for c in module.classes.values() :
+    (*table)[std::type_index(typeid(${c.c_type}))] = &${c.py_type}Type;
 %endfor
-
-   // write the export table for classes (enums) that have to be exported
-<% classes_to_export =  [c for c in module.classes.values() if c.export] %>
-%if len(classes_to_export) >0 :
-     // declare the exported wrapper functions
-     static void * _exported_wrapped_convert_fnt[3*${len(classes_to_export)}];
-
-     // init the array with the function pointers for classes to be exported
-     %for n,c in enumerate(classes_to_export):
-       _exported_wrapped_convert_fnt[3*${n}] = (void *)convert_to_python<${c.c_type_absolute}>;
-       _exported_wrapped_convert_fnt[3*${n}+1] = (void *)convert_from_python<${c.c_type_absolute}>;
-       _exported_wrapped_convert_fnt[3*${n}+2] = (void *)convertible_from_python<${c.c_type_absolute}>;
-     %endfor
-
-    /* Create a Capsule containing the API pointer array's address */
-    PyObject *c_api_object = PyCapsule_New((void *)_exported_wrapped_convert_fnt, "${module.full_name}._exported_wrapper_convert_fnt", NULL);
-    if (c_api_object != NULL) PyModule_AddObject(m, "_exported_wrapper_convert_fnt", c_api_object);
-%endif
 
 }
 
