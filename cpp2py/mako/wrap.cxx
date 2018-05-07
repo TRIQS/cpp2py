@@ -8,9 +8,6 @@ using dcomplex = std::complex<double>;
 #include <cpp2py.hpp>
 #include <cpp2py/converters/string.hpp>
 
-// needed for h5 mechanism below
-#include <cpp2py/converters/function.hpp>
-
 // for converters
 #include <cpp2py/converters/vector.hpp>
 #include <cpp2py/converters/string.hpp>
@@ -32,6 +29,21 @@ using dcomplex = std::complex<double>;
 %endif
 %endif
 %endfor
+
+%for ns in module.using:
+using ${ns};
+%endfor
+
+using namespace cpp2py;
+
+${module._preamble}
+
+
+// FIXME : put if before ...
+// needed for h5 mechanism below
+#include <cpp2py/h5_reader.hpp>
+#include <cpp2py/converters/function.hpp>
+
 
 //------------------------------------------------------------------------------------------------------
 // Second all the classes and enums wrapped by imported modules 
@@ -105,14 +117,6 @@ template <> struct py_converter<${c_name_absolute}> {
 ## END LOOP ON IMPORTED MODULES
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
-
-%for ns in module.using:
-using ${ns};
-%endfor
-
-using namespace cpp2py;
-
-${module._preamble}
 
 //--------------------- Generated converters --------------------------
  
@@ -870,38 +874,6 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
   Py_RETURN_NONE;
  }
 
-
-// FIXME : only one loop in the module init !
-
-// FIXME : pull out : function template + pas the type
-// and rewrite this into the module python load
-// Make the reader function for the type and register it in the hdf archive module
-// This function is called once in the module init function
-static void register_h5_reader_for_${c.py_type} () {
-
-  auto reader = [] (PyObject * h5_gr, std::string const & name) -> PyObject *{
-   auto gr = convert_from_python<triqs::h5::group>(h5_gr);
-   // declare the target C++ object, with special case if it is a view...
-   using c_type = triqs::regular_type_if_view_else_type_t<${c.c_type}>;
-   try { // now read
-     return convert_to_python(${c.c_type}( triqs::h5::h5_read<c_type> (gr, name))); // cover the view and value case
-   }
-   CATCH_AND_RETURN("in h5 reading of object ${c.py_type}", NULL);
-   return NULL; // unused
-  }; // end reader lambda
-
-  pyref h5_reader = convert_to_python(std::function<PyObject*(PyObject *, std::string)> (reader));
-  pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
-  pyref register_class = module.attr("register_class");
-
-  using c_type = triqs::regular_type_if_view_else_type_t<${c.c_type}>;
-  std::string hdf5_scheme = triqs::h5::get_hdf5_scheme<c_type>();
-  pyref ds =convert_to_python(hdf5_scheme);
-
-  pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
-  //pyref res = PyObject_CallFunction(register_class, "OOO", (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader);
-}
-
 %endif
 
 //--------------------- Arithmetic implementation -----------------------------
@@ -993,6 +965,7 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
 %endfor  ## Big loop on classes c
 
 
+// FIXME : remove this
 //--------------------- function returning the list of classes, enum wrapped  -----------------------------
 
  static PyObject* _get_cpp2py_wrapped_class_enums(PyObject *self, PyObject *args, PyObject *keywds) {
@@ -1064,8 +1037,14 @@ init${module.name}(void)
 %endfor
 
     // hdf5 registration
+  pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
+  pyref register_class = module.attr("register_class");
 %for c in [c for c in module.classes.values() if c.hdf5]:
-    register_h5_reader_for_${c.py_type}();
+  {   
+   pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
+   pyref ds =convert_to_python(triqs::h5::get_hdf5_scheme<${c.c_type}>());
+   pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
+  }
 %endfor
 
     // register all the types
