@@ -1,13 +1,17 @@
 set (CPP2PY_VERSION "1.5")
 
+option(BUILD_DEBIAN_PACKAGE "Build a deb package" OFF)
+if(BUILD_DEBIAN_PACKAGE)
+set(CMAKE_INSTALL_PREFIX "/usr")
+
 # Check CMAKE_INSTALL_PREFIX : must be provided and absolute
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
+elseif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
  message(FATAL_ERROR "CMAKE_INSTALL_PREFIX must be specified and must be an absolute path.\n There is no default.\n Current value : ${CMAKE_INSTALL_PREFIX}\n.  e.g. ... -DCMAKE_INSTALL_PREFIX=$HOME/triqs_install")
 endif()
 message(STATUS "Installation directory will be ${CMAKE_INSTALL_PREFIX}")
 
 cmake_minimum_required(VERSION 2.8.7)
-project(AllCpp2xx C CXX)
+project(cpp2py C CXX)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
@@ -94,3 +98,15 @@ MESSAGE(STATUS "***************************************************************"
 #--------------------------------------------------------
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
+#--------------------------------------------------------
+# Packaging
+#--------------------------------------------------------
+if(BUILD_DEBIAN_PACKAGE)
+set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_VERSION ${CPP2PY_VERSION})
+set(CPACK_PACKAGE_CONTACT "https://github.com/TRIQS/cpp2py")
+execute_process(COMMAND dpkg --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.23), libgcc1 (>= 1:8), libstdc++6, python, python-mako, python-numpy, python-h5py, python-scipy")
+include(CPack)
+endif()
