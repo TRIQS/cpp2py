@@ -155,6 +155,11 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  set (PYTHONLIBS_FOUND TRUE) 
 
  # Installation : Final destination of the python modules
- set(PYTHON_LIB_DEST_ROOT lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages)
+ if(BUILD_DEBIAN_PACKAGE)
+   set(PYTHON_LIB_DEST_DIR dist-packages)
+ else()
+   set(PYTHON_LIB_DEST_DIR site-packages)
+ endif()
+ set(PYTHON_LIB_DEST_ROOT lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/${PYTHON_LIB_DEST_DIR})
  message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST_ROOT}")
 
