@@ -13,6 +13,8 @@ include(FindPackageHandleStandardArgs)
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   SET(TRIAL_LIBRARY_PATHS
+   /usr/local/Cellar/llvm/6.0.0/lib/
+   /usr/local/Cellar/llvm/5.0.1/lib/
    /usr/local/lib/
    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
   )
@@ -32,6 +34,7 @@ SET(TRIAL_LIBRARY_PATHS
  ENV LD_INCLUDE_PATH
  /usr/lib 
  /usr/lib/x86_64-linux-gnu
+ /usr/lib/llvm-6.0/lib
  /usr/lib/llvm-5.0/lib
  /usr/lib/llvm-4.0/lib
  /usr/lib64/llvm
@@ -49,7 +52,7 @@ if (NOT CLANG_COMPILER)
   ENV PATH
   /usr/bin 
  )
-FIND_PROGRAM(CLANG_COMPILER names clang++ clang++-5.0 clang++-4.0 PATHS ${TRIAL_CLANG_PATHS} DOC "Clang compiler (for libclang option)")
+FIND_PROGRAM(CLANG_COMPILER names clang++ clang++-6.0 clang++-5.0 clang++-4.0 PATHS ${TRIAL_CLANG_PATHS} DOC "Clang compiler (for libclang option)")
 endif()
 
 if (NOT CLANG_COMPILER)

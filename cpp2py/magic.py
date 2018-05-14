@@ -33,6 +33,7 @@ class Cpp2pyMagics(Magics):
     @magic_arguments.argument( "-v", "--verbosity", type=int, help="increase output verbosity")
     @magic_arguments.argument( '-o', "--only", action='append', default=[], help="""Which object to wrap""")
     @magic_arguments.argument( '-C', "--converters", action='append', default=[], help="""Modules""")
+    @magic_arguments.argument(  "--no_clean", action='store_true', default=[], help="""""")
     @cell_magic
     def cpp2py(self, line, cell=None):
         """Compile and import everything from a Cpp2py code cell.
@@ -65,7 +66,7 @@ class Cpp2pyMagics(Magics):
 
         args = magic_arguments.parse_argstring(self.cpp2py, line)
         code = cell if cell.endswith('\n') else cell + '\n'
-        module = compile(code, verbosity = args.verbosity, only = args.only, modules = ''.join(args.converters))
+        module = compile(code, verbosity = args.verbosity, only = args.only, modules = ''.join(args.converters), no_clean = args.no_clean)
 
         # import all object and function in the main namespace
         imported = []

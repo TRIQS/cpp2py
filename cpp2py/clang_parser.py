@@ -330,7 +330,7 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     compiler_options = (compiler_options or []) 
     if platform.system() == 'Darwin': compiler_options.append("-stdlib=libc++") 
     if parse_all_comments : compiler_options.append("-fparse-all-comments")
-    compiler_options += ['-I%s'%x for x in includes] + libclang_config.LIBCLANG_CXX_ADDITIONAL_FLAGS
+    compiler_options += ['-isystem%s'%x for x in includes] + libclang_config.LIBCLANG_CXX_ADDITIONAL_FLAGS
 
     # print compiler_options
     # Initialising libclang
