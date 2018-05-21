@@ -3,7 +3,7 @@
 
 namespace cpp2py {
 
-  template <typename T, int R> struct py_converter<std::array<T, R>> {
+  template <typename T, size_t R> struct py_converter<std::array<T, R>> {
     // --------------------------------------
 
     static PyObject *c2py(std::array<T, R> const &v) {
@@ -39,7 +39,7 @@ namespace cpp2py {
         return true;
       }
     _false:
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::vector"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::array"); }
       return false;
     }
 
