@@ -242,6 +242,8 @@ class Cpp2Desc:
          
         # First treat the parameter class if any (classes passed by dictionnary that MUST be converted)
         param_cls_list = list(self.get_all_param_classes())
+        for c in param_cls_list : 
+            open('parameters_%s.rst'%c.spelling, 'w').write(doc.doc_param_dict_format(CL.get_members(c, True)))
 
         # Precompute
         self.all_enums     = list(self.all_enums_gen())
