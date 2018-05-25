@@ -35,16 +35,16 @@ execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# LIBCLANG : try to set LIBCLANG_LOCATION and LIBCLANG_CXX_ADDITIONAL_FLAGS automatically
+# LIBCLANG : try to set LIBCLANG_LOCATION and LIBCLANG_CXX_FLAGS automatically
 MESSAGE(STATUS "-------- LibClang detection -------------")
 
 find_package(LibClang)
 
 MESSAGE(STATUS "LibClang location: ${LIBCLANG_LOCATION}")
-MESSAGE(STATUS "LibClang additional flags: ${LIBCLANG_CXX_ADDITIONAL_FLAGS}")
+MESSAGE(STATUS "LibClang additional flags: ${LIBCLANG_CXX_FLAGS}")
 
 # allow user to modify
-set(LIBCLANG_CXX_ADDITIONAL_FLAGS "${LIBCLANG_CXX_ADDITIONAL_FLAGS}" CACHE STRING "Additional flags to be passed to libclang when parsing with clang")
+set(LIBCLANG_CXX_FLAGS "${LIBCLANG_CXX_FLAGS}" CACHE STRING "Additional flags to be passed to libclang when parsing with clang")
 set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libclang library")
 
 # Detect Python
