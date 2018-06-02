@@ -5,7 +5,7 @@
 set     name        cpp2py
 set     version     @CPP2PY_VERSION@
 set     root        @CMAKE_INSTALL_PREFIX@
-set     git_hash    @GIT_HASH@
+set     git_hash    @CPP2PY_GIT_HASH@
 
 set     url         "https://github.com/TRIQS/cpp2py"
 set     description "Cpp2Py is the Python/C++ interfacing tool of the TRIQS project"

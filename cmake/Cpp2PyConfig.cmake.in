@@ -4,7 +4,7 @@ set(CPP2PY_FOUND True)
 
 # Version
 set(CPP2PY_VERSION                      @CPP2PY_VERSION@)
-set(CPP2PY_GIT_HASH                     @GIT_HASH@)
+set(CPP2PY_GIT_HASH                     @CPP2PY_GIT_HASH@)
 
 # The compiler used for cpp2py
 set(CPP2PY_CXX_COMPILER                 @CMAKE_CXX_COMPILER@)

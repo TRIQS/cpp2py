@@ -1,4 +1,16 @@
-set (CPP2PY_VERSION "1.5")
+cmake_minimum_required(VERSION 2.8.12)
+project(cpp2py C CXX)
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+
+# Default to Release build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Type of build" FORCE)
+endif()
+message( STATUS "-------- BUILD-TYPE: ${CMAKE_BUILD_TYPE} -------------")
+
+# shared library. no option, use shared.
+set(BUILD_SHARED_LIBS ON)
 
 # Check CMAKE_INSTALL_PREFIX : must be provided and absolute
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
@@ -6,34 +18,33 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTA
 endif()
 message(STATUS "Installation directory will be ${CMAKE_INSTALL_PREFIX}")
 
-cmake_minimum_required(VERSION 2.8.7)
-project(cpp2py C CXX)
-include(CheckIncludeFile)
-include(CheckIncludeFileCXX)
-
-# shared library. no option, use shared.
-set(BUILD_SHARED_LIBS ON)
-#option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-
-# Release, Debug
-if(NOT CMAKE_BUILD_TYPE)
- set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
- mark_as_advanced(CMAKE_BUILD_TYPE)
-endif(NOT CMAKE_BUILD_TYPE)
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
-
 # add ./cmake to the path for module
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake) 
 
 # log info
-message( STATUS "-------- git and hash detection -------------")
+message( STATUS "-------- cpp2py version and git hash detection -------------")
 
 find_package(Git) 
-execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+
+# Get the version number from the latest annotated git tag
+execute_process(COMMAND bash "-c" "${GIT_EXECUTABLE} describe | sed \"s/-\\([0-9]*\\)-.*/.\\1/g\""
  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
- OUTPUT_VARIABLE   GIT_HASH
+ OUTPUT_VARIABLE   CPP2PY_VERSION
  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+if(NOT CPP2PY_VERSION)
+  set(CPP2PY_VERSION 1.5)
+endif()
+
+# Get the Git Hash
+execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+ WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+ OUTPUT_VARIABLE   CPP2PY_GIT_HASH
+ OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+message(STATUS "Cpp2py version : ${CPP2PY_VERSION}")
+message(STATUS "Git hash : ${CPP2PY_GIT_HASH}")
 
 # LIBCLANG : try to set LIBCLANG_LOCATION and LIBCLANG_CXX_FLAGS automatically
 MESSAGE(STATUS "-------- LibClang detection -------------")
