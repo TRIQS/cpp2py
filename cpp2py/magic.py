@@ -45,7 +45,7 @@ class Cpp2pyMagics(Magics):
     @magic_arguments.argument( "-v", "--verbosity", type=int, help="increase output verbosity")
     @magic_arguments.argument( '-o', "--only", action='append', default=[], help="""Which object to wrap""")
     @magic_arguments.argument( '-C', "--converters", action='append', default=[], help="""Modules""")
-    @magic_arguments.argument( '--cxxflags', action='append', default = ['-stdlib=libc++'], help="""Additional compiler flags""")
+    @magic_arguments.argument( '--cxxflags', action='append', default = [], help="""Additional compiler flags""")
     @magic_arguments.argument( "--no_clean", action='store_true', default=[], help="""""")
     @cell_magic
     def cpp2py(self, line, cell=None):
