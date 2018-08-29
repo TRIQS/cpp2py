@@ -4,7 +4,7 @@
 import sys,re,os, itertools, platform
 import clang.cindex
 from mako.template import Template
-from clang.cindex import CursorKind
+from clang.cindex import CursorKind, LibclangError
 import libclang_config
 
 def pretty_print(x, keep= None, s='...') : 
@@ -335,7 +335,12 @@ def parse(filename, compiler_options, includes, libclang_location, parse_all_com
     # print compiler_options
     # Initialising libclang
     clang.cindex.Config.set_library_file(libclang_location or libclang_config.LIBCLANG_LOCATION)
-    index = clang.cindex.Index.create()
+
+    try:
+        index = clang.cindex.Index.create()
+    except LibclangError as err:
+        print "ERROR creating libclang parser! Be sure to install libclang before installing c++2py."
+        raise err
     
     # Parse the file
     assert os.path.exists(filename), " File %s does not exist "%filename
