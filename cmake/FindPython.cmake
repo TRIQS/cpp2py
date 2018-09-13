@@ -122,7 +122,7 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  #
  EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s' % get_python_lib(0,1)" PYTHON_LIBRARY_BASE_PATH)
  EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print 'libpython%s' % string.join(get_config_vars('VERSION'))" PYTHON_LIBRARY_BASE_FILE)
- set( PYTHON_LIBRARY_SEARCH_PATH "${PYTHON_LIBRARY_BASE_PATH}/.." )
+ set( PYTHON_LIBRARY_SEARCH_PATHS "${PYTHON_LIBRARY_BASE_PATH}/.." "${PYTHON_LIBRARY_BASE_PATH}/../x86_64-linux-gnu" "${PYTHON_LIBRARY_BASE_PATH}/../i386-linux-gnu" )
  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.dylib" PATHS ${PYTHON_LIBRARY_SEARCH_PATH})
  else()
