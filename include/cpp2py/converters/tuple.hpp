@@ -25,14 +25,11 @@ namespace cpp2py {
     }
     template <int> static bool is_convertible_impl(PyObject *seq, bool raise_exception) { return true; }
 
-    // py2c implementation
-    template <int N, typename T, typename... Tail> static std::tuple<T, Tail...> py2c_impl(PyObject *seq) {
-      return std::tuple_cat(std::make_tuple(py_converter<T>::py2c(PySequence_Fast_GET_ITEM(seq, N))), py2c_impl<N + 1, Tail...>(seq));
+    template <size_t... Is> static auto py2c_impl(std::index_sequence<Is...>, PyObject *seq) {
+      return std::make_tuple(py_converter<Types>::py2c(PySequence_Fast_GET_ITEM(seq, Is))...);
     }
-    template <int> static std::tuple<> py2c_impl(PyObject *seq) { return std::make_tuple(); }
 
     public:
-
     // -----------------------------------------
 
     static PyObject *c2py(tuple_t const &t) { return c2py_impl(t, std::make_index_sequence<sizeof...(Types)>()); }
@@ -56,7 +53,7 @@ namespace cpp2py {
 
     static tuple_t py2c(PyObject *ob) {
       pyref seq = PySequence_Fast(ob, "expected a sequence");
-      return py2c_impl<0, Types...>((PyObject *)seq);
+      return py2c_impl(std::make_index_sequence<sizeof...(Types)>(), (PyObject *)seq);
     }
   };
 } // namespace cpp2py
