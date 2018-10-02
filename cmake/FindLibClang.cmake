@@ -13,6 +13,8 @@ include(FindPackageHandleStandardArgs)
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   SET(TRIAL_LIBRARY_PATHS
+   ENV LIBRARY_PATH
+   /usr/local/Cellar/llvm/7.0.0/lib/
    /usr/local/Cellar/llvm/6.0.0/lib/
    /usr/local/Cellar/llvm/5.0.1/lib/
    /usr/local/lib/
@@ -31,7 +33,7 @@ else()
 
 SET(TRIAL_LIBRARY_PATHS
  ENV LIBRARY_PATH
- ENV LD_INCLUDE_PATH
+ ENV LD_LIBRARY_PATH
  /usr/lib 
  /usr/lib/x86_64-linux-gnu
  /usr/lib/llvm-6.0/lib
