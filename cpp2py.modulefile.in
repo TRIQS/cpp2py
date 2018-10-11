@@ -28,7 +28,7 @@ setenv          CPP2PY_VERSION      $version
 setenv          CPP2PY_GIT_HASH     $git_hash
 
 prepend-path    PATH                $root/bin
-prepend-path    CPATH               $root/include
+prepend-path    CPLUS_INCLUDE_PATH  $root/include
 prepend-path    LIBRARY_PATH        $root/lib
 prepend-path    LD_LIBRARY_PATH     $root/lib
 prepend-path    PYTHONPATH          $root/@PYTHON_LIB_DEST_ROOT@
