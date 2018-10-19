@@ -72,16 +72,10 @@ add_subdirectory(cpp2py)
 add_subdirectory(cpp2rst)
 add_subdirectory(cpp2cxx)
 
-# Configure and install the file to source to setup the environment variables 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2pyvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INSTALL_PREFIX}/share)
+#--------------------------------------------------------
+#   Libclang Warning
+#--------------------------------------------------------
 
-###############################################################
-#
-#            final_message_for_user
-#   Remind the user how to set up his/her variables
-#
-###############################################################
 if (NOT LIBCLANG_LOCATION)
  MESSAGE(STATUS "**************************************************************************************")
  MESSAGE(STATUS "**************************          WARNING           ********************************")
@@ -93,18 +87,21 @@ if (NOT LIBCLANG_LOCATION)
  MESSAGE(STATUS "**************************************************************************************")
 endif()
 
+#--------------------------------------------------------
+#   Remind the user how to set up his/her variables
+#--------------------------------------------------------
+
+# Configure and install the file to source to setup the environment variables
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2pyvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INSTALL_PREFIX}/share)
 MESSAGE(STATUS "***************************************************************")
 MESSAGE(STATUS "* Use :                                                        ")
 MESSAGE(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
 MESSAGE(STATUS "*                                                              ") 
 MESSAGE(STATUS "*   to set up the environment variables                        ") 
 MESSAGE(STATUS "***************************************************************")
-
-#--------------------------------------------------------
-# Process and install modulefile
-#--------------------------------------------------------
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
 #--------------------------------------------------------
 # Packaging
