@@ -99,8 +99,12 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INS
 MESSAGE(STATUS "***************************************************************")
 MESSAGE(STATUS "* Use :                                                        ")
 MESSAGE(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
-MESSAGE(STATUS "*                                                              ") 
 MESSAGE(STATUS "*   to set up the environment variables                        ") 
+if(DEFINED ENV{MODULEPATH})
+  MESSAGE(STATUS "*                                                              ")
+  MESSAGE(STATUS "* Consider adding ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile")
+  MESSAGE(STATUS "*   to your environment modules                                ")
+endif()
 MESSAGE(STATUS "***************************************************************")
 
 #--------------------------------------------------------
