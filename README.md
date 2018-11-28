@@ -67,7 +67,7 @@ Exit the `SRC` folder and create a `BUILD` folder. Then, issue the following com
 
 ```bash
 cd BUILD
-cmake -DCMAKE_PREFIX_PATH=INSTALL_DIR/share/cmake/ ../SRC
+cmake -DCMAKE_PREFIX_PATH=INSTALL_DIR/lib/cmake/cpp2py ../SRC
 make 
 ```
 

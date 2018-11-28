@@ -27,4 +27,4 @@ target_include_directories(cpp2py SYSTEM INTERFACE ${CMAKE_INSTALL_PREFIX}/inclu
 
 # Install the library in lib and prepare an exported cmake file to reimport it
 install(TARGETS cpp2py DESTINATION lib EXPORT cpp2py-targets)
-install(EXPORT cpp2py-targets DESTINATION share/cmake)
+install(EXPORT cpp2py-targets DESTINATION lib/cmake/cpp2py)
