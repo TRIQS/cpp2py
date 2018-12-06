@@ -541,6 +541,9 @@ class class_ :
         
         name : string
                name given in Python
+
+        c_name : string
+               name given in C++
                If None, the C++ name extracted from the signature is used.
         
         calling_pattern : string
@@ -781,7 +784,7 @@ class module_ :
         if conv.c_type in self.converters : raise IndexError, "The class %s already exists"%conv.c_type
         self.converters[conv.c_type] = conv
 
-    def add_function(self, signature, name =None, calling_pattern = None,  doc = '', release_GIL_and_enable_signal = False):
+    def add_function(self, signature, name =None, calling_pattern = None,  doc = '', release_GIL_and_enable_signal = False, c_name = None):
         """
         Add a C++ overload to function of the module
 
@@ -801,6 +804,9 @@ class module_ :
         
         name : string 
                name given in Python
+
+        c_name : string
+               name given in C++
                If None, the C++ name extracted from the signature is used.
 
         calling_pattern : string
@@ -823,7 +829,7 @@ class module_ :
             The function wrapped MUST be pure C++, i.e.  no call whatsoever to the python C API, directly or indirectly.
             otherwise the behaviour is undefined.
        """
-        f = cfunction(signature, calling_pattern = calling_pattern, release_GIL_and_enable_signal = release_GIL_and_enable_signal, doc = doc,c_name = name)
+        f = cfunction(signature, calling_pattern = calling_pattern, release_GIL_and_enable_signal = release_GIL_and_enable_signal, doc = doc,c_name = c_name or name)
         name = name or f.c_name
         if name not in self.functions :
             self.functions[name] = pyfunction(name = name, doc = doc)
