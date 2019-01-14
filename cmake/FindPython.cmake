@@ -88,6 +88,7 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  # HDF5 version used by h5py
  #
  EXEC_PYTHON_SCRIPT ("import h5py;print h5py.version.hdf5_version" PYTHON_H5PY_HDF5VERSION)
+ set(PYTHON_H5PY_HDF5VERSION ${PYTHON_H5PY_HDF5VERSION} CACHE STRING "the hdf5 version that h5py was compiled against" FORCE)
  MESSAGE(STATUS "PYTHON_H5PY_HDF5VERSION = ${PYTHON_H5PY_HDF5VERSION}" )
  
  #
@@ -146,6 +147,12 @@ ENDFUNCTION (EXEC_PYTHON_SCRIPT)
  endif()
 
  set (PYTHONLIBS_FOUND TRUE) 
+
+ # Define Imported target python_and_numpy
+ add_library(python_and_numpy SHARED IMPORTED GLOBAL)
+ set_property(TARGET python_and_numpy PROPERTY IMPORTED_LOCATION ${PYTHON_LIBRARY})
+ set_property(TARGET python_and_numpy PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PYTHON_INCLUDE_DIRS} ${PYTHON_NUMPY_INCLUDE_DIR})
+ set_property(TARGET python_and_numpy PROPERTY PROPERTY INTERFACE_LINK_LIBRARIES "${PYTHON_EXTRA_LIBS}")
 
  # Installation : Final destination of the python modules
  if(BUILD_DEBIAN_PACKAGE)

@@ -1,10 +1,7 @@
+set(DEST ${PYTHON_LIB_DEST_ROOT})
 
-set(DEST ${PYTHON_LIB_DEST_ROOT}/cpp2rst)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${DEST} FILES_MATCHING PATTERN "*.py")
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py        DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cpp2rst.py         DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc.py             DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py           DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/render_fnt.py           DESTINATION  ${DEST})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/synopsis.py           DESTINATION  ${DEST})
-
+# Link all files with relevant extensions into binary tree
+# This allows us to get a working cpp2py Setup already after the build stage
+execute_process(COMMAND ${PROJECT_BINARY_DIR}/bin/cp_rs ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} "py")

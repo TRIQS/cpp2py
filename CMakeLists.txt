@@ -9,17 +9,18 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message( STATUS "-------- BUILD-TYPE: ${CMAKE_BUILD_TYPE} -------------")
 
-# shared library. no option, use shared.
-set(BUILD_SHARED_LIBS ON)
+# Build static library
+set(BUILD_SHARED_LIBS OFF)
 
 # Check CMAKE_INSTALL_PREFIX : must be provided and absolute
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX}))
  message(FATAL_ERROR "CMAKE_INSTALL_PREFIX must be specified and must be an absolute path.\n There is no default.\n Current value : ${CMAKE_INSTALL_PREFIX}\n.  e.g. ... -DCMAKE_INSTALL_PREFIX=$HOME/triqs_install")
 endif()
 message(STATUS "Installation directory will be ${CMAKE_INSTALL_PREFIX}")
+set(CPP2PY_BINARY_DIR ${PROJECT_BINARY_DIR} CACHE STRING "Binary directory of the Cpp2Py Project")
 
 # add ./cmake to the path for module
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake) 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # log info
 message( STATUS "-------- cpp2py version and git hash detection -------------")
@@ -28,7 +29,7 @@ find_package(Git)
 
 # Get the version number from the latest annotated git tag
 execute_process(COMMAND bash "-c" "${GIT_EXECUTABLE} describe | sed \"s/-\\([0-9]*\\)-.*/.\\1/g\""
- WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+ WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
  OUTPUT_VARIABLE   CPP2PY_VERSION
  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -38,7 +39,7 @@ endif()
 
 # Get the Git Hash
 execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
- WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+ WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
  OUTPUT_VARIABLE   CPP2PY_GIT_HASH
  OUTPUT_STRIP_TRAILING_WHITESPACE
 )

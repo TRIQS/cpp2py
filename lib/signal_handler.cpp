@@ -18,7 +18,7 @@
  * TRIQS. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#include "signal_handler.hpp"
+#include "cpp2py/signal_handler.hpp"
 #include <signal.h>
 #include <string.h>
 #include <vector>

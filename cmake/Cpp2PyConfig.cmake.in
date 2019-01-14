@@ -31,26 +31,21 @@ endif()
 #            Imported targets
 #
 ###################################################################################
-# Python
-add_library(python_and_numpy SHARED IMPORTED)
-set_property(TARGET python_and_numpy PROPERTY IMPORTED_LOCATION @PYTHON_LIBRARY@)
-set_property(TARGET python_and_numpy PROPERTY INTERFACE_INCLUDE_DIRECTORIES @PYTHON_INCLUDE_DIRS@ @PYTHON_NUMPY_INCLUDE_DIR@)
-set_property(TARGET python_and_numpy PROPERTY PROPERTY INTERFACE_LINK_LIBRARIES "@PYTHON_EXTRA_LIBS@")
-# Does not work ?
-#set_property(TARGET python_and_numpy PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES @PYTHON_INCLUDE_DIRS@ @PYTHON_NUMPY_INCLUDE_DIR@)
-
 # tools
-add_executable(c++2py IMPORTED)                                                     
+add_executable(c++2py IMPORTED GLOBAL)
 set_property(TARGET c++2py PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/c++2py")
 
-add_executable(c++2rst IMPORTED)                                                     
+add_executable(c++2rst IMPORTED GLOBAL)
 set_property(TARGET c++2rst PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/c++2rst")
+
+add_executable(c++2cxx IMPORTED GLOBAL)
+set_property(TARGET c++2cxx PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/c++2cxx")
+
+add_executable(cp_rs IMPORTED GLOBAL)
+set_property(TARGET cp_rs PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/cp_rs")
 
 # include the exported targets of this project 
 include(@CMAKE_INSTALL_PREFIX@/lib/cmake/cpp2py/cpp2py-targets.cmake)
-
-# FIXME : should we just put the rpath in the cpp2y
-# FIXME : who needs the rpath ?
 
 ###################################################################################
 #

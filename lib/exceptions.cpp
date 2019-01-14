@@ -18,7 +18,7 @@
  * TRIQS. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#include "exceptions.hpp"
+#include "cpp2py/exceptions.hpp"
 //#include <mpi.h>
 #include <sstream>
 
