@@ -146,7 +146,7 @@ class Cpp2Rst:
             mkchdir_for_one_class(c)
 
             # the file for the class
-            r = render_cls(doc_class = self.process_doc_class(c), doc_methods = doc_methods, cls = c, all_m = all_m, all_friend_functions = all_friend_functions)
+            r = render_cls(doc_class = self.process_doc_class(c), doc_methods = doc_methods, cls = c, all_m = all_m, all_friend_functions = all_friend_functions, cls_doc = cls_doc)
             safe_write(c.spelling, r)
                 
             mkchdir(c.spelling)

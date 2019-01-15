@@ -112,7 +112,7 @@ Example
     return R
 
 #------------------------------------
-def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) : 
+def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class, cls_doc) : 
     doc_elem = doc_class.elements
     R= rst_start
     
@@ -130,13 +130,18 @@ def render_cls(cls, all_m, all_friend_functions, doc_methods, doc_class) :
 .. _{cls.spelling}:
 
 {cls.spelling}
-{separator} 
+{separator}
+
+{cls_doc.brief_doc}
+
+{cls_doc.processed_doc}
+
 **Synopsis**:
 
 .. code-block:: c
 
     {templ_synop}class {cls.spelling};
-    """.format(cls = cls, separator = '=' * (len(cls.spelling)+2), templ_synop = make_synopsis_template_decl(cls))
+    """.format(cls = cls, separator = '=' * (len(cls.spelling)+2), templ_synop = make_synopsis_template_decl(cls), cls_doc = cls_doc)
 
     # doc, note, warning, figure
     R += replace_latex(doc_class.processed_doc)
