@@ -27,15 +27,11 @@ message( STATUS "-------- cpp2py version and git hash detection -------------")
 
 find_package(Git) 
 
-# Get the version number from the latest annotated git tag
-execute_process(COMMAND bash "-c" "${GIT_EXECUTABLE} describe | sed \"s/-\\([0-9]*\\)-.*/.\\1/g\""
- WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
- OUTPUT_VARIABLE   CPP2PY_VERSION
- OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT CPP2PY_VERSION)
-  set(CPP2PY_VERSION 1.5)
-endif()
+# Define the Cpp2Py Version Numbers
+set(CPP2PY_VERSION_MAJOR 1)
+set(CPP2PY_VERSION_MINOR 6)
+set(CPP2PY_VERSION_PATCH 0)
+set(CPP2PY_VERSION ${CPP2PY_VERSION_MAJOR}.${CPP2PY_VERSION_MINOR}.${CPP2PY_VERSION_PATCH})
 
 # Get the Git Hash
 execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
