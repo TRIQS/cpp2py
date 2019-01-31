@@ -6,6 +6,7 @@
 #include <map>
 #include <typeindex>
 #include <exception>
+#include <iostream>
 
 // silence warning on intel
 #ifndef __INTEL_COMPILER
