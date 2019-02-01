@@ -89,22 +89,20 @@ template<> struct py_converter<${c_type_absolute}> {
    void ** table = (void**) PyCapsule_GetPointer(capsule, "${module_name}._exported_wrapper_convert_fnt");
    return table;
  }
-
-  // requires that the type is copy constructible or disable the function
-  template<typename U, typename = std::enable_if_t< std::is_copy_constructible_v<U>> >
-  static PyObject * c2py(U const & x){
+ 
+  static PyObject * c2py(${c_type_absolute} const & x){
    if (wrapped_convert_fnt == NULL) return NULL;
-   return ((PyObject * (*)(${c_type_absolute} const &)) wrapped_convert_fnt[3*${n}])(${c_type_absolute}{x}); // use copy and move
+   return ((PyObject * (*)(${c_type_absolute} const &)) wrapped_convert_fnt[4*${n}])(x);
  }
 
   static PyObject * c2py(${c_type_absolute} && x){
    if (wrapped_convert_fnt == NULL) return NULL;
-   return ((PyObject * (*)(${c_type_absolute} &&)) wrapped_convert_fnt[3*${n}])(std::move(x));
+   return ((PyObject * (*)(${c_type_absolute} &&)) wrapped_convert_fnt[4*${n}+1])(std::move(x));
  }
  
   static ${c_type_absolute}& py2c(PyObject * ob){
    if (wrapped_convert_fnt == NULL) std::terminate(); // It should never happen since py2c is called only is is_convertible is true (py_converter specs)
-   return ((${c_type_absolute}& (*)(PyObject *)) wrapped_convert_fnt[3*${n}+1])(ob);
+   return ((${c_type_absolute}& (*)(PyObject *)) wrapped_convert_fnt[4*${n}+2])(ob);
  }
  
   static bool is_convertible(PyObject *ob, bool raise_exception) {
@@ -112,7 +110,7 @@ template<> struct py_converter<${c_type_absolute}> {
     if (!raise_exception && PyErr_Occurred()) {PyErr_Print();PyErr_Clear();}
     return false;
    }
-   return ((bool (*)(PyObject *,bool)) wrapped_convert_fnt[3*${n}+2])(ob,raise_exception);
+   return ((bool (*)(PyObject *,bool)) wrapped_convert_fnt[4*${n}+3])(ob,raise_exception);
  }
 };
 
@@ -1293,13 +1291,14 @@ init${module.name}(void)
 <% classes_to_export =  [c for c in module.classes.values() if c.export] %>
 %if len(classes_to_export) >0 :
      // declare the exported wrapper functions
-     static void * _exported_wrapped_convert_fnt[3*${len(classes_to_export)}];
+     static void * _exported_wrapped_convert_fnt[4*${len(classes_to_export)}];
 
      // init the array with the function pointers for classes to be exported
      %for n,c in enumerate(classes_to_export):
-       _exported_wrapped_convert_fnt[3*${n}+0] = (void *)convert_to_python<${c.c_type_absolute}>;
-       _exported_wrapped_convert_fnt[3*${n}+1] = (void *)convert_from_python<${c.c_type_absolute}>;
-       _exported_wrapped_convert_fnt[3*${n}+2] = (void *)convertible_from_python<${c.c_type_absolute}>;
+       _exported_wrapped_convert_fnt[4*${n}] = (void *)convert_to_python<${c.c_type_absolute} const &>;
+       _exported_wrapped_convert_fnt[4*${n}+1] = (void *)convert_to_python<${c.c_type_absolute}>;
+       _exported_wrapped_convert_fnt[4*${n}+2] = (void *)convert_from_python<${c.c_type_absolute}>;
+       _exported_wrapped_convert_fnt[4*${n}+3] = (void *)convertible_from_python<${c.c_type_absolute}>;
      %endfor
 
     /* Create a Capsule containing the API pointer array's address */
