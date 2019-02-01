@@ -1050,7 +1050,7 @@ init${module.name}(void)
     // register all the types
     auto *table  = get_pytypeobject_table();
 %for c in module.classes.values() :
-    (*table)[std::type_index(typeid(${c.c_type}))] = &${c.py_type}Type;
+    (*table)[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
 %endfor
 
 }

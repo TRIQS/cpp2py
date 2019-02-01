@@ -47,7 +47,7 @@ namespace cpp2py {
 
   //---------------------  py_converters -----------------------------
 
-  using pytypeobject_table_t = std::map<std::type_index, PyTypeObject *>;
+  using pytypeobject_table_t = std::map<std::string, PyTypeObject *>;
 
   // We share in the __main__.__cpp2py_table a Py Capsule with a table
   // C++ type -> Python Type for wrapped type
@@ -86,14 +86,13 @@ namespace cpp2py {
   inline PyTypeObject *get_type_ptr(std::type_index const &ind) {
     pytypeobject_table_t *table = get_pytypeobject_table();
     PyTypeObject *r             = nullptr;
-    try {
-      r = table->at(ind);
-    } catch (std::out_of_range const &) {
-      // FIXME Add demangling
-      std::string s = std::string{"The type "} + ind.name() + " can not be converted";
-      PyErr_SetString(PyExc_RuntimeError, s.c_str());
-    }
-    return r;
+
+    auto it = table->find(ind.name());
+    if(it != table->end()) return it->second;
+
+    std::string s = std::string{"The type "} + ind.name() + " can not be converted";
+    PyErr_SetString(PyExc_RuntimeError, s.c_str());
+    return nullptr;
   }
 
   // default version is that the type is wrapped.
