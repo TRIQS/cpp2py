@@ -11,6 +11,7 @@ using dcomplex = std::complex<double>;
 // for converters
 #include <cpp2py/converters/vector.hpp>
 #include <cpp2py/converters/string.hpp>
+#include <cpp2py/converters/function.hpp>
 #include <algorithm>
 
 //------------------------------------------------------------------------------------------------------
@@ -37,12 +38,6 @@ using ${ns};
 using namespace cpp2py;
 
 ${module._preamble}
-
-
-// FIXME : put if before ...
-// needed for h5 mechanism below
-#include <cpp2py/h5_reader.hpp>
-#include <cpp2py/converters/function.hpp>
 
 
 //------------------------------------------------------------------------------------------------------
@@ -1036,6 +1031,7 @@ init${module.name}(void)
     PyModule_AddObject(m, "${c.py_type}", (PyObject *)&${c.py_type}Type);
 %endfor
 
+#ifdef TRIQS_INCLUDED_H5
     // hdf5 registration
   pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
   pyref register_class = module.attr("register_class");
@@ -1046,6 +1042,7 @@ init${module.name}(void)
    pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
   }
 %endfor
+#endif
 
     // register all the types
     auto *table  = get_pytypeobject_table();
