@@ -81,7 +81,7 @@ template <> struct py_converter<${c_name_absolute}> {
    return PyUnicode_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s=PyUnicode_AsString(ob);
+   std::string s=PyString_AsString(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
@@ -92,7 +92,7 @@ template <> struct py_converter<${c_name_absolute}> {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s=PyUnicode_AsString(ob);
+   std::string s=PyString_AsString(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -455,7 +455,7 @@ template <> struct py_converter<${en.c_name}> {
    return PyUnicode_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s=PyUnicode_AsString(ob);
+   std::string s=PyString_AsString(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
@@ -466,7 +466,7 @@ template <> struct py_converter<${en.c_name}> {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s=PyUnicode_AsString(ob);
+   std::string s=PyString_AsString(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -752,7 +752,7 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-    pyref code1 = Py_CompileString(PyUnicode_AsString (s), "nofile", Py_eval_input);
+    pyref code1 = Py_CompileString(PyString_AsString (s), "nofile", Py_eval_input);
     PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
