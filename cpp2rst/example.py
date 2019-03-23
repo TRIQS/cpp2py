@@ -5,7 +5,7 @@ def prepare_example(filename, decal):
        and compute the lineno of the code for inclusion"""
     filename += ".cpp"
     if not os.path.exists(filename) :
-        #print "example file %s (in %s) does not exist"%(filename,os.getcwd())
+        #print("example file %s (in %s) does not exist"%(filename,os.getcwd()))
         return None, None, None, 0, 0
     ls = open(filename).read().strip().split('\n')
     r = [i for i, l in enumerate(ls) if not (re.match(r"^\s*/?\*",l) or re.match("^\s*//",l))]
@@ -19,4 +19,3 @@ def prepare_example(filename, decal):
     code = '\n'.join(decal*' ' + x.strip() for x in ls[s:e])
     doc2 = '\n'.join(cls(x) for x in ls[e:])
     return code, doc1, doc2, s, e
-

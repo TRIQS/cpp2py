@@ -14,6 +14,55 @@ using dcomplex = std::complex<double>;
 #include <cpp2py/converters/function.hpp>
 #include <algorithm>
 
+
+// Defines for Python 2/3 compatibility.
+#ifndef __PYCOMPAT_HPP__
+#define __PYCOMPAT_HPP__
+
+#if PY_MAJOR_VERSION >= 3
+// Python3 treats all ints as longs, PyInt_X functions have been removed.
+#define PyInt_Check PyLong_Check
+#define PyInt_CheckExact PyLong_CheckExact
+#define PyInt_AsLong PyLong_AsLong
+#define PyInt_AS_LONG PyLong_AS_LONG
+#define PyInt_FromLong PyLong_FromLong
+#define PyNumber_Int PyNumber_Long
+
+// Python3 strings are unicode, these defines mimic the Python2 functionality.
+#define PyString_Check PyUnicode_Check
+#define PyString_FromString PyUnicode_FromString
+#define PyString_FromStringAndSize PyUnicode_FromStringAndSize
+#define PyString_Size PyUnicode_GET_SIZE
+
+// PyUnicode_AsUTF8 isn't available until Python 3.3
+#if (PY_VERSION_HEX < 0x03030000)
+#define PyString_AsString _PyUnicode_AsString
+#else
+#define PyString_AsString PyUnicode_AsUTF8
+#endif
+#endif
+
+// python < 2.6, Py_TYPE  and PyVarObject_HEAD_INIT are not defined:
+#ifndef Py_TYPE
+  #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+#ifndef PyVarObject_HEAD_INIT
+    #define PyVarObject_HEAD_INIT(type, size) \
+        PyObject_HEAD_INIT(type) size,
+#endif
+
+// python > 3 Py_TPFLAGS_CHECKTYPES is not defined:
+#ifndef Py_TPFLAGS_CHECKTYPES
+  #define Py_TPFLAGS_CHECKTYPES 0
+#endif
+
+#endif // END HEADER GUARD
+
+
+
+
+
+
 //------------------------------------------------------------------------------------------------------
 //---------------------   includes and using  -------------------
 //------------------------------------------------------------------------------------------------------
@@ -246,7 +295,7 @@ static PyObject* ${c.py_type}_new(PyTypeObject *type, PyObject *args, PyObject *
 // dealloc
 static void ${c.py_type}_dealloc(${c.py_type}* self) {
   if (self->_c != NULL) delete self->_c; // should never be null, but I protect it anyway
-  self->ob_type->tp_free((PyObject*)self);
+  Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 //--------------------- Iterator by wrapping the C++ -----------------------------
@@ -264,7 +313,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
  // dealloc
  static void  ${c.py_type}__iterator_dealloc(${c.py_type}__iterator * self) {
    Py_XDECREF(self->container);
-   self->ob_type->tp_free((PyObject*)self);
+   Py_TYPE(self)->tp_free((PyObject*)self);
  }
 
  // the __iter__ of the iterator type : returns itself
@@ -390,9 +439,8 @@ static PyMethodDef ${c.py_type}_methods[] = {
 //--------------------- The xxxType table  -----------------------------
 
 static PyTypeObject ${c.py_type}Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "${module.full_name}.${c.py_type}",             /*tp_name*/
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "${module.full_name}.${c.py_type}",/*tp_name*/
     sizeof(${c.py_type}),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)${c.py_type}_dealloc, /*tp_dealloc*/
@@ -410,7 +458,7 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
     "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
@@ -429,9 +477,9 @@ static PyTypeObject ${c.py_type}Type = {
     ${"(initproc)%s___init__"%c.py_type if c.constructor else 0},      /* tp_init */
     0,                         /* tp_alloc */
 %if c.constructor:
- ${c.py_type}_new,           /* tp_new */
+    (newfunc)${c.py_type}_new,           /* tp_new */
 %else:
- 0,                          /* tp_new */
+    0,                          /* tp_new */
 %endif
 };
 
@@ -983,7 +1031,6 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
  }
 
 //--------------------- module function table  -----------------------------
-
 // the table of the function of the module...
 static PyMethodDef module_methods[] = {
 %for pyf in module.functions.values():
@@ -996,17 +1043,36 @@ static PyMethodDef module_methods[] = {
 %endif
 %endfor
     {"_get_cpp2py_wrapped_class_enums", (PyCFunction)_get_cpp2py_wrapped_class_enums, METH_VARARGS, "[Internal] Returns the list of wrapped objects  " },
-
-{NULL}  /* Sentinel */
+    {NULL}  /* Sentinel */
 };
 
-//--------------------- module init function -----------------------------
+//--------------------- module struct & init error definition ------------
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef ${module.name}_def =
+{
+    PyModuleDef_HEAD_INIT,
+    "${module.name}", /* name of module */
+    "${module.doc}", /* module documentation, may be NULL */
+    -1,   /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    module_methods
+};
+#define INITERROR return NULL
+#else
+#define INITERROR return
+#endif
+
+//--------------------- module init function -----------------------------
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC
+PyInit_${module.name}(void)
+#else
+#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
 init${module.name}(void)
+#endif
 {
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
     // import numpy
@@ -1020,18 +1086,24 @@ init${module.name}(void)
     PyObject* m;
 
 %for c in module.classes.values() :
-    if (PyType_Ready(&${c.py_type}Type) < 0) return;
+    if (PyType_Ready(&${c.py_type}Type) < 0) INITERROR;
 
     %if c.iterator :
     // initializing the ${c.py_type}__iterator
     ${c.py_type}__iteratorType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)  return;
+    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)  INITERROR;
     Py_INCREF(&${c.py_type}__iteratorType);
     %endif
 %endfor
 
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&${module.name}_def);
+#else
     m = Py_InitModule3("${module.name}", module_methods, "${module.doc}");
-    if (m == NULL) return;
+#endif
+    if (m == NULL)  
+      INITERROR;
+
 
 %for c in module.classes.values() :
     Py_INCREF(&${c.py_type}Type);
@@ -1056,5 +1128,7 @@ init${module.name}(void)
 %for c in module.classes.values() :
     (*table)[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
 %endfor
-
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }

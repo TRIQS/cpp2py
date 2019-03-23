@@ -2,7 +2,7 @@ from cpp2py.doc import replace_latex, process_doc
 import re
 from collections import OrderedDict
 
-class ProcessDoc: 
+class ProcessDoc:
     """
 Meaning of the @option in the doc:
 
@@ -25,16 +25,16 @@ Meaning of the @option in the doc:
 
 The @ MUST BE THE LAST FIELDS
     """
-    def __init__(self, node, var_unique, var_multi) : 
-        def cls(s) : 
+    def __init__(self, node, var_unique, var_multi) :
+        def cls(s) :
             return re.sub(r'\\n',r'\n', s).strip()
-        
+
         doc = node.raw_comment if node.raw_comment else "\n\n"
-        #print "COMMENT", doc
-        for p in [r"/\*",r"\*/",r"^\s*\*", r"///", r"//", r"\\brief"] : 
+        #print("COMMENT", doc)
+        for p in [r"/\*",r"\*/",r"^\s*\*", r"///", r"//", r"\\brief"] :
             doc = re.sub(p,"",doc, flags = re.MULTILINE)
-        spl = doc.strip().split('\n',1) 
-        self.brief_doc, doc = spl[0], spl[1] if len(spl)>1 else '' 
+        spl = doc.strip().split('\n',1)
+        self.brief_doc, doc = spl[0], spl[1] if len(spl)>1 else ''
 
         spl = doc.split('@')
 
@@ -46,8 +46,8 @@ The @ MUST BE THE LAST FIELDS
             if item in var_unique:
                 if item not in d:
                     d[item] = rest
-                else : 
-                    print("@%s is present more than once !"%item) 
+                else :
+                    print("@%s is present more than once !"%item)
             elif item in var_multi:
                 value, comment = rest.split(' ',1)
                 d[item].append((value, comment))
@@ -55,6 +55,6 @@ The @ MUST BE THE LAST FIELDS
                 print("@%s not recognized"%item)
         for x in var_unique:
             if x not in d: d[x] = ''
-        
+
         self.processed_doc = spl[0]
         self.elements = d

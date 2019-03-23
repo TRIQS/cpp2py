@@ -829,7 +829,7 @@ class module_ :
         for f, name, x in l:
             n_dict_call = sum( 1 if overload._dict_call else 0 for overload in f.overloads)
             assert n_dict_call <= 1, "At most one possible overload with ** call"
-            assert n_dict_call ==0  or len(f.overloads) == 1, "The function %s.%s has a ** call and overloads, which is meaningless !"%(name,f.py_name)
+            assert n_dict_call ==0  or len(f.overloads) == 1, ("The function %s.%s has a ** call and overloads, which is meaningless !"%(name,f.py_name))
         return l
 
     def generate_code(self) :
@@ -850,8 +850,7 @@ class module_ :
 
         # call mako
         tpl = Template(filename=mako_template, strict_undefined=True)
-        rendered = tpl.render(module=self,
-                   sys_modules = sys.modules)
+        rendered = tpl.render(module=self, sys_modules = sys.modules)
 
         with open(wrap_file,'w') as f:
            f.write(rendered)

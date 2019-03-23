@@ -5,7 +5,7 @@ import re,os, itertools, platform
 import clang.cindex
 from mako.template import Template
 from clang.cindex import CursorKind, LibclangError
-import libclang_config
+import cpp2py.libclang_config as libclang_config
 
 def pretty_print(x, keep= None, s='...') :
    print(x)
@@ -116,10 +116,10 @@ def get_param_default_value(node):
     returns the default value if present or None
     Defined at the rhs of an = sign.
     """
-    #print [x.spelling for x in node.get_tokens()]
+    #print([x.spelling for x in node.get_tokens()])
     sp = ''.join(x.spelling for x in node.get_tokens()).split('=')
     assert len(sp) == 1 or len(sp) ==2
-    #print "    ---> default =",   None if len(sp)==1 else sp[1]
+    #print("    ---> default =",   None if len(sp)==1 else sp[1])
     return None if len(sp)==1 else sp[1]
 
 #--------------------  class components ---------------------------------------------------------
@@ -348,14 +348,14 @@ def parse(filename, compiler_options, includes, system_includes, libclang_locati
     compiler_options += ['-I%s'%x for x in includes]
     compiler_options += ['-isystem%s'%x for x in system_includes] + libclang_config.LIBCLANG_CXX_FLAGS
 
-    # print compiler_options
+    # print(compiler_options)
     # Initialising libclang
     clang.cindex.Config.set_library_file(libclang_location or libclang_config.LIBCLANG_LOCATION)
 
     try:
         index = clang.cindex.Index.create()
     except LibclangError as err:
-        print "ERROR creating libclang parser! Be sure to install libclang before installing c++2py."
+        print("ERROR creating libclang parser! Be sure to install libclang before installing c++2py.")
         raise err
 
     # Parse the file

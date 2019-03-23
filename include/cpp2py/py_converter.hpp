@@ -72,7 +72,11 @@ namespace cpp2py {
     pytypeobject_table_t *t = new pytypeobject_table_t{};
     // never destroyed. we could add a destructor, but useless, the table with leave in the interpreter
     pyref c = PyCapsule_New((void *)t, "__main__.__cpp2py_table", (PyCapsule_Destructor)_table_destructor);
+#if PY_MAJOR_VERSION >= 3
+    pyref s = PyUnicode_FromString("__cpp2py_table");
+#else
     pyref s = PyString_FromString("__cpp2py_table");
+#endif
     int err = PyObject_SetAttr(mod, s, c);
     if (err) {
       PyErr_SetString(PyExc_RuntimeError, "Can not add the __cpp2py_table to main ???");
@@ -157,13 +161,13 @@ namespace cpp2py {
 
   /*
  * type          T            py_converter<T>::p2yc     convert_from_python<T>   converter_for_parser type of p      impl
- *                                                 
+ *
  * regular       R            R or R&& or R const&      R  or R&& or R const&    R*                                *p = py_converter<T>::p2yc(ob))
  * view          V            V                         V                        V*                                p->rebind(py_converter<T>::p2yc(ob))
- * wrapped       W            W *                       W                        W**                               *p = py_converter<T>::p2yc(ob))  
+ * wrapped       W            W *                       W                        W**                               *p = py_converter<T>::p2yc(ob))
  * wrapped view  WV           WV *                      WV                       WV**                              p->rebind(py_converter<T>::p2yc(ob))
- * PyObejct *    PyObject *   PyObject *                PyObject *               PyObject **                       *p = py_converter<T>::p2yc(ob))  
- * U*            U*           U*                        U*                       U**                               *p = py_converter<T>::p2yc(ob)) 
+ * PyObejct *    PyObject *   PyObject *                PyObject *               PyObject **                       *p = py_converter<T>::p2yc(ob))
+ * U*            U*           U*                        U*                       U**                               *p = py_converter<T>::p2yc(ob))
  *
  */
 

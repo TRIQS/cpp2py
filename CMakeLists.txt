@@ -26,7 +26,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # log info
 message( STATUS "-------- cpp2py version and git hash detection -------------")
 
-find_package(Git) 
+find_package(Git)
 
 # Get the Git Hash
 execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
@@ -51,7 +51,27 @@ set(LIBCLANG_CXX_FLAGS "${LIBCLANG_CXX_FLAGS}" CACHE STRING "Additional flags to
 set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libclang library")
 
 # Detect Python
-find_package(Python)
+if(CMAKE_VERSION VERSION_LESS "3.12")
+  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/compatibility)
+  find_package(Python)
+else()
+  find_package(Python3 COMPONENTS Development Interpreter)
+  set(PYTHON_VERSION_MAJOR ${Python3_VERSION_MAJOR})
+  set(PYTHON_VERSION_MINOR ${Python3_VERSION_MINOR})
+  set(PYTHON_INTERPRETER ${Python3_EXECUTABLE})
+  set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+  set(PYTHON_INCLUDE_DIRS ${Python3_INCLUDE_DIRS})
+  set(PYTHON_LIBRARY ${Python3_LIBRARIES})
+  set(PYTHON_SITE_PKG ${Python3_SITELIB})
+  find_package(NumPy)
+  if(BUILD_DEBIAN_PACKAGE)
+    set(PYTHON_LIB_DEST_DIR dist-packages)
+  else()
+    set(PYTHON_LIB_DEST_DIR site-packages)
+  endif()
+  set(PYTHON_LIB_DEST_ROOT lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/${PYTHON_LIB_DEST_DIR} CACHE PATH "Install directory for Python Modules relative to CMAKE_INSTALL_PREFIX")
+  message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST_ROOT}")
+endif()
 
 # subdirs
 add_subdirectory(bin)            # Executables
@@ -91,13 +111,24 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INS
 MESSAGE(STATUS "***************************************************************")
 MESSAGE(STATUS "* Use :                                                        ")
 MESSAGE(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
-MESSAGE(STATUS "*   to set up the environment variables                        ") 
+MESSAGE(STATUS "*   to set up the environment variables                        ")
 if(DEFINED ENV{MODULEPATH})
   MESSAGE(STATUS "*                                                              ")
   MESSAGE(STATUS "* Consider adding ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile")
   MESSAGE(STATUS "*   to your environment modules                                ")
 endif()
 MESSAGE(STATUS "***************************************************************")
+
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 #--------------------------------------------------------
 # Packaging

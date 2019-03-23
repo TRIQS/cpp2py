@@ -8,7 +8,7 @@ def print_out (m, out) :
    print(l*'-' + m + l*'-' + '\n' + out)
 
 def execute(command, message):
-    #print "EXEC", command
+    #print("EXEC", command)
     try:
        out = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as E :
@@ -16,7 +16,7 @@ def execute(command, message):
        raise RuntimeError("Error")
     #if verbosity>0:
     #print_out(message, out)
-    #print message
+    #print(message)
 
 def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir = '/tmp', recompile = False, no_clean = False):
     """
@@ -27,7 +27,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
     cxxflags = " -std=c++17 " + cxxflags
 
     modules = modules.strip().split(' ')
-    #print modules
+    #print(modules)
 
     use_GIL = False
     #if not GIL, we replace std::cout by py_stream for capture in the notebook
@@ -39,7 +39,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
     pos = next(n for n, l in enumerate(lines) if l.strip() and not l.strip().startswith('#'))
     code = '\n'.join(lines[:pos] + ['namespace __cpp2py_anonymous {'] + lines[pos:] + ['}'])
 
-    #print code
+    #print(code)
     # key for hash
     key = code, sys.version_info, sys.executable, cxxflags, modules, only
     dir_name = hashlib.md5(str(key).encode('utf-8')).hexdigest().strip()
@@ -86,7 +86,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
             # Call make
             execute ("make -j2  ", "make")
 
-            #print "Done"
+            #print("Done")
         except: # we clean if fail
             os.chdir(old_cwd)
             if not no_clean : shutil.rmtree(module_dirname)

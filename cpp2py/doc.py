@@ -31,7 +31,7 @@ def treat_member_list(member_list) :
       mm = _m(m)
       mm.doc, doc_lines = "", [l.lstrip() for l in clean_doc_string(m.raw_comment).splitlines()]
 
-      #print m, doc_lines
+      #print(m, doc_lines)
       mm.initializer = CL.get_member_initializer(m)
       mm.ctype = m.type.spelling
       for l in doc_lines:
