@@ -3,7 +3,7 @@ from collections import OrderedDict
 import cpp2py.clang_parser as CL
 import global_vars
 
- 
+
 """
 Meaning of the @option in the doc:
 
@@ -14,34 +14,34 @@ Meaning of the @option in the doc:
  @warning    Warning
  @note       Note
  @figure     An illustration
- 
+
  @include   For a class, a function, the top level file to include [default: the definition file]
  @example filename  File name of the example. Path should start from doc/documentation/examples
 
  @head  head and tail are the two parts in common for all overload.
- @tail   Cf  
+ @tail   Cf
  @brief Short description used in tables
 
 """
 
-# --------------------------------- 
+# ---------------------------------
 
 def replace_latex(s, escape_slash=False):
-    """replace 
+    """replace
        $XX X$  by :math:`XX X`
        $$X XX$$  by \n\n.. math:\n\t\tX XX\n\n..\n
        [[ XXX]]  by :ref:` XXX`
-     
+
     """
     assert not escape_slash # useless
-    
+
     text=re.sub('\$\$([^\$]+)\$\$', r'\n\n.. math::\n\t\t\1\n\n..\n', s, flags= re.DOTALL) # multiline math
     text=re.sub('\$([^\$]+)\$', r':math:`\1`', text)
- 
+
     if escape_slash: text=text.encode('string_escape')
     return text
 
-# --------------------------------- 
+# ---------------------------------
 
 def clean_doc_string(s):
     if '\t'  in s:
@@ -62,32 +62,32 @@ def strip_left_spaces(s):
 
 # ------------------------------------------------------------------------
 
-class ProcessedDoc: 
-    
-    fields_allowed_in_docs = ['include', 'return', 'warning','figure', 'note', 'brief', 'example', 'param', 'tparam', 'group', 'head', 'tail', 'category'] 
+class ProcessedDoc:
+
+    fields_allowed_in_docs = ['include', 'return', 'warning','figure', 'note', 'brief', 'example', 'param', 'tparam', 'group', 'head', 'tail', 'category']
     fields_with_multiple_entry = ['param', 'tparam']
 
     """
       Result of the processing of the documentation string for a function or a class
-      
+
       self.brief_doc : first line
       self.doc       : rest of the doc
       self.elements : dict with all fields @XXX -> Value
-                      params, tparams will always be a list, if present 
+                      params, tparams will always be a list, if present
 
       Replace latex with proper rst call in all fields.
     """
-    def __init__(self, node): 
+    def __init__(self, node):
         raw_doc = node.raw_comment
 
         if not raw_doc : raw_doc = "\n\n" # default value
 
         # Clean *, &&, /// and co.
         doc = clean_doc_string(raw_doc).rstrip() # do NOT remove leading space
-        
+
         # split : the first line is brief, and the rest
         doc = replace_latex(doc)
-        if '$' in doc : 
+        if '$' in doc :
             print "FAILED to process the latex for node %s"%CL.fully_qualified(node)
             print doc
         doc2 = doc.split('@',1)[0] # Get rid of everything after the first @

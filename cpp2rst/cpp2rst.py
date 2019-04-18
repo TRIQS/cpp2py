@@ -68,7 +68,7 @@ class Cpp2Rst:
 
     def run(self, output_directory):
 
-        print "Generating the documentation ..."
+        print()"Generating the documentation ...")
         mkchdir(output_directory)
 
         # The namespace are going to be cleaned in the parameters in the synopsis
@@ -170,7 +170,7 @@ class Cpp2Rst:
             cls.name_for_label = synopsis.make_label(cls.fully_qualified_name)
             D[cls.fully_qualified_name] = cls
 
-            print " ... class :  %s"%cls.fully_qualified_name, cls.location
+            print(" ... class :  %s"%cls.fully_qualified_name, cls.location)
             #assert ',' not in cls.fully_qualified_name, "Not implemented"
 
             # process the doc of the class and add it to the node
