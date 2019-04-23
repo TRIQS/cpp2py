@@ -84,7 +84,7 @@ def make_doc_function(node):
     if util.use_parameter_class(node):
         member_list = CL.get_members(util.get_decl_param_class(node), True)
         table = doc_param_dict_format(member_list)
-        return r"%s\n\n%s\n\n%s\n"%( pdoc.brief_doc, pdoc.doc, table) 
+        return "%s\n\n%s\n\n%s\n"%( pdoc.brief_doc, pdoc.doc, table) 
 
         # member_list2 = treat_member_list(member_list)
         # h = ['Parameter Name','Type','Default', 'Documentation']
@@ -100,15 +100,15 @@ def make_doc_function(node):
    
     params = pdoc.elements.pop('param', None) # parameters of the function
     if params:
-       doc += "Parameters\n----------\n"
+       doc += "\nParameters\n----------\n"
        for p in params:
            name, comment = (p + '  ').split(' ',1)
-           doc += r"%s \n%s\n\n"%(name, decal(comment))
+           doc += "%s \n%s\n\n"%(name, decal(comment))
 
     ret = pdoc.elements.pop('return', None)
     if ret:
         _type = '' # FIXME : deduce the type ?
-        doc += r"Returns\n-------\n%s\n%s\n\n"%(_type, decal(ret))
+        doc += "Returns\n-------\nout  %s\n%s\n\n"%(_type, decal(ret))
    
     return doc.strip()
 
