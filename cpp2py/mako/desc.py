@@ -10,7 +10,7 @@ module = module_(full_name = "${W.modulename}", doc = r"${doc.replace_latex(W.mo
 module.add_imports(*${import_list})
 %endif
 
-# Add here all includes 
+# Add here all includes
 module.add_include("${W.filename.split('c++/')[-1]}")
 
 # Add here anything to add in the C++ code at the start, e.g. namespace using
@@ -88,9 +88,9 @@ module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}",
 ## converters
 %for c in W.param_cls_list:
 # Converter for ${c.spelling}
-c = converter_(    
-        c_type = "${c.type.spelling}", 
-        doc = r"""${doc.make_doc(c)}""",  
+c = converter_(
+        c_type = "${c.type.spelling}",
+        doc = r"""${doc.make_doc(c)}""",
 )
 %for m in CL.get_members(c, True):
 c.add_member(c_name = "${m.spelling}",
@@ -105,4 +105,3 @@ module.add_converter(c)
 
 ##
 module.generate_code()
-
