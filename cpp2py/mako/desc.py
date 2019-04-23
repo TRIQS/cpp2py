@@ -6,7 +6,9 @@ from cpp2py.wrap_generator import *
 module = module_(full_name = "${W.modulename}", doc = "${doc.replace_latex(W.moduledoc)}", app_name = "${W.appname}")
 
 # Imports
+%if import_list:
 module.add_imports(*${import_list})
+%endif
 
 # Add here all includes 
 module.add_include("${W.filename.split('c++/')[-1]}")
@@ -33,7 +35,7 @@ module.add_enum("${e.spelling}", ${["%s::%s"%(e.spelling, x.spelling) for x in e
 c = class_(
         py_type = "${util.deduce_normalized_python_class_name(c.spelling)}",  # name of the python class
         c_type = "${c.type.get_canonical().spelling}",   # name of the C++ class
-        doc = """${doc.make_doc(c)}""",   # doc of the C++ class
+        doc = """${doc.make_doc_class(c)}""",   # doc of the C++ class
         hdf5 = ${'True' if W.has_hdf5_scheme(c) else 'False'},
 )
 <%
@@ -48,7 +50,7 @@ c.add_member(c_name = "${m.spelling}",
 %endfor
 ##
 %for m in CL.get_constructors(c, W.keep_fnt):
-c.add_constructor("""${W.make_signature_for_desc(m, True)}""", doc = """${doc.make_doc(m)}""")
+c.add_constructor("""${W.make_signature_for_desc(m, True)}""", doc = """${doc.make_doc_function(m)}""")
 
 %endfor
 ##
@@ -57,7 +59,7 @@ c.add_method("""${W.make_signature_for_desc(m)}""",
              %if m.is_static_method() :
              is_static = True,
              %endif
-             doc = """${doc.make_doc(m)}""")
+             doc = """${doc.make_doc_function(m)}""")
 
 %endfor
 ##
@@ -67,7 +69,7 @@ c.add_property(name = "${p.name}",
                %if p.setter :
                setter = cfunction("${W.make_signature_for_desc(p.setter)}"),
                %endif
-               doc = """${p.doc}""")
+               doc = """${doc.clean_doc_string(p.doc)}""")
 
 %endfor
 ##
@@ -76,7 +78,7 @@ module.add_class(c)
 %endfor
 ##
 %for f in W.all_functions:
-module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}", doc = """${doc.make_doc(f)}""")
+module.add_function ("${W.make_signature_for_desc(f, is_free_function = True)}", doc = """${doc.make_doc_function(f)}""")
 
 %endfor
 
