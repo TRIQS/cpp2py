@@ -174,7 +174,7 @@ def render_fnt(parent_class, f_name, f_overloads):
     def make_unique(topic) :
         rets = set(f.processed_doc.elements.pop(topic, '').rstrip() for f in f_overloads)
         rets = list(x for x in rets if x)
-        if len(rets)> 1: print "Warning : Multiple documentation of %s across overloads. Picking first one"%topic
+        if len(rets)> 1: print("Warning : Multiple documentation of %s across overloads. Picking first one"%topic)
         return rets[0] if rets else ''
 
     def make_unique_list(topic) :
@@ -186,12 +186,12 @@ def render_fnt(parent_class, f_name, f_overloads):
                if name not in D:
                    D[name] = desc.rstrip()
                else:
-                   if D[name] != desc.rstrip() :
-                       print "Warning : multiple definition of parameter %s at overload %s"%(name, n)
+                   if D[name] != desc.strip() :
+                       print("Warning : multiple definition of parameter %s at overload %s"%(name, n))
         return D
 
     def render_dict(d, header, char, role):
-        """ 
+        """
            Make rst code for a list of items with  a header
            It splits the first word in a separate column
         """

@@ -41,11 +41,8 @@ class Cpp2Rst:
            namespaces : list of string
                       Restrict the generation to the given namespaces.
 
-           includes : string, optional
+           includes         : string, optional
                       Additional includes to add (-I xxx) for clang
-
-           system_includes : string, optional
-                      Additional System includes to add (-isystem xxx) for clang
 
            compiler_options : string, optional
                       Additional option for clang compiler
