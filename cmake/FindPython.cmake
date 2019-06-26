@@ -151,6 +151,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  # The C API of numpy has changed with 1.7.0, the macro is a version switch in a few files of the libs.
  if(PYTHON_NUMPY_VERSION VERSION_LESS "1.7.0")
 <<<<<<< HEAD
+<<<<<<< HEAD
    set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS PYTHON_NUMPY_VERSION_LT_17)
  endif()
 
@@ -162,6 +163,11 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  else()
   target_compile_definitions(python_and_numpy INTERFACE NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION)
 >>>>>>> e27e79c... [cmake] If numpy version>=1.7 add NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION defines to python_and_numpy target
+=======
+   set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS PYTHON_NUMPY_VERSION_LT_17)
+ else()
+   set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION)
+>>>>>>> 56778e5... [cmake] Adjust FindPython cmake to be compatible against older cmake version
  endif()
 
  # Installation : Final destination of the python modules
