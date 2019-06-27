@@ -165,7 +165,10 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
 >>>>>>> e27e79c... [cmake] If numpy version>=1.7 add NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION defines to python_and_numpy target
 =======
    set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS PYTHON_NUMPY_VERSION_LT_17)
- else()
+ endif()
+
+ # Disable the inclusion of the deprecated Numpy API headers starting from 1.8.0. This seems to be buggy for earlier versions.
+ if(PYTHON_NUMPY_VERSION VERSION_GREATER "1.8.0")
    set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION)
 >>>>>>> 56778e5... [cmake] Adjust FindPython cmake to be compatible against older cmake version
  endif()
