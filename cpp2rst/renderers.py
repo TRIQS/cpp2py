@@ -375,11 +375,8 @@ def render_top_page(ns_list):
 
     R ="""
 
-C++ API
-=======
-
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
 %s
 """%('\n'.join(sep + ns.replace('::','/') for ns in ns_list))
