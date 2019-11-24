@@ -4,7 +4,7 @@
 
 import re
 import cpp2py.clang_parser as CL
-import cpp2py.util
+import cpp2py.util as util
 from cpp2py.processed_doc import ProcessedDoc, replace_latex, clean_doc_string
 
 def make_table(*list_of_list):
