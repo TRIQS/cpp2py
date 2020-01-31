@@ -147,6 +147,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  add_library(python_and_numpy INTERFACE)
  target_link_libraries(python_and_numpy INTERFACE ${PYTHON_LIBRARY} "${PYTHON_EXTRA_LIBS}")
  target_include_directories(python_and_numpy INTERFACE ${PYTHON_INCLUDE_DIRS} ${PYTHON_NUMPY_INCLUDE_DIR})
+ target_compile_options(python_and_numpy INTERFACE -Wno-register) # Some version of Python.h still use register
 
  # The C API of numpy has changed with 1.7.0, the macro is a version switch in a few files of the libs.
  if(PYTHON_NUMPY_VERSION VERSION_LESS "1.7.0")
