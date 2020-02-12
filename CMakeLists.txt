@@ -1,6 +1,7 @@
 # Start configuration
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 project(CPP2PY VERSION 1.6.0 LANGUAGES C CXX)
+get_directory_property(IS_SUBPROJECT PARENT_DIRECTORY)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
@@ -54,6 +55,7 @@ set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libcl
 if(CMAKE_VERSION VERSION_LESS "3.12")
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/compatibility)
   find_package(Python)
+  install(TARGETS python_and_numpy EXPORT cpp2py-targets)
 else()
   find_package(Python3 COMPONENTS Development Interpreter)
   set(PYTHON_VERSION_MAJOR ${Python3_VERSION_MAJOR})
@@ -103,21 +105,23 @@ endif()
 #   Remind the user how to set up his/her variables
 #--------------------------------------------------------
 
-# Configure and install the file to source to setup the environment variables
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2pyvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
+if(NOT IS_SUBPROJECT)
+  # Configure and install the file to source to setup the environment variables
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2pyvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh @ONLY)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INSTALL_PREFIX}/share)
-MESSAGE(STATUS "***************************************************************")
-MESSAGE(STATUS "* Use :                                                        ")
-MESSAGE(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
-MESSAGE(STATUS "*   to set up the environment variables                        ")
-if(DEFINED ENV{MODULEPATH})
-  MESSAGE(STATUS "*                                                              ")
-  MESSAGE(STATUS "* Consider adding ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile")
-  MESSAGE(STATUS "*   to your environment modules                                ")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INSTALL_PREFIX}/share)
+  message(STATUS "***************************************************************")
+  message(STATUS "* Use :                                                        ")
+  message(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
+  message(STATUS "*   to set up the environment variables                        ")
+  if(DEFINED ENV{MODULEPATH})
+    message(STATUS "*                                                              ")
+    message(STATUS "* Consider adding ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile")
+    message(STATUS "*   to your environment modules                                ")
+  endif()
+  message(STATUS "***************************************************************")
 endif()
-MESSAGE(STATUS "***************************************************************")
 
 # uninstall target
 if(NOT TARGET uninstall)
