@@ -66,7 +66,7 @@ class Cpp2Rst:
 
     def run(self, output_directory):
 
-        print()"Generating the documentation ...")
+        print("Generating the documentation ...")
         mkchdir(output_directory)
 
         # The namespace are going to be cleaned in the parameters in the synopsis
@@ -110,7 +110,7 @@ class Cpp2Rst:
 
     def analyse_one_ns(self, namespace):
 
-        print "*** Namespace %s ***"%namespace
+        print("*** Namespace %s ***"%namespace)
 
         # ----------------------
         #      Filters
@@ -262,10 +262,10 @@ class Cpp2Rst:
         # Now treat the functions
         functions_by_name = self.regroup_func_by_names(functions)
 
-        docs = dict ( (n, [ProcessedDoc(f) for f in fs]) for (n,fs) in functions_by_name.items())
+        docs = { n: [ProcessedDoc(f) for f in fs] for (n,fs) in functions_by_name.items() }
 
         for f_name, f_overloads in functions_by_name.items():
-            print ((" ... function " + f_name, "      [", f_overloads[0].location.file.name, ']')
+            print(" ... function " + f_name, "      [", f_overloads[0].location.file.name, ']')
             cur_dir = os.getcwd()
             mkchdir_for_one_node(f_overloads[0])
             r = renderers.render_fnt(parent_class = None, f_name = f_name, f_overloads = f_overloads)

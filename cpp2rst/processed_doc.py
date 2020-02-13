@@ -46,7 +46,7 @@ def replace_latex(s, escape_slash=False):
 
 def clean_doc_string(s):
     if '\t'  in s:
-        print "WARNING : TABS ", s.replace('\t','TAB')
+        print("WARNING : TABS ", s.replace('\t','TAB'))
 
     for p in [r"^\s*/\*\*?",r"\*/",r"^\s*\*",  r'^\s*\*/\s*$',r"^\s*///", r"^s*//"]:
         s = re.sub(p,"",s, flags = re.MULTILINE)
@@ -89,8 +89,8 @@ class ProcessedDoc:
         # split : the first line is brief, and the rest
         doc = replace_latex(doc)
         if '$' in doc :
-            print "FAILED to process the latex for node %s"%CL.fully_qualified(node)
-            print doc
+            print("FAILED to process the latex for node %s"%CL.fully_qualified(node))
+            print(doc)
         doc2 = doc.split('@',1)[0] # Get rid of everything after the first @
         self.doc = doc2
 
@@ -105,7 +105,7 @@ class ProcessedDoc:
         for m in re.finditer(regex, doc, re.DOTALL):
             key, val = m.group(1), replace_latex(m.group(2)).rstrip()
             if key not in self.fields_allowed_in_docs:
-                print "Field %s is not recognized"%key
+                print("Field %s is not recognized"%key)
             if key in self.fields_with_multiple_entry:
                 d[key].append(val)
             else:
