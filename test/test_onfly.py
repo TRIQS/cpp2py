@@ -6,13 +6,13 @@ if 1:
     code = """        
     #include <vector>
     std::vector<int> f(int x) { return {x,x+1};}
-    //std::vector<double> g(int x) { return {1.0*x,x+2.0};}
+    std::vector<double> g(int x) { return {1.0*x,x+2.0};}
     """
 
     m= M.compile(code, verbosity =3)
 
     assert m.f(1) == [1, 2]
-    #assert m.g(1) == [1, 3]
+    assert m.g(1) == [1, 3]
 
 if 0:
     # 
