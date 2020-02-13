@@ -15,54 +15,6 @@ using dcomplex = std::complex<double>;
 #include <algorithm>
 
 
-// Defines for Python 2/3 compatibility.
-#ifndef __PYCOMPAT_HPP__
-#define __PYCOMPAT_HPP__
-
-#if PY_MAJOR_VERSION >= 3
-// Python3 treats all ints as longs, PyInt_X functions have been removed.
-#define PyInt_Check PyLong_Check
-#define PyInt_CheckExact PyLong_CheckExact
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_AS_LONG PyLong_AS_LONG
-#define PyInt_FromLong PyLong_FromLong
-#define PyNumber_Int PyNumber_Long
-
-// Python3 strings are unicode, these defines mimic the Python2 functionality.
-#define PyString_Check PyUnicode_Check
-#define PyString_FromString PyUnicode_FromString
-#define PyString_FromStringAndSize PyUnicode_FromStringAndSize
-#define PyString_Size PyUnicode_GET_SIZE
-
-// PyUnicode_AsUTF8 isn't available until Python 3.3
-#if (PY_VERSION_HEX < 0x03030000)
-#define PyString_AsString _PyUnicode_AsString
-#else
-#define PyString_AsString PyUnicode_AsUTF8
-#endif
-#endif
-
-// python < 2.6, Py_TYPE  and PyVarObject_HEAD_INIT are not defined:
-#ifndef Py_TYPE
-  #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
-#endif
-#ifndef PyVarObject_HEAD_INIT
-    #define PyVarObject_HEAD_INIT(type, size) \
-        PyObject_HEAD_INIT(type) size,
-#endif
-
-// python > 3 Py_TPFLAGS_CHECKTYPES is not defined:
-#ifndef Py_TPFLAGS_CHECKTYPES
-  #define Py_TPFLAGS_CHECKTYPES 0
-#endif
-
-#endif // END HEADER GUARD
-
-
-
-
-
-
 //------------------------------------------------------------------------------------------------------
 //---------------------   includes and using  -------------------
 //------------------------------------------------------------------------------------------------------
@@ -125,23 +77,22 @@ namespace cpp2py {
 template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
-    if (x == ${c_namespace}${val}) return PyUnicode_FromString("${val}");
-   %endfor
-   return PyUnicode_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+    if (x == ${c_namespace}${val}) return PyString_FromString("${val}");
+   % endfor return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s=PyUnicode_AsString(ob);
+   std::string s = PyString_AsString(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
    return ${c_namespace}${values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyUnicode_Check(ob))  {
+   if (!PyString_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s=PyUnicode_AsString(ob);
+   std::string s = PyString_AsString(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -477,9 +428,9 @@ static PyTypeObject ${c.py_type}Type = {
     ${"(initproc)%s___init__"%c.py_type if c.constructor else 0},      /* tp_init */
     0,                         /* tp_alloc */
 %if c.constructor:
-    (newfunc)${c.py_type}_new,           /* tp_new */
+    (newfunc)${c.py_type}_new, /* tp_new */
 %else:
-    0,                          /* tp_new */
+    0,                         /* tp_new */
 %endif
 };
 
@@ -498,23 +449,22 @@ namespace cpp2py {
 template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
-    if (x == ${val}) return PyUnicode_FromString("${val}");
-   %endfor
-   return PyUnicode_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+    if (x == ${val}) return PyString_FromString("${val}");
+   % endfor return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s=PyUnicode_AsString(ob);
+   std::string s = PyString_AsString(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
    return ${en.values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyUnicode_Check(ob))  {
+   if (!PyString_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s=PyUnicode_AsString(ob);
+   std::string s = PyString_AsString(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -796,11 +746,11 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
     }
     PyObject* global_dict = PyModule_GetDict(this_module); //borrowed
     PyObject* s = PyTuple_GetItem(args,0); //borrowed
-    if (!PyUnicode_Check(s)) {
+    if (!PyString_Check(s)) {
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-    pyref code1 = Py_CompileString(PyUnicode_AsString (s), "nofile", Py_eval_input);
+    pyref code1        = Py_CompileString(PyString_AsString(s), "nofile", Py_eval_input);
     PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
@@ -814,13 +764,13 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 static PyObject* ${c.py_type}___repr__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyUnicode_FromString(fs.str().c_str());
+  return PyString_FromString(fs.str().c_str());
 }
 
 static PyObject* ${c.py_type}___str__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyUnicode_FromString(fs.str().c_str());
+  return PyString_FromString(fs.str().c_str());
 }
 
 %endif
@@ -1022,10 +972,10 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
   static const char * inclu = "${repr( module.include_list)}";
 
-  PyDict_SetItemString(d, "classes", pyref(PyUnicode_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyUnicode_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyUnicode_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyUnicode_FromString(inclu)));
+  PyDict_SetItemString(d, "classes", pyref(PyString_FromString(cls)));
+  PyDict_SetItemString(d, "enums", pyref(PyString_FromString(ens)));
+  PyDict_SetItemString(d, "module_name", pyref(PyString_FromString("${module.full_name}")));
+  PyDict_SetItemString(d, "includes", pyref(PyString_FromString(inclu)));
 
   return d;
  }

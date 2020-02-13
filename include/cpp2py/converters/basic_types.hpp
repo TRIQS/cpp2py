@@ -27,17 +27,7 @@ namespace cpp2py {
   };
 
   // --- long
-#if PY_MAJOR_VERSION >= 3
-  template <> struct py_converter<long> {
-    static PyObject *c2py(long i) { return PyLong_FromLong(i); }
-    static long py2c(PyObject *ob) { return PyLong_AsLong(ob); }
-    static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyLong_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to long"); }
-      return false;
-    }
-  };
-#else
+
   template <> struct py_converter<long> {
     static PyObject *c2py(long i) { return PyInt_FromLong(i); }
     static long py2c(PyObject *ob) { return PyInt_AsLong(ob); }
@@ -47,7 +37,7 @@ namespace cpp2py {
       return false;
     }
   };
-#endif
+
   template <> struct py_converter<int> : py_converter<long> {};
   template <> struct py_converter<unsigned int> : py_converter<long> {};
   template <> struct py_converter<unsigned long> : py_converter<long> {};
@@ -59,11 +49,7 @@ namespace cpp2py {
     static PyObject *c2py(double x) { return PyFloat_FromDouble(x); }
     static double py2c(PyObject *ob) { return PyFloat_AsDouble(ob); }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-#if PY_MAJOR_VERSION >= 3
-      if (PyFloat_Check(ob) || PyLong_Check(ob)) return true;
-#else
       if (PyFloat_Check(ob) || PyInt_Check(ob)) return true;
-#endif
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to double"); }
       return false;
     }

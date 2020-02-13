@@ -5,18 +5,12 @@ namespace cpp2py {
 
   template <> struct py_converter<std::string> {
 
-    static PyObject *c2py(std::string const &x) { return PyUnicode_FromString(x.c_str()); }
+    static PyObject *c2py(std::string const &x) { return PyString_FromString(x.c_str()); }
 
-    static std::string py2c(PyObject *ob) {
-#if PY_MAJOR_VERSION >= 3
-      return PyUnicode_AsUTF8(ob);
-#else
-      return PyUnicode_AsString(ob);
-#endif
-    }
+    static std::string py2c(PyObject *ob) { return PyString_AsString(ob); }
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyUnicode_Check(ob) or PyUnicode_Check(ob)) return true;
+      if (PyString_Check(ob) or PyUnicode_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
       return false;
     }
@@ -24,18 +18,12 @@ namespace cpp2py {
 
   template <> struct py_converter<const char *> {
 
-    static PyObject *c2py(const char *x) { return PyUnicode_FromString(x); }
+    static PyObject *c2py(const char *x) { return PyString_FromString(x); }
 
-    static const char *py2c(PyObject *ob) {
-#if PY_MAJOR_VERSION >= 3
-      return PyUnicode_AsUTF8(ob);
-#else
-      return PyUnicode_AsString(ob);
-#endif
-    }
+    static const char *py2c(PyObject *ob) { return PyString_AsString(ob); }
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyUnicode_Check(ob) or PyUnicode_Check(ob)) return true;
+      if (PyString_Check(ob) or PyUnicode_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
       return false;
     }
