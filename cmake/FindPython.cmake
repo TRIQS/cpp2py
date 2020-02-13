@@ -117,13 +117,8 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  # Check for Python library path
  #
  EXEC_PYTHON_SCRIPT("import string; from distutils.sysconfig import *; print('%s' % get_python_lib(0,1))" PYTHON_LIBRARY_BASE_PATH)
- EXEC_PYTHON_SCRIPT("import string; from distutils.sysconfig import *; print('libpython%s' % \"\".join(get_config_vars('VERSION')))" PYTHON_LIBRARY_BASE_FILE)
- set( PYTHON_LIBRARY_SEARCH_PATHS "${PYTHON_LIBRARY_BASE_PATH}/.." "${PYTHON_LIBRARY_BASE_PATH}/../x86_64-linux-gnu" "${PYTHON_LIBRARY_BASE_PATH}/../i386-linux-gnu")
- if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  find_file(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.dylib" PATHS ${PYTHON_LIBRARY_SEARCH_PATHS})
- else()
-  find_file(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_SEARCH_PATHS})
- endif()
+ set(PYTHON_LIBRARY_SEARCH_PATHS "${PYTHON_LIBRARY_BASE_PATH}/.." "${PYTHON_LIBRARY_BASE_PATH}/../x86_64-linux-gnu" "${PYTHON_LIBRARY_BASE_PATH}/../i386-linux-gnu")
+ find_library(PYTHON_LIBRARY NAMES python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} python${PYTHON_VERSION_MAJOR} PATHS ${PYTHON_LIBRARY_SEARCH_PATHS} NO_DEFAULT_PATH)
  message(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
  mark_as_advanced(PYTHON_LIBRARY)
 
