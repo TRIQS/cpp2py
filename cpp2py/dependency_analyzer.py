@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 import cpp2py.util as util, importlib
 from .cpp2py_info_base import Cpp2pyInfoStd
   

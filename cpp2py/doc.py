@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 # This module contains functions to process the documentation
 # of classes, functions, from C++ to Python
 # make_doc(x) is the general function, where x is a node.

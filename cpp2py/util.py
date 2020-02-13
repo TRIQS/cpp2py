@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 # This module contains a few utilities
 import re, os
 import cpp2py.clang_parser as CL

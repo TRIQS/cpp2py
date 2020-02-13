@@ -1,5 +1,6 @@
+from __future__ import absolute_import, division, print_function
 import imp, os, sys, shutil, subprocess, hashlib, re, tempfile
-import libclang_config as Config
+import cpp2py.libclang_config as Config
 
 cxx_compiler = Config.CXX_COMPILER
 

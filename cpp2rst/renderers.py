@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 import os, re, itertools
 import cpp2py.clang_parser as CL
 from synopsis import make_synopsis_list, make_synopsis_template_decl, make_label, replace_ltgt, escape_lg

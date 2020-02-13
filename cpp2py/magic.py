@@ -6,6 +6,7 @@ Cpp2py magic
 {CPP2PY_DOC}
 
 """
+from __future__ import absolute_import, division, print_function
 import os
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic, cell_magic
