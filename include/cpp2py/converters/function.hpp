@@ -1,11 +1,6 @@
 #pragma once
 #include <functional>
 
-#ifndef PyVarObject_HEAD_INIT
-    #define PyVarObject_HEAD_INIT(type, size) \
-        PyObject_HEAD_INIT(type) size,
-#endif
-
 namespace cpp2py {
 
   // ---- function ----

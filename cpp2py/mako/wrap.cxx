@@ -277,8 +277,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
  PyObject* ${c.py_type}__iterator__iternext__(PyObject *self);
 
  static PyTypeObject ${c.py_type}__iteratorType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
     "${module.name}.${c.py_type}__iterator",            /*tp_name*/
     sizeof(${c.py_type}__iterator),       /*tp_basicsize*/
     0,     /*tp_itemsize*/
