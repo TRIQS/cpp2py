@@ -316,7 +316,7 @@ PyObject* ${c.py_type}___iter__(PyObject *self);
 %if c.number_protocol :
 static PyNumberMethods ${c.py_type}_as_number = {
 
-%for op_name in ["add", "subtract", "multiply", "divide", "remainder", "divmod", "power", "negative", "positive", "absolute", "nonzero", "invert", "lshift", "rshift", "and", "xor", "or", "coerce", "int", "long", "float", "oct", "hex", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_divide", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide ", "true_divide ", "inplace_floor_divide ", "inplace_true_divide ", "index "] :
+%for op_name in ["add", "subtract", "multiply", "remainder", "divmod", "power", "negative", "positive", "absolute", "bool", "invert", "lshift", "rshift", "and", "xor", "or", "int", "reserved", "float", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide", "true_divide", "inplace_floor_divide", "inplace_true_divide", "index", "matrix_multiply", "inplace_matrix_multiply"] :
 % if op_name in c.number_protocol and c.number_protocol[op_name].arity==2 :
  (binaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
 %elif op_name in c.number_protocol and c.number_protocol[op_name].arity==1 :
