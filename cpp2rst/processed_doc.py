@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 import re, itertools, os
 from collections import OrderedDict
 import cpp2py.clang_parser as CL
-import global_vars
+from . import global_vars
 
 
 """

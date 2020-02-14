@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 import re, os
 import cpp2py.clang_parser as CL
-import global_vars
+from . import global_vars
 
 def escape_lg(s):
     """Escape the > and < in the string, which are special in rst"""

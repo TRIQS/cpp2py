@@ -7,7 +7,7 @@ import re, os, itertools, platform
 import clang.cindex
 from mako.template import Template
 from clang.cindex import CursorKind, LibclangError
-import cpp2py.libclang_config as libclang_config
+from . import libclang_config
 
 
 def pretty_print(x, keep=None, s='...'):

@@ -3,8 +3,8 @@ import os, re, sys, itertools
 from collections import OrderedDict
 
 import cpp2py.clang_parser as CL
-import synopsis, renderers, global_vars
-from processed_doc import ProcessedDoc
+from . import synopsis, renderers, global_vars
+from .processed_doc import ProcessedDoc
 
 # --------------------------------
 
