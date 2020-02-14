@@ -1,5 +1,5 @@
 #pragma once
-#include "./python.hpp"
+#include "./../py3c.h"
 
 namespace cpp2py {
 
