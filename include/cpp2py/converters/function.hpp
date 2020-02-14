@@ -59,7 +59,7 @@ namespace cpp2py {
 
     static void std_function_dealloc(std_function *self) {
       delete self->_c;
-      self->ob_type->tp_free((PyObject *)self);
+      Py_TYPE(self)->tp_free((PyObject *)self);
     }
 
     // technical details to implement the __call function of the wrapping python object, cf below
