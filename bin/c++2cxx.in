@@ -32,6 +32,7 @@ cxx_env = os.getenv('CXXFLAGS').split() if os.getenv('CXXFLAGS') else []
 W= Cpp2Cxx(filename = args.filename,
             namespaces= args.namespace,
             includes = args.includes or (),
+            system_includes = args.system_includes or (),
             compiler_options = args.cxxflags.split(' ') + cxx_env,
             libclang_location = args.libclang_location,
             target_file_only = args.target_file_only
