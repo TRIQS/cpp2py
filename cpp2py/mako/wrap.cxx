@@ -77,23 +77,23 @@ namespace cpp2py {
 template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
-    if (x == ${c_namespace}${val}) return PyString_FromString("${val}");
+    if (x == ${c_namespace}${val}) return PyStr_FromString("${val}");
    %endfor
-   return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyStr_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s = PyString_AsString(ob);
+   std::string s = PyStr_AsString(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
    return ${c_namespace}${values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob)) {
+   if (!PyStr_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s = PyString_AsString(ob);
+   std::string s = PyStr_AsString(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -450,23 +450,23 @@ namespace cpp2py {
 template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
-    if (x == ${val}) return PyString_FromString("${val}");
+    if (x == ${val}) return PyStr_FromString("${val}");
    %endfor
-   return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyStr_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s = PyString_AsString(ob);
+   std::string s = PyStr_AsString(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
    return ${en.values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob)) {
+   if (!PyStr_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s = PyString_AsString(ob);
+   std::string s = PyStr_AsString(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -581,7 +581,7 @@ template <> struct py_converter<${en.c_name}> {
     std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
     for (int i =0; i < errors.size(); ++i) {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
-      if (errors[i]) err_list += PyString_AsString((PyObject*)errors[i]);
+      if (errors[i]) err_list += PyStr_AsString((PyObject*)errors[i]);
       err_list +="\n";
     }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
@@ -748,11 +748,11 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
     }
     PyObject* global_dict = PyModule_GetDict(this_module); //borrowed
     PyObject* s = PyTuple_GetItem(args,0); //borrowed
-    if (!PyString_Check(s)) {
+    if (!PyStr_Check(s)) {
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-    pyref code1        = Py_CompileString(PyString_AsString(s), "nofile", Py_eval_input);
+    pyref code1        = Py_CompileString(PyStr_AsString(s), "nofile", Py_eval_input);
     PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
@@ -766,13 +766,13 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 static PyObject* ${c.py_type}___repr__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyStr_FromString(fs.str().c_str());
 }
 
 static PyObject* ${c.py_type}___str__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyStr_FromString(fs.str().c_str());
 }
 
 %endif
@@ -974,10 +974,10 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
   static const char * inclu = "${repr( module.include_list)}";
 
-  PyDict_SetItemString(d, "classes", pyref(PyString_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyString_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyString_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyString_FromString(inclu)));
+  PyDict_SetItemString(d, "classes", pyref(PyStr_FromString(cls)));
+  PyDict_SetItemString(d, "enums", pyref(PyStr_FromString(ens)));
+  PyDict_SetItemString(d, "module_name", pyref(PyStr_FromString("${module.full_name}")));
+  PyDict_SetItemString(d, "includes", pyref(PyStr_FromString(inclu)));
 
   return d;
  }

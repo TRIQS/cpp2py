@@ -72,7 +72,7 @@ namespace cpp2py {
     pytypeobject_table_t *t = new pytypeobject_table_t{};
     // never destroyed. we could add a destructor, but useless, the table with leave in the interpreter
     pyref c = PyCapsule_New((void *)t, "__main__.__cpp2py_table", (PyCapsule_Destructor)_table_destructor);
-    pyref s = PyString_FromString("__cpp2py_table");
+    pyref s = PyStr_FromString("__cpp2py_table");
     int err = PyObject_SetAttr(mod, s, c);
     if (err) {
       PyErr_SetString(PyExc_RuntimeError, "Can not add the __cpp2py_table to main ???");
