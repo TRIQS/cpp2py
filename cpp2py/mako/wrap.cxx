@@ -1000,7 +1000,6 @@ static PyMethodDef module_methods[] = {
 
 //--------------------- module struct & init error definition ------------
 
-#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef ${module.name}_def =
 {
     PyModuleDef_HEAD_INIT,
@@ -1009,26 +1008,13 @@ static struct PyModuleDef ${module.name}_def =
     -1,   /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
     module_methods
 };
-#define INITERROR return NULL
-#else
-#define INITERROR return
-#endif
 
 //--------------------- module init function -----------------------------
-#if PY_MAJOR_VERSION >= 3
-PyMODINIT_FUNC
-PyInit_${module.name}(void)
-#else
-#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-init${module.name}(void)
-#endif
+MODULE_INIT_FUNC(${module.name})
 {
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
     // import numpy
-    import_array();
+    import_array1(NULL);
 #endif
 
 %for c in module.imports :
@@ -1038,23 +1024,21 @@ init${module.name}(void)
     PyObject* m;
 
 %for c in module.classes.values() :
-    if (PyType_Ready(&${c.py_type}Type) < 0) INITERROR;
+    if (PyType_Ready(&${c.py_type}Type) < 0)
+      return NULL;
 
     %if c.iterator :
     // initializing the ${c.py_type}__iterator
     ${c.py_type}__iteratorType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)  INITERROR;
+    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)
+      return NULL;
     Py_INCREF(&${c.py_type}__iteratorType);
     %endif
 %endfor
 
-#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&${module.name}_def);
-#else
-    m = Py_InitModule3("${module.name}", module_methods, "${module.doc}");
-#endif
     if (m == NULL)  
-      INITERROR;
+      return NULL;
 
 
 %for c in module.classes.values() :
@@ -1080,7 +1064,5 @@ init${module.name}(void)
 %for c in module.classes.values() :
     (*table)[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
 %endfor
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }
