@@ -78,7 +78,8 @@ template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
     if (x == ${c_namespace}${val}) return PyString_FromString("${val}");
-   % endfor return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+   %endfor
+   return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
    std::string s = PyString_AsString(ob);
@@ -450,7 +451,8 @@ template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
     if (x == ${val}) return PyString_FromString("${val}");
-   % endfor return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+   %endfor
+   return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
    std::string s = PyString_AsString(ob);
