@@ -426,7 +426,11 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
+#if IS_PY3
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+#else
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
+#endif
     "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
