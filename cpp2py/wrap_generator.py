@@ -400,6 +400,8 @@ class class_ :
             for scalar in arithmetic[1:] :
                div.add_overload (calling_pattern = "/", signature = {'args' :[(self.c_type,'x'), (scalar,'y')], 'rtype' : self.c_type})
             self.number_protocol['divide'] = div
+            self.number_protocol['true_divide'] = div
+            self.number_protocol['floor_divide'] = div
 
           if algebra :
             mul.add_overload (calling_pattern = "*", signature = {'args' :[(self.c_type,'x'), (self.c_type,'y')], 'rtype' : self.c_type})
@@ -439,6 +441,8 @@ class class_ :
         one_op('-',"subtract","__isub__")
         one_op('*',"multiply","__imul__")
         one_op('/',"divide","__idiv__")
+        one_op('/',"true_divide","__idiv__")
+        one_op('/',"floor_divide","__idiv__")
 
     def add_constructor(self, signature, calling_pattern = None, intermediate_type = None, doc = ''):
         """
