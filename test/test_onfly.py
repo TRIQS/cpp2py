@@ -9,7 +9,7 @@ if 1:
     std::vector<double> g(int x) { return {1.0*x,x+2.0};}
     """
 
-    m= M.compile(code, verbosity =3)
+    m= M.compile(code, verbosity =3, no_clean = True)
 
     assert m.f(1) == [1, 2]
     assert m.g(1) == [1, 3]
@@ -22,7 +22,7 @@ if 0:
     dcomplex f(gf_view<imfreq> g) { return g[0](0,0); }
     """
 
-    m2= M.compile(code, verbosity = 3, modules = ['pytriqs'])
+    m2= M.compile(code, verbosity = 3, modules = ['pytriqs'], no_clean = True)
 
     from pytriqs.gf import *
     gw = GfImFreq(indices = [1], beta = 50)

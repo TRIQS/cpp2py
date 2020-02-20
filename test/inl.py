@@ -11,7 +11,7 @@ code = """
   gf<imfreq> ma(int n) { return {{10,Fermion, n}, {2,2}};}
 """
 
-M = compile(code, modules = "pytriqs", cxxflags = ' -O2 ')
+M = compile(code, modules = "pytriqs", cxxflags = ' -O2 ', no_clean = True)
 
 
 print(M.f(2))
