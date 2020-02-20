@@ -772,8 +772,12 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
+#if IS_PY3
+    pyref code       = Py_CompileString(PyStr_AsString(s), "nofile", Py_eval_input);
+#else
     pyref code1        = Py_CompileString(PyStr_AsString(s), "nofile", Py_eval_input);
     PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
+#endif
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
   }
