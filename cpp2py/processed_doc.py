@@ -1,4 +1,6 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import object
 import re
 from collections import OrderedDict
 import cpp2py.clang_parser as CL
@@ -65,7 +67,7 @@ def clean_doc_string(s):
 
 # ------------------------------------------------------------------------
 
-class ProcessedDoc:
+class ProcessedDoc(object):
     fields_allowed_in_docs = ['include', 'return', 'synopsis', 'warning', 'figure', 'note', 'example', 'param',
                               'tparam', 'group']
     fields_with_multiple_entry = ['param', 'tparam']

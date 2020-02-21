@@ -1,4 +1,6 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import zip
 import os, re, itertools
 import cpp2py.clang_parser as CL
 from .synopsis import make_synopsis_list, make_synopsis_template_decl, make_label, replace_ltgt, escape_lg
@@ -198,7 +200,7 @@ def render_fnt(parent_class, f_name, f_overloads):
         """
         if not d: return ''
         head = make_header(header, char) if header else ''
-        return head + '\n'.join(" * :%s:`%s` %s\n"%(role, k.strip(),v) for (k,v) in d.items())
+        return head + '\n'.join(" * :%s:`%s` %s\n"%(role, k.strip(),v) for (k,v) in list(d.items()))
 
     has_overload = len(f_overloads)> 1
 
@@ -309,14 +311,14 @@ def render_cls(cls, all_methods, all_friend_functions):
 
         # Regroup the function by sub category
         D = OrderedDict()
-        for name, flist in all_f.items():
+        for name, flist in list(all_f.items()):
             cat =flist[0].processed_doc.elements.get('category', None)
             name_for_user = escape_lg(name)
             if name_for_user in ['constructor', 'destructor'] : name_for_user = '(%s)'%name_for_user
             D.setdefault(cat, list()).append((":ref:`%s <%s>`"%(name_for_user,make_label(cls.fully_qualified_name + '__' + name)), flist[0].processed_doc.elements['brief']))
 
         # Make the sub lists
-        for cat, list_table_args in D.items() :
+        for cat, list_table_args in list(D.items()) :
             if cat : R += make_header(cat, '~')
             R += render_table(list_table_args)
 
@@ -359,7 +361,7 @@ def render_ns(ns, all_functions, all_classes, all_usings):
     if all_functions:
         R += make_header('Functions')
         R += render_table([(":ref:`%s <%s>`"%(name, make_label(CL.fully_qualified_name(f_list[0]))),
-                            f_list[0].processed_doc.elements['brief']) for (name, f_list) in all_functions.items() ])
+                            f_list[0].processed_doc.elements['brief']) for (name, f_list) in list(all_functions.items()) ])
         #R += render_table([(":ref:`%s <%s>`"%(name, escape_lg(name)), f_list[0].processed_doc.elements['brief']) for (name, f_list) in all_functions.items() ])
         #R += render_table([(":ref:`%s <%s_%s>`"%(name,escape_lg(ns), escape_lg(name)), f_list[0].processed_doc.elements['brief']) for (name, f_list) in all_functions.items() ])
         R += toctree_hidden

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
 import re, os
 import cpp2py.clang_parser as CL
 from . import global_vars

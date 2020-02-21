@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import object
 import os, re, sys, itertools
 from mako.template import Template
 import cpp2py.clang_parser as CL
 
-class Cpp2Cxx:
+class Cpp2Cxx(object):
     """ """
     def __init__(self, filename, namespaces=(), compiler_options=None, includes = None, system_includes = None, libclang_location = None, parse_all_comments = False, target_file_only = False):
         """

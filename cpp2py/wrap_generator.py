@@ -1,4 +1,7 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 import sys, imp
 import re
 import os
@@ -21,7 +24,7 @@ def translate_c_type_to_py_type(t) :
     # numpy, etc...
     return t
 
-class cfunction :
+class cfunction(object) :
     """
        Representation of one overload of a C++ function or method.
     """
@@ -196,7 +199,7 @@ class cfunction :
         if self._dict_call is not None : return doc
         return "Signature : %s\n%s"%( self._get_signature(),doc)
 
-class pyfunction :
+class pyfunction(object) :
     """
        Representation of one python function of the extension
        It is basically :
@@ -235,7 +238,7 @@ class pyfunction :
         return repr(s)[1:-1] # remove the ' ' made by repr
 
 
-class converter_:
+class converter_(object):
     """
     Representation of a simple converter for a struct
     """
@@ -251,7 +254,7 @@ class converter_:
         self.doc = doc
         self.members = []
 
-    class member_:
+    class member_(object):
         pass
 
     def add_member(self, c_name, c_type, initializer = '', doc = ''):
@@ -281,7 +284,7 @@ class converter_:
         rendered = tpl.render(c=self)
         return rendered
 
-class class_ :
+class class_(object) :
     """
        Representation of a wrapped type
     """
@@ -559,7 +562,7 @@ class class_ :
         if 'c_name' not in kw and 'calling_pattern' not in kw : kw['c_name']= "operator()"
         self.add_method(name = "__call__", **kw)
 
-    class _iterator :
+    class _iterator(object) :
         def __init__(self,c_type, c_cast_type, begin, end) :
           self.c_type, self.c_cast_type, self.begin, self.end = c_type, c_cast_type, begin, end
 
@@ -579,7 +582,7 @@ class class_ :
         """
         self.iterator = self._iterator(c_type, c_cast_type, begin, end)
 
-    class _member :
+    class _member(object) :
         def __init__(self, c_name, c_type, py_name, read_only, doc):
             """
             Parameters
@@ -620,7 +623,7 @@ class class_ :
         """
         self.members.append( self._member(c_name, c_type, py_name, read_only, doc))
 
-    class _property :
+    class _property(object) :
         def __init__(self, name, getter, setter, doc) :
           self.name, self.getter, self.setter, self.doc = name, getter, setter, doc
 
@@ -682,7 +685,7 @@ class class_ :
         self.has_mapping_protocol = '__getitem__impl' in self.methods or '__len__impl' in self.methods
         if '__setitem__impl' in self.methods and not  '__getitem__impl' in self.methods : raise RuntimeError("Cannot generate a class with a setter and no getter")
 
-class module_ :
+class module_(object) :
     """
        Representation of a module
     """
@@ -801,7 +804,7 @@ class module_ :
         """
         self._preamble += preamble + '\n'
 
-    class _enum :
+    class _enum(object) :
         def __init__(self, c_name, values, c_namespace, doc) :
             self.c_name, self.c_namespace, self.values, self.doc = c_name, c_namespace + "::", values, doc
             self.c_name_absolute = self.c_namespace + self.c_name
@@ -851,7 +854,7 @@ class module_ :
         wrap_file = sys.argv[1]
 
         # prepare generation
-        for c in self.classes.values() : c._prepare_for_generation()
+        for c in list(self.classes.values()) : c._prepare_for_generation()
 
         # call mako
         tpl = Template(filename=mako_template, strict_undefined=True)

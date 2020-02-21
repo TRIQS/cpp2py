@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
 
 # This module contains functions to process the documentation
 # of classes, functions, from C++ to Python
 # make_doc(x) is the general function, where x is a node.
 
+from builtins import zip
+from builtins import object
 import re
 import cpp2py.clang_parser as CL
 import cpp2py.util as util
@@ -24,7 +27,7 @@ def make_table(*list_of_list):
     return '\n'.join(r) + '\n'
 
 def treat_member_list(member_list) :
-    class _m:
+    class _m(object):
       def __init__(self, m):
           self.spelling, self.type = m.spelling, m.type
 

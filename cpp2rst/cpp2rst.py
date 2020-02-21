@@ -1,4 +1,6 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import object
 import os, re, sys, itertools
 from collections import OrderedDict
 
@@ -27,7 +29,7 @@ def mkchdir(*subdirs):
 
 # -------------------------------------------------------
 
-class Cpp2Rst:
+class Cpp2Rst(object):
     """ """
     def __init__(self, filename, namespaces=(), compiler_options=None, includes=None, system_includes=None, libclang_location = None, parse_all_comments = False, target_file_only = False):
         """
@@ -79,7 +81,7 @@ class Cpp2Rst:
 
         # Cross linking
         # synopsis will be called by the renderers, and they need to know the class we are documenting
-        global_vars.synopsis_class_list = sum((cls_list for (cls_list, fnt_list, using_list) in d.values()), list())
+        global_vars.synopsis_class_list = sum((cls_list for (cls_list, fnt_list, using_list) in list(d.values())), list())
 
         for ns in self.namespaces:
             self.run_one_ns(ns, *d[ns])
@@ -186,7 +188,7 @@ class Cpp2Rst:
             friend_functions = self.regroup_func_by_names(CL.get_friend_functions(cls, keep = keep_is_documented))
 
             # Analyse the doc string for all methods and functions, and store the result in the node itself
-            for (n,f_list) in (methods.items() + friend_functions.items()):
+            for (n,f_list) in (list(methods.items()) + list(friend_functions.items())):
                 for f in f_list:
                     f.processed_doc = ProcessedDoc(f)
 
@@ -200,7 +202,7 @@ class Cpp2Rst:
             cls.usings = list(CL.get_usings(cls)) # , keep_using))
 
         # Eliminate doublons, like forward declarations
-        classes = D.values()
+        classes = list(D.values())
 
         # A list of AST nodes for the methods and functions
         functions = CL.get_functions(self.root, keep_fnt, traverse_namespaces = True, keep_ns = keep_ns)
@@ -217,7 +219,7 @@ class Cpp2Rst:
             c.namespace = CL.get_namespace(c)
             c.fully_qualified_name = '::'.join([c.namespace, c.spelling])
             D[c.fully_qualified_name] = c
-        usings = D.values()
+        usings = list(D.values())
 
         return classes, functions, usings
 
@@ -248,7 +250,7 @@ class Cpp2Rst:
 
             # write a file for each function
             def render(message, d) :
-                for f_name, f_overloads in d.items():
+                for f_name, f_overloads in list(d.items()):
                     print (" ...... %s [%s]"%(f_name, message))
                     r = renderers.render_fnt(parent_class = c, f_name = f_name, f_overloads = f_overloads)
                     safe_write(f_name, r)
@@ -262,9 +264,9 @@ class Cpp2Rst:
         # Now treat the functions
         functions_by_name = self.regroup_func_by_names(functions)
 
-        docs = { n: [ProcessedDoc(f) for f in fs] for (n,fs) in functions_by_name.items() }
+        docs = { n: [ProcessedDoc(f) for f in fs] for (n,fs) in list(functions_by_name.items()) }
 
-        for f_name, f_overloads in functions_by_name.items():
+        for f_name, f_overloads in list(functions_by_name.items()):
             print(" ... function " + f_name, "      [", f_overloads[0].location.file.name, ']')
             cur_dir = os.getcwd()
             mkchdir_for_one_node(f_overloads[0])

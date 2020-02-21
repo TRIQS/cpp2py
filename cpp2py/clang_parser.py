@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
 
 # This module defines the function parse that
 # call libclang to parse a C++ file, and retrieve
 # A few helper functions for libclang
+from builtins import next
 import re, os, itertools, platform
 import clang.cindex
 from mako.template import Template

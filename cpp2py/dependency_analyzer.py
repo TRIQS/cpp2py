@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import object
 import cpp2py.util as util, importlib
 from .cpp2py_info_base import Cpp2pyInfoStd
   
-class DependencyAnalyzer:
+class DependencyAnalyzer(object):
     """
     A parametrized function that takes a list of AST node of types
     and deduces the list of python modules to import and converters to include

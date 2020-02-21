@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import map
+from builtins import next
+from builtins import object
 import os, re, sys, itertools
 from mako.template import Template
 
 import cpp2py.clang_parser as CL
 from . import util, doc, dependency_analyzer
 
-class Cpp2Desc:
+class Cpp2Desc(object):
     """ """
     def __init__(self, filename, namespaces=(), classes= (), namespace_to_factor= (), appname= '',
                  modulename = '', moduledoc ='', use_properties = False, members_read_only = True,  converters = (),
@@ -187,7 +191,7 @@ class Cpp2Desc:
         method_list = list(self.get_public_methods(c)) # MUST be a list, or the generator will be exhausted later in mlist = ...
         if not self.use_properties : return method_list, ()
 
-        class property_:
+        class property_(object):
             def __init__ (self, **kw) :
                 self.__dict__.update(kw)
 

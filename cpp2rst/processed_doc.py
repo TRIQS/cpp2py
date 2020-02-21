@@ -1,4 +1,6 @@
 from __future__ import absolute_import, division, print_function
+from __future__ import unicode_literals
+from builtins import object
 import re, itertools, os
 from collections import OrderedDict
 import cpp2py.clang_parser as CL
@@ -63,7 +65,7 @@ def strip_left_spaces(s):
 
 # ------------------------------------------------------------------------
 
-class ProcessedDoc:
+class ProcessedDoc(object):
 
     fields_allowed_in_docs = ['include', 'return', 'warning','figure', 'note', 'brief', 'example', 'param', 'tparam', 'group', 'head', 'tail', 'category']
     fields_with_multiple_entry = ['param', 'tparam']
