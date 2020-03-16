@@ -5,7 +5,7 @@ from cpp2py.doc import replace_latex, process_doc
 import re
 from collections import OrderedDict
 
-class ProcessDoc(object):
+class ProcessDoc:
     """
 Meaning of the @option in the doc:
 

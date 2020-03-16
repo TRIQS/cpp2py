@@ -29,7 +29,7 @@ def mkchdir(*subdirs):
 
 # -------------------------------------------------------
 
-class Cpp2Rst(object):
+class Cpp2Rst:
     """ """
     def __init__(self, filename, namespaces=(), compiler_options=None, includes=None, system_includes=None, libclang_location = None, parse_all_comments = False, target_file_only = False):
         """

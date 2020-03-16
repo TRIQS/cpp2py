@@ -4,13 +4,13 @@ from builtins import object
 import cpp2py.util as util, importlib
 from .cpp2py_info_base import Cpp2pyInfoStd
   
-class DependencyAnalyzer(object):
+class DependencyAnalyzer:
     """
     A parametrized function that takes a list of AST node of types
     and deduces the list of python modules to import and converters to include
     """
   
-    basic_types = ["void", "bool", "int", "long", "long long", "unsigned int", "unsigned long", "unsigned long long", "double"]
+    basic_types = ["void", "bool", "int", "long", "long long", "unsigned int", "unsigned long", "unsigned long long", "double", "char"]
   
     def __init__(self, modules_with_converter_list):
         """

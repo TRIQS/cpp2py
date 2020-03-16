@@ -27,7 +27,7 @@ def make_table(*list_of_list):
     return '\n'.join(r) + '\n'
 
 def treat_member_list(member_list) :
-    class _m(object):
+    class _m:
       def __init__(self, m):
           self.spelling, self.type = m.spelling, m.type
 

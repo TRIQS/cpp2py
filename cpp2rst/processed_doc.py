@@ -65,7 +65,7 @@ def strip_left_spaces(s):
 
 # ------------------------------------------------------------------------
 
-class ProcessedDoc(object):
+class ProcessedDoc:
 
     fields_allowed_in_docs = ['include', 'return', 'warning','figure', 'note', 'brief', 'example', 'param', 'tparam', 'group', 'head', 'tail', 'category']
     fields_with_multiple_entry = ['param', 'tparam']

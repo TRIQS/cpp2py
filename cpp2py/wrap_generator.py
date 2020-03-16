@@ -24,7 +24,7 @@ def translate_c_type_to_py_type(t) :
     # numpy, etc...
     return t
 
-class cfunction(object) :
+class cfunction:
     """
        Representation of one overload of a C++ function or method.
     """
@@ -199,7 +199,7 @@ class cfunction(object) :
         if self._dict_call is not None : return doc
         return "Signature : %s\n%s"%( self._get_signature(),doc)
 
-class pyfunction(object) :
+class pyfunction:
     """
        Representation of one python function of the extension
        It is basically :
@@ -238,7 +238,7 @@ class pyfunction(object) :
         return repr(s)[1:-1] # remove the ' ' made by repr
 
 
-class converter_(object):
+class converter_:
     """
     Representation of a simple converter for a struct
     """
@@ -254,7 +254,7 @@ class converter_(object):
         self.doc = doc
         self.members = []
 
-    class member_(object):
+    class member_:
         pass
 
     def add_member(self, c_name, c_type, initializer = '', doc = ''):
@@ -284,7 +284,7 @@ class converter_(object):
         rendered = tpl.render(c=self)
         return rendered
 
-class class_(object) :
+class class_:
     """
        Representation of a wrapped type
     """
@@ -562,7 +562,7 @@ class class_(object) :
         if 'c_name' not in kw and 'calling_pattern' not in kw : kw['c_name']= "operator()"
         self.add_method(name = "__call__", **kw)
 
-    class _iterator(object) :
+    class _iterator:
         def __init__(self,c_type, c_cast_type, begin, end) :
           self.c_type, self.c_cast_type, self.begin, self.end = c_type, c_cast_type, begin, end
 
@@ -582,7 +582,7 @@ class class_(object) :
         """
         self.iterator = self._iterator(c_type, c_cast_type, begin, end)
 
-    class _member(object) :
+    class _member:
         def __init__(self, c_name, c_type, py_name, read_only, doc):
             """
             Parameters
@@ -623,7 +623,7 @@ class class_(object) :
         """
         self.members.append( self._member(c_name, c_type, py_name, read_only, doc))
 
-    class _property(object) :
+    class _property:
         def __init__(self, name, getter, setter, doc) :
           self.name, self.getter, self.setter, self.doc = name, getter, setter, doc
 
@@ -685,7 +685,7 @@ class class_(object) :
         self.has_mapping_protocol = '__getitem__impl' in self.methods or '__len__impl' in self.methods
         if '__setitem__impl' in self.methods and not  '__getitem__impl' in self.methods : raise RuntimeError("Cannot generate a class with a setter and no getter")
 
-class module_(object) :
+class module_:
     """
        Representation of a module
     """
@@ -804,7 +804,7 @@ class module_(object) :
         """
         self._preamble += preamble + '\n'
 
-    class _enum(object) :
+    class _enum:
         def __init__(self, c_name, values, c_namespace, doc) :
             self.c_name, self.c_namespace, self.values, self.doc = c_name, c_namespace + "::", values, doc
             self.c_name_absolute = self.c_namespace + self.c_name

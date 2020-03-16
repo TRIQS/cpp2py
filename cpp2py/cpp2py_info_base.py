@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 from builtins import object
 import re
-class Cpp2pyInfoBase(object):
+class Cpp2pyInfoBase:
     """
        Derive to implement table_converters, table_imports
     """

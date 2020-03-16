@@ -5,7 +5,7 @@ import os, re, sys, itertools
 from mako.template import Template
 import cpp2py.clang_parser as CL
 
-class Cpp2Cxx(object):
+class Cpp2Cxx:
     """ """
     def __init__(self, filename, namespaces=(), compiler_options=None, includes = None, system_includes = None, libclang_location = None, parse_all_comments = False, target_file_only = False):
         """
