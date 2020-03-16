@@ -16,7 +16,7 @@ from IPython.paths import get_ipython_cache_dir
 
 __version__ = '0.3.0'
 
-from compiler import compile, print_out
+from .compiler import compile, print_out
 from IPython.core.display import display_javascript
 
 js = """
