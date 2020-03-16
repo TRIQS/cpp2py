@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 # Global parameter
 examples_root = None
 

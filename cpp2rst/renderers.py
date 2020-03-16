@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 from builtins import zip
 import os, re, itertools
 import cpp2py.clang_parser as CL

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 from builtins import zip
 import cpp2py.clang_parser as CL
 from .synopsis import make_synopsis_list, make_synopsis_template_decl

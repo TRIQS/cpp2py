@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 from builtins import next
 from builtins import str
 import imp, os, sys, shutil, subprocess, hashlib, re, tempfile

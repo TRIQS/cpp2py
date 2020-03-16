@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 
 # This module defines the function parse that
 # call libclang to parse a C++ file, and retrieve
