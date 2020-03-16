@@ -29,10 +29,10 @@ namespace cpp2py {
   // --- long
 
   template <> struct py_converter<long> {
-    static PyObject *c2py(long i) { return PyInt_FromLong(i); }
-    static long py2c(PyObject *ob) { return PyInt_AsLong(ob); }
+    static PyObject *c2py(long i) { return PyLong_FromLong(i); }
+    static long py2c(PyObject *ob) { return PyLong_AsLong(ob); }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyInt_Check(ob)) return true;
+      if (PyLong_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to long"); }
       return false;
     }
@@ -49,7 +49,7 @@ namespace cpp2py {
     static PyObject *c2py(double x) { return PyFloat_FromDouble(x); }
     static double py2c(PyObject *ob) { return PyFloat_AsDouble(ob); }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyFloat_Check(ob) || PyInt_Check(ob)) return true;
+      if (PyFloat_Check(ob) || PyLong_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to double"); }
       return false;
     }

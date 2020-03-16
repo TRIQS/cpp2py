@@ -77,23 +77,23 @@ namespace cpp2py {
 template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
-    if (x == ${c_namespace}${val}) return PyStr_FromString("${val}");
+    if (x == ${c_namespace}${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyStr_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s = PyStr_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
    return ${c_namespace}${values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyStr_Check(ob)) {
+   if (!PyUnicode_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s = PyStr_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -297,11 +297,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
     0,     /*tp_getattro*/
     0,     /*tp_setattro*/
     0,     /*tp_as_buffer*/
-#if IS_PY3
     Py_TPFLAGS_DEFAULT, /* tp_flags */
-#else
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER, /* tp_flags: Py_TPFLAGS_HAVE_ITER tells python to use tp_iter and tp_iternext fields. */
-#endif
     "Internal ${c.py_type} iterator object.",           /* tp_doc */
     0,  /* tp_traverse */
     0,  /* tp_clear */
@@ -321,7 +317,6 @@ PyObject* ${c.py_type}___iter__(PyObject *self);
 %if c.number_protocol :
 static PyNumberMethods ${c.py_type}_as_number = {
 
-#if IS_PY3
 %for op_name in ["add", "subtract", "multiply", "remainder", "divmod", "power", "negative", "positive", "absolute", "bool", "invert", "lshift", "rshift", "and", "xor", "or", "int", "reserved", "float", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide", "true_divide", "inplace_floor_divide", "inplace_true_divide", "index", "matrix_multiply", "inplace_matrix_multiply"] :
 % if op_name in c.number_protocol and c.number_protocol[op_name].arity==2:
  (binaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
@@ -331,17 +326,6 @@ static PyNumberMethods ${c.py_type}_as_number = {
  0, /*nb_${op_name}*/
 % endif
 %endfor
-#else
-%for op_name in ["add", "subtract", "multiply", "divide", "remainder", "divmod", "power", "negative", "positive", "absolute", "nonzero", "invert", "lshift", "rshift", "and", "xor", "or", "coerce", "int", "long", "float", "oct", "hex", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_divide", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide ", "true_divide ", "inplace_floor_divide ", "inplace_true_divide ", "index "] :
-% if op_name in c.number_protocol and c.number_protocol[op_name].arity==2:
- (binaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
-% elif op_name in c.number_protocol and c.number_protocol[op_name].arity==1:
- (unaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
-% else:
- 0, /*nb_${op_name}*/
-% endif
-%endfor
-#endif
 
 };
 %endif
@@ -426,11 +410,7 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-#if IS_PY3
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-#else
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
-#endif
     "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
@@ -470,23 +450,23 @@ namespace cpp2py {
 template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
-    if (x == ${val}) return PyStr_FromString("${val}");
+    if (x == ${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyStr_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s = PyStr_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
    return ${en.values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyStr_Check(ob)) {
+   if (!PyUnicode_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s = PyStr_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -601,7 +581,7 @@ template <> struct py_converter<${en.c_name}> {
     std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
     for (int i =0; i < errors.size(); ++i) {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
-      if (errors[i]) err_list += PyStr_AsString((PyObject*)errors[i]);
+      if (errors[i]) err_list += PyUnicode_AsUTF8((PyObject*)errors[i]);
       err_list +="\n";
     }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
@@ -768,16 +748,11 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
     }
     PyObject* global_dict = PyModule_GetDict(this_module); //borrowed
     PyObject* s = PyTuple_GetItem(args,0); //borrowed
-    if (!PyStr_Check(s)) {
+    if (!PyUnicode_Check(s)) {
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-#if IS_PY3
-    pyref code       = Py_CompileString(PyStr_AsString(s), "nofile", Py_eval_input);
-#else
-    pyref code1        = Py_CompileString(PyStr_AsString(s), "nofile", Py_eval_input);
-    PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
-#endif
+    pyref code       = Py_CompileString(PyUnicode_AsUTF8(s), "nofile", Py_eval_input);
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
   }
@@ -790,13 +765,13 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 static PyObject* ${c.py_type}___repr__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyStr_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 static PyObject* ${c.py_type}___str__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyStr_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 %endif
@@ -998,10 +973,10 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
   static const char * inclu = "${repr( module.include_list)}";
 
-  PyDict_SetItemString(d, "classes", pyref(PyStr_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyStr_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyStr_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyStr_FromString(inclu)));
+  PyDict_SetItemString(d, "classes", pyref(PyUnicode_FromString(cls)));
+  PyDict_SetItemString(d, "enums", pyref(PyUnicode_FromString(ens)));
+  PyDict_SetItemString(d, "module_name", pyref(PyUnicode_FromString("${module.full_name}")));
+  PyDict_SetItemString(d, "includes", pyref(PyUnicode_FromString(inclu)));
 
   return d;
  }
@@ -1034,7 +1009,7 @@ static struct PyModuleDef ${module.name}_def =
 };
 
 //--------------------- module init function -----------------------------
-MODULE_INIT_FUNC(${module.name})
+PyMODINIT_FUNC PyInit_${module.name}(void)
 {
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
     // import numpy
