@@ -1,5 +1,4 @@
 #!@PYTHON_INTERPRETER@
-from __future__ import absolute_import, division, print_function
 import os, sys, argparse, shlex
 from cpp2py.cpp2desc import Cpp2Desc
 import cpp2py.libclang_config as config
