@@ -1,6 +1,3 @@
-from builtins import map
-from builtins import next
-from builtins import object
 import os, re, sys, itertools
 from mako.template import Template
 

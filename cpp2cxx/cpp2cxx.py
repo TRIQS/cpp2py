@@ -1,4 +1,3 @@
-from builtins import object
 import os, re, sys, itertools
 from mako.template import Template
 import cpp2py.clang_parser as CL

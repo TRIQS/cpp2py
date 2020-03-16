@@ -1,4 +1,3 @@
-from builtins import zip
 import os, re, itertools
 import cpp2py.clang_parser as CL
 from .synopsis import make_synopsis_list, make_synopsis_template_decl, make_label, replace_ltgt, escape_lg

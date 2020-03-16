@@ -1,5 +1,3 @@
-from builtins import next
-from builtins import str
 import imp, os, sys, shutil, subprocess, hashlib, re, tempfile
 import cpp2py.libclang_config as Config
 

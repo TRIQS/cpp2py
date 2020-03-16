@@ -1,4 +1,3 @@
-from builtins import object
 from cpp2py.doc import replace_latex, process_doc
 import re
 from collections import OrderedDict

@@ -1,4 +1,3 @@
-from builtins import object
 import re, itertools, os
 from collections import OrderedDict
 import cpp2py.clang_parser as CL

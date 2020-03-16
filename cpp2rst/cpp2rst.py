@@ -1,4 +1,3 @@
-from builtins import object
 import os, re, sys, itertools
 from collections import OrderedDict
 

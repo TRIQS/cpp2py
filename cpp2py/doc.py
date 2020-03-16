@@ -3,8 +3,6 @@
 # of classes, functions, from C++ to Python
 # make_doc(x) is the general function, where x is a node.
 
-from builtins import zip
-from builtins import object
 import re
 import cpp2py.clang_parser as CL
 import cpp2py.util as util

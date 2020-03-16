@@ -1,6 +1,5 @@
 # Generated automatically using the command :
 # ${W.shell_command}
-from builtins import object, next, str, map, zip, range
 from cpp2py.wrap_generator import *
 
 # The module
