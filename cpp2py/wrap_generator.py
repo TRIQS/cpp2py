@@ -355,10 +355,10 @@ class class_:
       self.export = export
 
       # If hdf5 is True, wrap the C++.
-      # We cannot generate a default implementation with error message as triqs::h5::group might not be available.
+      # We cannot generate a default implementation with error message as h5::group might not be available.
       # FIXME Remove triqs dependence
       if hdf5:
-          self.add_method("void __write_hdf5__(triqs::h5::group gr, std::string key)", calling_pattern = "h5_write(gr, key, self_c);", doc = "hdf5 writing")
+          self.add_method("void __write_hdf5__(h5::group gr, std::string key)", calling_pattern = "h5_write(gr, key, self_c);", doc = "hdf5 writing")
 
       # Init arithmetic
       # expect a tuple : "algebra", "scalar1", "scalar2", etc...

@@ -60,12 +60,12 @@ class Cpp2Cxx:
         # FIXME : treat template !
         h5w = '\n'.join('h5_write(gr, "%s", %s);'%(x.spelling, x.spelling) for x in CL.get_members(cls, False))
         h5 = """
-void h5_write(triqs::h5::group h5group, std::string const & subgroup_name, {cls_name} const &x) {{
+void h5_write(h5::group h5group, std::string const & subgroup_name, {cls_name} const &x) {{
 auto gr = h5group.create_group(subgroup_name);
 {h5w}
 }}
 
-void h5_read(triqs::h5::group h5group, std::string const & subgroup_name,{cls_name} &x) {{
+void h5_read(h5::group h5group, std::string const & subgroup_name,{cls_name} &x) {{
 auto gr = h5group.open_group(subgroup_name);
 {h5r}
 }}

@@ -860,9 +860,9 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
 // FIXME pass by the ordinary calls....
 // FIXME Py_RETURN_NONE : in the usual call.
 static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
-  triqs::h5::group gr;
+  h5::group gr;
   const char * key;
-  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<triqs::h5::group>, &gr, &key)) return NULL;
+  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<h5::group>, &gr, &key)) return NULL;
   auto & self_c = convert_from_python<${c.c_type}>(self);
   try {
    h5_write(gr, key, self_c);
@@ -1052,7 +1052,7 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
 %for c in [c for c in module.classes.values() if c.hdf5]:
   {
    pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
-   pyref ds =convert_to_python(triqs::h5::get_hdf5_scheme<${c.c_type}>());
+   pyref ds =convert_to_python(h5::get_hdf5_scheme<${c.c_type}>());
    pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
   }
 %endfor
