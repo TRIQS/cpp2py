@@ -1,6 +1,6 @@
 #pragma once
 #include <tuple>
-#include <triqs/utility/variant.hpp>
+#include <variant>
 
 namespace cpp2py {
 
