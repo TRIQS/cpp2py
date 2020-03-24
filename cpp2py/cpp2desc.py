@@ -159,11 +159,11 @@ class Cpp2Desc:
         keep = lambda m : CL.is_public(m) and not CL.is_template(m) and not ("ignore_in_python" in CL.get_annotations(m)) and not (m.spelling.startswith('operator') and not m.spelling=="operator()")
         return CL.get_methods(c, True, keep)
 
-    def has_hdf5_scheme(self, c):
-        """True iif the class c has a static method std::string hdf5_scheme()"""
+    def has_hdf5_format(self, c):
+        """True iif the class c has a static method std::string hdf5_format()"""
         keep = lambda m : CL.is_public(m)
         for m in CL.get_methods(c, True, keep):
-            if m.spelling == "hdf5_scheme" and m.is_static_method() and ('string' in m.result_type.spelling) and len(list(CL.get_params(m))) == 0:
+            if m.spelling == "hdf5_format" and m.is_static_method() and ('string' in m.result_type.spelling) and len(list(CL.get_params(m))) == 0:
                return True
         return False
 
@@ -268,7 +268,7 @@ class Cpp2Desc:
         print("Analysing dependencies")
         types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
-        if any(map(self.has_hdf5_scheme, self.all_classes)):
+        if any(map(self.has_hdf5_format, self.all_classes)):
             import_list.append("_h5py")
 
         # Reporting

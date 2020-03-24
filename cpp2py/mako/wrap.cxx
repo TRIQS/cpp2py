@@ -1052,7 +1052,7 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
 %for c in [c for c in module.classes.values() if c.hdf5]:
   {
    pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
-   pyref ds =convert_to_python(h5::get_hdf5_scheme<${c.c_type}>());
+   pyref ds =convert_to_python(h5::get_hdf5_format<${c.c_type}>());
    pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
   }
 %endfor
