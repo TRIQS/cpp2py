@@ -19,11 +19,11 @@ namespace cpp2py {
 
 // I can use the trace in cpp2py::exception
 #define CATCH_AND_RETURN(MESS, RET)                                                                                                                  \
-  catch (cpp2py::keyboard_interrupt const &e) {                                                                                                       \
+  catch (cpp2py::keyboard_interrupt const &e) {                                                                                                      \
     PyErr_SetString(PyExc_KeyboardInterrupt, e.what());                                                                                              \
     return RET;                                                                                                                                      \
   }                                                                                                                                                  \
-  catch (cpp2py::exception const &e) {                                                                                                                \
+  catch (cpp2py::exception const &e) {                                                                                                               \
     auto err = std::string(".. Error occurred at ") + cpp2py::get_current_time() + "\n.. Error " + MESS + "\n.. C++ error was : \n" + e.what();      \
     PyErr_SetString(PyExc_RuntimeError, err.c_str());                                                                                                \
     return RET;                                                                                                                                      \
@@ -34,7 +34,8 @@ namespace cpp2py {
     return RET;                                                                                                                                      \
   }                                                                                                                                                  \
   catch (...) {                                                                                                                                      \
-    PyErr_SetString(PyExc_RuntimeError, "Unknown error " MESS);                                                                                      \
+    auto err = std::string(".. Error occurred at ") + cpp2py::get_current_time() + "\n.. Error " + MESS;                                             \
+    PyErr_SetString(PyExc_RuntimeError, err.c_str());                                                                                                \
     return RET;                                                                                                                                      \
   }
 
