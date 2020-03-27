@@ -1024,10 +1024,12 @@ template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py
 
   auto reader = [](PyObject *h5_gr, std::string const &name) -> PyObject * {
     auto gr = convert_from_python<h5::group>(h5_gr);
-    // declare the target C++ object, with special case if it is a view...
+
+    // If T is a view type grab the regular_t of it
     using c_type = typename _regular<T>::type;
-    try { // now read
-      return convert_to_python(T(h5::h5_read<c_type>(gr, name))); // cover the view and value case
+
+    try { // Now call the proper h5_read
+      return convert_to_python(T(h5::h5_read<c_type>(gr, name)));
     }
     CATCH_AND_RETURN("in h5 reading of object" + typeid(c_type).name(), NULL);
   };
@@ -1040,6 +1042,7 @@ template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py
 //--------------------- module init function -----------------------------
 PyMODINIT_FUNC PyInit_${module.name}(void)
 {
+
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
     // import numpy
     import_array1(NULL);
@@ -1087,10 +1090,17 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
 %endfor
 #endif
 
+    cpp2py::init_conv_table();
+    //std::cout << " INIT Module " << "${module.name}" << std::endl;
+    //std::cout << " table ptr count " << cpp2py::conv_table_sptr.use_count() << std::endl;
     // register all the types
-    auto *table  = get_pytypeobject_table();
+    auto &conv_table  = *cpp2py::conv_table_sptr.get();
 %for c in module.classes.values() :
-    (*table)[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
+    conv_table[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
 %endfor
+    //for(auto & [k, v]: conv_table){
+      //std::cout << k << "\n";
+    //}
+
     return m;
 }
