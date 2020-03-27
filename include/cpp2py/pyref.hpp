@@ -78,7 +78,20 @@ namespace cpp2py {
     } // NULL : pass the error in chain call x.attr().attr()....
 
     /// Import the module and returns a pyref to it
-    static pyref module(std::string const &module_name) { return PyImport_ImportModule(module_name.c_str()); }
+    static pyref module(std::string const &module_name) {
+      // Maybe the module was already imported?
+      PyObject * mod = PyImport_GetModule(PyUnicode_FromString(module_name.c_str()));
+
+      // If not, import normally
+      if(mod == NULL)
+        mod = PyImport_ImportModule(module_name.c_str());
+
+      // Did we succeed?
+      if(mod == NULL)
+	throw std::runtime_error(std::string{"Failed to import module "} + module_name);
+
+      return mod;
+    }
 
     /// Make a Python string from the C++ string
     static pyref string(std::string const &s) { return PyUnicode_FromString(s.c_str()); }
