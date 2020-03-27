@@ -1008,6 +1008,35 @@ static struct PyModuleDef ${module.name}_def =
     module_methods
 };
 
+//--------------------- hdf5 helper function -----------------------------
+#ifdef H5_INTERFACE_INCLUDED
+
+template <typename T, typename Enable = void>
+struct _regular {
+  using type = T;
+};
+template <typename T>
+struct _regular<T, std::void_t<typename T::regular_type>> {
+  using type = typename T::regular_type;
+};
+
+template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py_h5_reader(const char *) {
+
+  auto reader = [](PyObject *h5_gr, std::string const &name) -> PyObject * {
+    auto gr = convert_from_python<h5::group>(h5_gr);
+    // declare the target C++ object, with special case if it is a view...
+    using c_type = typename _regular<T>::type;
+    try { // now read
+      return convert_to_python(T(h5::h5_read<c_type>(gr, name))); // cover the view and value case
+    }
+    CATCH_AND_RETURN("in h5 reading of object" + typeid(c_type).name(), NULL);
+  };
+
+  return {reader};
+}
+
+#endif
+
 //--------------------- module init function -----------------------------
 PyMODINIT_FUNC PyInit_${module.name}(void)
 {
@@ -1045,16 +1074,16 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
     PyModule_AddObject(m, "${c.py_type}", (PyObject *)&${c.py_type}Type);
 %endfor
 
-#ifdef TRIQS_INCLUDED_H5
+#ifdef H5_INTERFACE_INCLUDED
     // hdf5 registration
-  pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
-  pyref register_class = module.attr("register_class");
+    pyref module = pyref::module("h5.hdf_formats");
+    pyref register_class = module.attr("register_class");
 %for c in [c for c in module.classes.values() if c.hdf5]:
-  {
-   pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
-   pyref ds =convert_to_python(h5::get_hdf5_format<${c.c_type}>());
-   pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
-  }
+    {
+      pyref h5_reader = convert_to_python(make_py_h5_reader<${c.c_type}>("${c.py_type}"));
+      pyref ds = convert_to_python(h5::get_hdf5_format<${c.c_type}>());
+      pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
+    }
 %endfor
 #endif
 
