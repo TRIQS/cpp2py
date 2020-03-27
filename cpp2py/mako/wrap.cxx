@@ -860,12 +860,12 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
 // FIXME pass by the ordinary calls....
 // FIXME Py_RETURN_NONE : in the usual call.
 static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
-  h5::group gr;
+  h5::group * gr_ptr;
   const char * key;
-  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<h5::group>, &gr, &key)) return NULL;
+  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<h5::group>, &gr_ptr, &key)) return NULL;
   auto & self_c = convert_from_python<${c.c_type}>(self);
   try {
-   h5_write(gr, key, self_c);
+    h5_write(*gr_ptr, key, self_c);
   }
   CATCH_AND_RETURN("in h5 writing of object ${c.py_type}",NULL);
   Py_RETURN_NONE;
