@@ -55,7 +55,7 @@ namespace cpp2py {
   static std::shared_ptr<conv_table_t> conv_table_sptr = {};
 
   // Access the table of the wrapped types, and creates if it does not exists.
-  std::shared_ptr<conv_table_t> get_conv_table_from_main() {
+  inline std::shared_ptr<conv_table_t> get_conv_table_from_main() {
     // Fetch __main__ module
     pyref mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
     if (mod == NULL) {
@@ -78,7 +78,7 @@ namespace cpp2py {
   }
 
   // Initialize the converter table
-  void init_conv_table() {
+  inline void init_conv_table() {
     conv_table_sptr = get_conv_table_from_main();
 
     // Init map if pointer in main is null
