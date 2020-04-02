@@ -1079,7 +1079,7 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
 
 #ifdef H5_INTERFACE_INCLUDED
     // hdf5 registration
-    pyref module = pyref::module("h5.hdf_formats");
+    pyref module = pyref::module("h5.formats");
     pyref register_class = module.attr("register_class");
 %for c in [c for c in module.classes.values() if c.hdf5]:
     {
