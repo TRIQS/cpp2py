@@ -11,7 +11,7 @@
 #  - it has modules : distutils, numpy
 #
 #  This module defines the variables
-#  - PYTHON_INTERPRETER : name of the python interpreter
+#  - PYTHON_EXECUTABLE : Path to the Python interpreter
 #  - PYTHON_VERSION_MAJOR : Python major version found e.g. 2
 #  - PYTHON_VERSION_MINOR : Python version found e.g. 7
 #  - PYTHON_INCLUDE_DIRS : include for compilation
@@ -26,21 +26,25 @@ include(FindPackageHandleStandardArgs)
 
 message( STATUS "-------- Python detection -------------")
 
-# IF PYTHON_INTERPRETER is not defined, try to find a python
-if(NOT PYTHON_INTERPRETER)
- find_program(PYTHON_INTERPRETER python PATHS $ENV{PATH})
-endif(NOT PYTHON_INTERPRETER)
-if(NOT PYTHON_INTERPRETER)
- message(FATAL_ERROR "No python interpreter found")
-endif(NOT PYTHON_INTERPRETER)
+if(PYTHON_INTERPRETER AND NOT PYTHON_EXECUTABLE)
+  set(PYTHON_EXECUTABLE ${PYTHON_INTERPRETER} CACHE PATH "Path to the Python interpreter")
+endif()
 
-message(STATUS "Python interpreter ${PYTHON_INTERPRETER}")
+# IF PYTHON_EXECUTABLE is not defined, try to find a python
+if(NOT PYTHON_EXECUTABLE)
+  find_program(PYTHON_EXECUTABLE NAMES python python3 PATHS $ENV{PATH} DOC "Path to the Python interpreter")
+endif(NOT PYTHON_EXECUTABLE)
+if(NOT PYTHON_EXECUTABLE)
+ message(FATAL_ERROR "No python interpreter found")
+endif(NOT PYTHON_EXECUTABLE)
+
+message(STATUS "Python interpreter ${PYTHON_EXECUTABLE}")
 #
 # The function EXEC_PYTHON_SCRIPT executes the_script in  python interpreter
 # and set the variable of output_var_name in the calling scope
 #
 FUNCTION( EXEC_PYTHON_SCRIPT the_script output_var_name)
- EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}"
+ EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "${the_script}"
   OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
  if(NOT returncode EQUAL 0)
   message(FATAL_ERROR "The script : ${the_script} \n did not run properly in the Python interpreter. Check your python installation.")

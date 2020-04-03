@@ -1,4 +1,4 @@
-#!@PYTHON_INTERPRETER@
+#!@PYTHON_EXECUTABLE@
 
 # Acts as cp -rs on Linux
 # Workaround for the absence of this option on OS X
