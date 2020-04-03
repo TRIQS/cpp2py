@@ -65,10 +65,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  EXEC_PYTHON_SCRIPT("import mako.template" nulle) # check that Mako is there...
  EXEC_PYTHON_SCRIPT("import distutils " nulle) # check that distutils is there...
  EXEC_PYTHON_SCRIPT("import numpy" nulle) # check that numpy is there...
- EXEC_PYTHON_SCRIPT("import h5py" nulle) # check that h5py is there...
  EXEC_PYTHON_SCRIPT("import scipy" nulle) # check that scipy is there...
-
- #EXEC_PYTHON_SCRIPT("import mpi4py" nulle) # check that mpi4py is there...
 
  # Adjust this
  if(Build_Documentation)
@@ -87,13 +84,6 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
   message(ERROR "The Python herader files have not been found. Please check that you installed the Python headers and not only the interpreter.")
  endif(NOT TEST_PYTHON_INCLUDE)
  mark_as_advanced(TEST_PYTHON_INCLUDE)
-
- #
- # HDF5 version used by h5py
- #
- EXEC_PYTHON_SCRIPT("import h5py;print(h5py.version.hdf5_version)" PYTHON_H5PY_HDF5VERSION)
- set(PYTHON_H5PY_HDF5VERSION ${PYTHON_H5PY_HDF5VERSION} CACHE STRING "the hdf5 version that h5py was compiled against" FORCE)
- message(STATUS "PYTHON_H5PY_HDF5VERSION = ${PYTHON_H5PY_HDF5VERSION}")
 
  #
  # include files for numpy
