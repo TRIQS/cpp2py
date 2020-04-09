@@ -234,7 +234,7 @@ class Cpp2Desc:
             return tname
 
         if util.use_parameter_class(f) :
-            r = '**%s'%cls(CL.get_params(f).next().type.spelling)
+            r = '**%s'%cls(next(CL.get_params(f)).type.spelling)
         else:
             plist = [ (cls(p.type.spelling), p.spelling, CL.get_param_default_value(p)) for p in CL.get_params(f)]
             r = ', '.join("%s %s"%(t, n) + (" = %s"%d.replace('"','\\"') if d else "") for t, n, d  in plist )
