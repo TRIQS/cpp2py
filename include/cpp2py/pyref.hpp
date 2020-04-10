@@ -1,5 +1,6 @@
 #pragma once
 #include <Python.h>
+#include <string>
 
 namespace cpp2py {
 
@@ -107,20 +108,24 @@ namespace cpp2py {
     }
 
     /// checks that ob is of type module_name.cls_name
-    static bool check_is_instance(PyObject *ob, const char *module_name, const char *cls_name, bool raise_exception) {
-      pyref cls = pyref::get_class(module_name, cls_name, raise_exception);
-      int i     = PyObject_IsInstance(ob, cls);
+    static bool check_is_instance(PyObject *ob, PyObject *cls, bool raise_exception) {
+      int i = PyObject_IsInstance(ob, cls);
       if (i == -1) { // an error has occurred
         i = 0;
         if (!raise_exception) PyErr_Clear();
       }
-      if ((i == 0) && (raise_exception)) PyErr_SetString(PyExc_TypeError, "Type error : a Gf is expected in Python -> C++ convertion");
+      if ((i == 0) && (raise_exception)) {
+        pyref cls_name_obj = PyObject_GetAttrString(cls, "__name__");
+        std::string err    = "Type error: Python object does not match expected type ";
+        err.append(PyUnicode_AsUTF8(cls_name_obj));
+        PyErr_SetString(PyExc_TypeError, err.c_str());
+      }
       return i;
     }
   };
 
   // FIXME : put static or the other functions inline ?
-  
+
   /// Returns a pyref from a borrowed ref
   inline pyref borrowed(PyObject *ob) {
     Py_XINCREF(ob);
