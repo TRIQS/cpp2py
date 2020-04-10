@@ -10,7 +10,6 @@ namespace cpp2py {
     PyObject *ob = NULL;
 
     public:
-   
     /// Null
     pyref() = default;
 
@@ -53,7 +52,7 @@ namespace cpp2py {
     }
 
     /// ref counting
-    int refcnt() const { return (ob !=NULL ? Py_REFCNT(ob) : -100);}
+    int refcnt() const { return (ob != NULL ? Py_REFCNT(ob) : -100); }
 
     /// True iif the object is not NULL
     explicit operator bool() const { return (ob != NULL); }
@@ -80,15 +79,13 @@ namespace cpp2py {
     /// Import the module and returns a pyref to it
     static pyref module(std::string const &module_name) {
       // Maybe the module was already imported?
-      PyObject * mod = PyImport_GetModule(PyUnicode_FromString(module_name.c_str()));
+      PyObject *mod = PyImport_GetModule(PyUnicode_FromString(module_name.c_str()));
 
       // If not, import normally
-      if(mod == NULL)
-        mod = PyImport_ImportModule(module_name.c_str());
+      if (mod == NULL) mod = PyImport_ImportModule(module_name.c_str());
 
       // Did we succeed?
-      if(mod == NULL)
-	throw std::runtime_error(std::string{"Failed to import module "} + module_name);
+      if (mod == NULL) throw std::runtime_error(std::string{"Failed to import module "} + module_name);
 
       return mod;
     }
@@ -97,8 +94,7 @@ namespace cpp2py {
     static pyref string(std::string const &s) { return PyUnicode_FromString(s.c_str()); }
 
     /// Make a Python Tuple from the C++ objects
-    template<typename ... T>
-    static pyref make_tuple(T const & ...x) { return PyTuple_Pack(sizeof...(T), static_cast<PyObject*>(x)...);}
+    template <typename... T> static pyref make_tuple(T const &... x) { return PyTuple_Pack(sizeof...(T), static_cast<PyObject *>(x)...); }
 
     /// gets a reference to the class cls_name in module_name
     static pyref get_class(const char *module_name, const char *cls_name, bool raise_exception) {
