@@ -688,7 +688,7 @@ class module_:
     """
        Representation of a module
     """
-    def __init__(self, full_name,  doc = '', app_name = None) :
+    def __init__(self, full_name,  doc = '', app_name = None, wrapped_members_as_shared_refs = False) :
         """
         Parameters
         ----------
@@ -701,6 +701,7 @@ class module_:
 
         """
         self.full_name = full_name if app_name is None or app_name=="triqs" else app_name+"."+full_name
+        self.wrapped_members_as_shared_refs = wrapped_members_as_shared_refs
         self.name = full_name.rsplit('.',1)[-1]
         self.doc = doc
         self.classes = {}    # dict : string -> class_. Key is the Python type

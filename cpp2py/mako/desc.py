@@ -3,7 +3,7 @@
 from cpp2py.wrap_generator import *
 
 # The module
-module = module_(full_name = "${W.modulename}", doc = r"${doc.replace_latex(W.moduledoc)}", app_name = "${W.appname}")
+module = module_(full_name = "${W.modulename}", doc = r"${doc.replace_latex(W.moduledoc)}", app_name = "${W.appname}", wrapped_members_as_shared_refs = ${W.wrapped_members_as_shared_refs})
 
 # Imports
 %if import_list:
