@@ -4,9 +4,6 @@
 #include<iostream> //for std::cout...
 using dcomplex = std::complex<double>;
 
-// global options
-constexpr bool wrapped_members_as_shared_refs = ${int(module.wrapped_members_as_shared_refs)};
-
 // first the basic stuff
 #include <cpp2py/cpp2py.hpp>
 #include <cpp2py/converters/string.hpp>

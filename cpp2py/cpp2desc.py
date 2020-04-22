@@ -8,7 +8,7 @@ class Cpp2Desc:
     """ """
     def __init__(self, filename, namespaces=(), classes= (), namespace_to_factor= (), appname= '',
                  modulename = '', moduledoc ='', use_properties = False, members_read_only = True,  converters = (),
-                 compiler_options=None, includes= None, system_includes= None, libclang_location = None, shell_command = '', parse_all_comments = True, target_file_only = False, wrapped_members_as_shared_refs = False):
+                 compiler_options=None, includes= None, system_includes= None, libclang_location = None, shell_command = '', parse_all_comments = True, target_file_only = False):
         """
            Parse the file at construction
 
@@ -59,12 +59,9 @@ class Cpp2Desc:
 
            target_file_only : bool
                       Neglect any included files during desc generation [default = False]
-
-           wrapped_members_as_shared_refs : bool
-                      For classes with members which are a wrapped type, do not copy them on access but return them as shared references instead. Note that members with types that are only converted (e.g. std::vector) will continue to be copied on access [default = False]
         """
-        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc',
-                  'use_properties', 'members_read_only', 'shell_command', 'target_file_only', 'wrapped_members_as_shared_refs']:
+        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc', 
+                  'use_properties', 'members_read_only', 'shell_command', 'target_file_only']:
             setattr(self, x, locals()[x])
         self.DE = dependency_analyzer.DependencyAnalyzer(converters)
         # parse the file

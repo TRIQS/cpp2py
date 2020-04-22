@@ -134,7 +134,7 @@ namespace cpp2py {
       if (p == nullptr) return NULL;
       py_type *self = (py_type *)p->tp_alloc(p, 0);
       if (self != NULL) {
-        if constexpr (is_ref && wrapped_members_as_shared_refs) {
+        if constexpr (is_ref) {
 	  // Keep parent alive for lifetime of self
           if (parent != nullptr) {
             self->parent = parent;
