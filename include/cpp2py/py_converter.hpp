@@ -15,11 +15,6 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 //---------------------  Copied from TRIQS, basic utilities -----------------------------
-// to remove TRIQS dependence for this tool
-namespace __std17 {
-  template <typename... Ts> struct _make_void { typedef void type; };
-  template <typename... Ts> using void_t = typename _make_void<Ts...>::type;
-} // namespace __std17
 
 namespace cpp2py {
 
@@ -28,10 +23,10 @@ namespace cpp2py {
   template <typename T> struct is_view : std::false_type {};
 
   // Makes a clone
-  template <typename T, typename = __std17::void_t<>> struct _make_clone {
+  template <typename T, typename = std::void_t<>> struct _make_clone {
     static T invoke(T const &x) { return T{x}; }
   };
-  template <typename T> struct _make_clone<T, __std17::void_t<typename T::regular_type>> {
+  template <typename T> struct _make_clone<T, std::void_t<typename T::regular_type>> {
     static auto invoke(T const &x) { return typename T::regular_type{x}; }
   };
   template <typename T> auto make_clone(T const &x) { return _make_clone<T>::invoke(x); }
@@ -141,12 +136,12 @@ namespace cpp2py {
   // helpers for better error message
   // some class (e.g. range !) only have ONE conversion, i.e. C -> Py, but not both
   // we need to distinguish
-  template <class, class = __std17::void_t<>> struct does_have_a_converterPy2C : std::false_type {};
-  template <class T> struct does_have_a_converterPy2C<T, __std17::void_t<decltype(py_converter<std::decay_t<T>>::py2c(nullptr))>> : std::true_type {};
+  template <class, class = std::void_t<>> struct does_have_a_converterPy2C : std::false_type {};
+  template <class T> struct does_have_a_converterPy2C<T, std::void_t<decltype(py_converter<std::decay_t<T>>::py2c(nullptr))>> : std::true_type {};
 
-  template <class, class = __std17::void_t<>> struct does_have_a_converterC2Py : std::false_type {};
+  template <class, class = std::void_t<>> struct does_have_a_converterC2Py : std::false_type {};
   template <class T>
-  struct does_have_a_converterC2Py<T, __std17::void_t<decltype(py_converter<std::decay_t<T>>::c2py(std::declval<T>()))>> : std::true_type {};
+  struct does_have_a_converterC2Py<T, std::void_t<decltype(py_converter<std::decay_t<T>>::c2py(std::declval<T>()))>> : std::true_type {};
 
   // We only use these functions in the code, not directly the converter
   template <typename T> static PyObject *convert_to_python(T &&x) {
