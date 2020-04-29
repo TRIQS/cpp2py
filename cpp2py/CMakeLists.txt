@@ -48,7 +48,7 @@ macro(add_cpp2py_module)
     COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_BINARY_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
-  target_link_libraries(${module_name} PRIVATE python_and_numpy cpp2py)
+  target_link_libraries(${module_name} cpp2py)
 
   set_target_properties(${module_name}
     PROPERTIES
@@ -57,7 +57,7 @@ macro(add_cpp2py_module)
   )
 
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(${module_name} PRIVATE "-undefined dynamic_lookup")
+    target_link_libraries(${module_name} "-undefined dynamic_lookup")
   endif()
 
   # Keep a list of every module target.
