@@ -46,7 +46,7 @@ template <> struct py_converter<${c.c_type}> {
  static void _check(PyObject *dic, std::stringstream &fs, int &err, const char *name, const char *tname) {
   if (!convertible_from_python<T>(PyDict_GetItemString(dic, name), false))
    fs << "\n" << ++err << " The parameter " << name << " does not have the right type : expecting " << tname
-      << " in C++, but got '" << PyDict_GetItemString(dic, name)->ob_type->tp_name << "' in Python.";
+      << " in C++, but got '" << Py_TYPE(PyDict_GetItemString(dic, name))->tp_name << "' in Python.";
  }
 
  template <typename T>

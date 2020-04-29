@@ -2,34 +2,34 @@ import os, re, sys, itertools
 from mako.template import Template
 
 import cpp2py.clang_parser as CL
-import util, doc, dependency_analyzer
+from . import util, doc, dependency_analyzer
 
-class Cpp2Desc: 
+class Cpp2Desc:
     """ """
-    def __init__(self, filename, namespaces=(), classes= (), namespace_to_factor= (), appname= '', 
+    def __init__(self, filename, namespaces=(), classes= (), namespace_to_factor= (), appname= '',
                  modulename = '', moduledoc ='', use_properties = False, members_read_only = True,  converters = (),
                  compiler_options=None, includes= None, system_includes= None, libclang_location = None, shell_command = '', parse_all_comments = True, target_file_only = False):
         """
            Parse the file at construction
-           
+
            Parameters
            -----------
 
            filename : string
                       Name of the file to parse
-           
-           namespaces : list of string 
+
+           namespaces : list of string
                       Restrict the generation to the given namespaces.
-           
+
            classes : list of string
                       Restrict the generation to the given classes.
-           
+
            appname  : string
                       Name of the application
-           
+
            modulename : string
                       Name of the module
-           
+
            moduledoc : string
                       Documentation of the module
 
@@ -47,10 +47,10 @@ class Cpp2Desc:
 
            system_includes : string, optional
                       Additional System includes to add (-isystem xxx) for clang
-           
-           compiler_options : string, optional 
+
+           compiler_options : string, optional
                       Additional option for clang compiler
-           
+
            libclang_location : string, optional
                       Absolute path to libclang. By default, the detected one.
 
@@ -60,7 +60,7 @@ class Cpp2Desc:
            target_file_only : bool
                       Neglect any included files during desc generation [default = False]
         """
-        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc', 
+        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc',
                   'use_properties', 'members_read_only', 'shell_command', 'target_file_only']:
             setattr(self, x, locals()[x])
         self.DE = dependency_analyzer.DependencyAnalyzer(converters)
@@ -68,18 +68,18 @@ class Cpp2Desc:
         self.root = CL.parse(filename, compiler_options, includes, system_includes, libclang_location, parse_all_comments)
 
     # ---------- Generate the AST nodes for every classes, functions, functions and methods
-   
+
     namespaces_to_skip = ['std', 'boost', 'detail', 'impl']
 
     def keep_ns(self, n):
-        ns = CL.fully_qualified(n) 
+        ns = CL.fully_qualified(n)
         if any((x in ns) for x in self.namespaces_to_skip) : return False
         return len(self.namespaces) == 0 or any((ns in x) for x in self.namespaces)
-    
+
     def keep_cls(self, c):
-        """ 
-           The filter to keep a class/struct or an enum : 
-            if we a namespace list, it must be in it. 
+        """
+           The filter to keep a class/struct or an enum :
+            if we a namespace list, it must be in it.
             if we have an explicit self.classes : c must be into it
             if target_file_only it has to be in the file given to c++2py
         """
@@ -87,15 +87,15 @@ class Cpp2Desc:
         if self.namespaces:
             qualified_ns = CL.get_namespace(c)
             if not any((x in qualified_ns) for x in self.namespaces) : return False
-        if self.classes: 
+        if self.classes:
             return c.spelling in self.classes or CL.fully_qualified(c) in self.classes
         return (c.location.file.name == self.filename) if self.target_file_only else True
-        
+
     def keep_fnt(self, f):
         # Same as class, but eliminate operator (except operator()) , begin, end.
         if (f.spelling.startswith('operator') and not f.spelling =="operator()")  or f.spelling in ['begin','end'] : return False
         return self.keep_cls(f)
-    
+
     def all_functions_gen(self):
         """Generates all the AST nodes of functions"""
         return CL.get_functions(self.root, self.keep_fnt, traverse_namespaces = True, keep_ns = self.keep_ns)
@@ -110,9 +110,9 @@ class Cpp2Desc:
 
     def get_all_functions_and_methods(self):
         """ AST nodes for every function, class methods and constructors"""
-        for f in self.all_functions_gen(): 
+        for f in self.all_functions_gen():
             yield f
-        for c in self.all_classes_gen(): 
+        for c in self.all_classes_gen():
             for m in CL.get_methods(c):
                 yield m
             for m in CL.get_constructors(c):
@@ -122,25 +122,25 @@ class Cpp2Desc:
         """ yields all param classes """
         for f in self.get_all_functions_and_methods():
             r = util.get_decl_param_class(f)
-            if r : 
+            if r :
                 yield r
 
     def get_all_params_ret_type(self, param_cls_list):
         """Yields every parameters and return type of every methods and functions"""
-       
+
         for f in self.all_functions_gen():
             yield getattr(f, 'result_type', None)
-            for p in CL.get_params(f) : 
+            for p in CL.get_params(f) :
                 yield p.type
 
-        for x in itertools.chain(param_cls_list, self.all_classes_gen()): 
+        for x in itertools.chain(param_cls_list, self.all_classes_gen()):
             for m in CL.get_members(x, False): # False : no inherited
                 yield m.type
             for m in itertools.chain(CL.get_constructors(x), CL.get_methods(x)):
                 # A minimal filter, do not reuse self.keep_fnt here, because the namespace is N1::N2:...::ClassName
                 if CL.is_template(m) or ("ignore_in_python" in CL.get_annotations(m)): continue
                 yield getattr(m, 'result_type', None)
-                for p in CL.get_params(m) : 
+                for p in CL.get_params(m) :
                     yield p.type
 
     def get_public_methods(self, c):
@@ -150,7 +150,7 @@ class Cpp2Desc:
 
         c:  AST node
             a cursor to a class
-        
+
         Returns
         --------
         A list of cursors to the methods
@@ -159,11 +159,11 @@ class Cpp2Desc:
         keep = lambda m : CL.is_public(m) and not CL.is_template(m) and not ("ignore_in_python" in CL.get_annotations(m)) and not (m.spelling.startswith('operator') and not m.spelling=="operator()")
         return CL.get_methods(c, True, keep)
 
-    def has_hdf5_scheme(self, c):
-        """True iif the class c has a static method std::string hdf5_scheme()"""
+    def has_hdf5_format(self, c):
+        """True iif the class c has a static method std::string hdf5_format()"""
         keep = lambda m : CL.is_public(m)
         for m in CL.get_methods(c, True, keep):
-            if m.spelling == "hdf5_scheme" and m.is_static_method() and ('string' in m.result_type.spelling) and len(list(CL.get_params(m))) == 0: 
+            if m.spelling == "hdf5_format" and m.is_static_method() and ('string' in m.result_type.spelling) and len(list(CL.get_params(m))) == 0:
                return True
         return False
 
@@ -175,13 +175,13 @@ class Cpp2Desc:
         -----------
 
         method_list : a generator of the methods to treat
-        
+
         Returns
         --------
           Tuple (proplist, methodlist) where
                   proplist : a list of property_
                   methodlist : the others methods
-        """ 
+        """
 
         method_list = list(self.get_public_methods(c)) # MUST be a list, or the generator will be exhausted later in mlist = ...
         if not self.use_properties : return method_list, ()
@@ -196,17 +196,17 @@ class Cpp2Desc:
         plist1 = [m for m in method_list if maybe_prop(m)]
         mlist =  [m for m in method_list if not maybe_prop(m)]
         plist = []
-    
-        OUT, SEP = '', '        '   
+
+        OUT, SEP = '', '        '
         for m in plist1:
             n, set_m = m.spelling, None
             if n.startswith('set_') : continue # do nothing, will be treated with the get_
-            if n.startswith('get_') : 
-                # treat the corresponding setter 
-                n = n[4:] 
+            if n.startswith('get_') :
+                # treat the corresponding setter
+                n = n[4:]
                 set_m = next( (m for m in plist1 if m.spelling == 'set_' + n), None)
-                if set_m : 
-                    p = list(CL.get_params(set_m)) 
+                if set_m :
+                    p = list(CL.get_params(set_m))
                     if set_m.result_type.spelling == "void" and len(p) ==1 :
                         if not util.decay(p[0].spelling) == m.result_type.spelling :
                             OUT += SEP + "Warning :\n"
@@ -219,11 +219,11 @@ class Cpp2Desc:
             OUT += SEP + "%s %s\n" %(m.spelling, set_m.spelling if set_m else '')
             plist.append(property_(name= n, doc = doc.make_doc(m), getter = m, setter = set_m))
 
-        if OUT: 
-            print "   Class %s : transforming to property : \n%s"%(c.spelling, OUT)
+        if OUT:
+            print("   Class %s : transforming to property : \n%s"%(c.spelling, OUT))
 
         return mlist, plist
-  
+
     def make_signature_for_desc(self, f, is_constructor = False, is_free_function = False):
         """Given a node of a function/methods, it makes the signature for desc file"""
         # first format the arguments
@@ -232,12 +232,12 @@ class Cpp2Desc:
             for ns in self.namespace_to_factor : 
                 tname = re.sub(ns + '::','',tname)
             return tname
-        
-        if util.use_parameter_class(f) : 
-            r = '**%s'%cls(CL.get_params(f).next().type.spelling)
+
+        if util.use_parameter_class(f) :
+            r = '**%s'%cls(next(CL.get_params(f)).type.spelling)
         else:
             plist = [ (cls(p.type.spelling), p.spelling, CL.get_param_default_value(p)) for p in CL.get_params(f)]
-            r = ', '.join("%s %s"%(t, n) + (" = %s"%d.replace('"','\\"') if d else "") for t, n, d  in plist ) 
+            r = ', '.join("%s %s"%(t, n) + (" = %s"%d.replace('"','\\"') if d else "") for t, n, d  in plist )
 
         if is_constructor:
             return "(%s)"%r
@@ -247,10 +247,10 @@ class Cpp2Desc:
 
     def generate_desc_file(self, output_filename, verbose  = True):
         """ Makes the desc file"""
-         
+
         # First treat the parameter class if any (classes passed by dictionnary that MUST be converted)
         param_cls_list = list(self.get_all_param_classes())
-        for c in param_cls_list : 
+        for c in param_cls_list :
             open('parameters_%s.rst'%c.spelling, 'w').write(doc.doc_param_dict_format(CL.get_members(c, True)))
 
         # Precompute
@@ -258,41 +258,40 @@ class Cpp2Desc:
         self.all_classes   = list(self.all_classes_gen())
         self.all_functions = list(self.all_functions_gen())
         self.param_cls_list = param_cls_list
-       
+
         # checks
         for c in param_cls_list:
             for m in CL.get_members(c, True):
-                assert CL.is_public(m), "Parameter class : all members must be public. %s::%s is not"%(c.spelling, m.spelling) 
+                assert CL.is_public(m), "Parameter class : all members must be public. %s::%s is not"%(c.spelling, m.spelling)
 
         # analyse the modules and converters that need to be added
-        print "Analysing dependencies"
-        types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums 
+        print("Analysing dependencies")
+        types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
-        if any(map(self.has_hdf5_scheme, self.all_classes)):
-            converters_list.append("triqs/cpp2py_converters/h5.hpp")
-   
-        # Reporting 
+        if any(map(self.has_hdf5_format, self.all_classes)):
+            import_list.append("_h5py")
+
+        # Reporting
         if self.all_classes:
-            print "Wrapping classes:"
-            for c in self.all_classes: 
-                print "   ", c.spelling
+            print("Wrapping classes:")
+            for c in self.all_classes:
+                print("   ", c.spelling)
         if self.all_enums:
-            print "Wrapping enums:"
-            for c in self.all_enums: 
-                print "   ", c.spelling
+            print("Wrapping enums:")
+            for c in self.all_enums:
+                print("   ", c.spelling)
         if self.all_functions:
-            print "Wrapping functions:"
-            for c in self.all_functions: 
-                print "   ", c.spelling
+            print("Wrapping functions:")
+            for c in self.all_functions:
+                print("   ", c.spelling)
         if param_cls_list:
-            print "Generating converters for :"
-            for c in param_cls_list: 
-                print "   ", c.spelling
+            print("Generating converters for :")
+            for c in param_cls_list:
+                print("   ", c.spelling)
 
         # Render mako
-        print "Generating " + output_filename
+        print("Generating " + output_filename)
         tpl = Template(filename= util.script_path() + '/mako/desc.py', strict_undefined = True)
-        rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,  
+        rendered = tpl.render(W = self, CL = CL, doc = doc, util = util,
                               import_list = import_list, converters_list = converters_list, using_list = list(self.namespaces) + list(self.namespace_to_factor))
         open(output_filename, "w").write(util.clean_end_and_while_char(rendered))
-

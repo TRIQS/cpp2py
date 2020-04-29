@@ -1,6 +1,6 @@
 # Start configuration
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
-project(CPP2PY VERSION 1.6.0 LANGUAGES C CXX)
+project(CPP2PY VERSION 2.0.0 LANGUAGES C CXX)
 get_directory_property(IS_SUBPROJECT PARENT_DIRECTORY)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
@@ -27,7 +27,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # log info
 message( STATUS "-------- cpp2py version and git hash detection -------------")
 
-find_package(Git) 
+find_package(Git)
 
 # Get the Git Hash
 execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
@@ -54,6 +54,22 @@ set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libcl
 # Detect Python
 find_package(Python)
 install(TARGETS python_and_numpy EXPORT cpp2py-targets)
+
+# find_package(Python3 COMPONENTS Development Interpreter)
+# set(PYTHON_VERSION_MAJOR ${Python3_VERSION_MAJOR})
+# set(PYTHON_VERSION_MINOR ${Python3_VERSION_MINOR})
+# set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+# set(PYTHON_INCLUDE_DIRS ${Python3_INCLUDE_DIRS})
+# set(PYTHON_LIBRARY ${Python3_LIBRARIES})
+# set(PYTHON_SITE_PKG ${Python3_SITELIB})
+# find_package(NumPy)
+# if(BUILD_DEBIAN_PACKAGE)
+#   set(PYTHON_LIB_DEST_DIR dist-packages)
+# else()
+#   set(PYTHON_LIB_DEST_DIR site-packages)
+# endif()
+# set(PYTHON_LIB_DEST_ROOT lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/${PYTHON_LIB_DEST_DIR} CACHE PATH "Install directory for Python Modules relative to CMAKE_INSTALL_PREFIX")
+# message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PYTHON_LIB_DEST_ROOT}")
 
 # subdirs
 add_subdirectory(bin)            # Executables
@@ -101,6 +117,17 @@ if(NOT IS_SUBPROJECT)
     message(STATUS "*   to your environment modules                                ")
   endif()
   message(STATUS "***************************************************************")
+endif()
+
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
 #--------------------------------------------------------

@@ -1,10 +1,10 @@
-#!@PYTHON_INTERPRETER@
+#!@PYTHON_EXECUTABLE@
 import os, sys, argparse, shlex
 from cpp2py.cpp2desc import Cpp2Desc
 import cpp2py.libclang_config as config
 
 #
-print "Welcome to C++2py"
+print("Welcome to C++2py")
 
 # --- Parsing the arguments of the script and options
 

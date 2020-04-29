@@ -1,4 +1,3 @@
-
 ################################################################################
 #
 # TRIQS: a Toolbox for Research in Interacting Quantum Systems
@@ -20,6 +19,6 @@
 #
 ################################################################################
 
-from cpp2cxx import Cpp2Cxx
+from .cpp2cxx import Cpp2Cxx
 
 __all__ = ['Cpp2Cxx']

@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 import cpp2py.clang_parser as CL
- 
+
 """
 Meaning of the @option in the doc:
 
@@ -25,7 +25,8 @@ Meaning of the @option in the doc:
 The @ MUST BE THE LAST FIELDS
 """
 
-# --------------------------------- 
+
+# ---------------------------------
 # Should be internal ??
 def replace_latex(s, escape_slash=False):
     """replace 
@@ -34,36 +35,38 @@ def replace_latex(s, escape_slash=False):
        [[ XXX]]  by :ref:` XXX`
      
     """
-    if not s : return s
-    any_math_char = 'A-Za-z0-9{}\[\],;|\(\)=./\/+-_^\'' #any math character
-    #matches all expressions starting and ending with any math char, with possibly whitespaces in between
-    pattern_1 = '\$(['+any_math_char+']['+any_math_char+' ]*['+any_math_char+']+)\$'
-    #matches any single math char
-    pattern_2 = '\$(['+any_math_char+'])\$'
-    #out of line formula
-    text=re.sub('\$'+pattern_1+'\$', r'\n\n.. math::\n\t\t\1\n\n..\n', s)
-    text=re.sub('\$'+pattern_2+'\$', r'\n\n.. math::\n\t\t\1\n\n..\n', text)
-    #inline formula
-    text=re.sub(pattern_1, r':math:`\1`', text)
-    text=re.sub(pattern_2, r':math:`\1`', text)
-    #to create a hyperlink
-    text=re.sub('\[\[([A-Za-z0-9{}\(,\)=./\/+-_]+)\]\]', r':ref:`\1`', text)
+    if not s: return s
+    any_math_char = 'A-Za-z0-9{}\[\],;|\(\)=./\/+-_^\''  # any math character
+    # matches all expressions starting and ending with any math char, with possibly whitespaces in between
+    pattern_1 = '\$([' + any_math_char + '][' + any_math_char + ' ]*[' + any_math_char + ']+)\$'
+    # matches any single math char
+    pattern_2 = '\$([' + any_math_char + '])\$'
+    # out of line formula
+    text = re.sub('\$' + pattern_1 + '\$', r'\n\n.. math::\n\t\t\1\n\n..\n', s)
+    text = re.sub('\$' + pattern_2 + '\$', r'\n\n.. math::\n\t\t\1\n\n..\n', text)
+    # inline formula
+    text = re.sub(pattern_1, r':math:`\1`', text)
+    text = re.sub(pattern_2, r':math:`\1`', text)
+    # to create a hyperlink
+    text = re.sub('\[\[([A-Za-z0-9{}\(,\)=./\/+-_]+)\]\]', r':ref:`\1`', text)
 
-    if escape_slash: text=text.encode('string_escape')
+    if escape_slash: text = text.encode('string_escape')
 
     return text
 
+
 def clean_doc_string(s):
-    if not s : return ""
-    for p in [r"/\*",r"\*/",r"^\s*\*", r'\*\s*\n', r'\*/\s*$',r"///", r"//", r"\\brief"] : 
-        s = re.sub(p,"",s, flags = re.MULTILINE)
+    if not s: return ""
+    for p in [r"/\*", r"\*/", r"^\s*\*", r'\*\s*\n', r'\*/\s*$', r"///", r"//", r"\\brief"]:
+        s = re.sub(p, "", s, flags=re.MULTILINE)
     return s.strip()
+
 
 # ------------------------------------------------------------------------
 
-class ProcessedDoc: 
-    
-    fields_allowed_in_docs = ['include', 'return', 'synopsis', 'warning','figure', 'note', 'example', 'param', 'tparam', 'group'] 
+class ProcessedDoc:
+    fields_allowed_in_docs = ['include', 'return', 'synopsis', 'warning', 'figure', 'note', 'example', 'param',
+                              'tparam', 'group']
     fields_with_multiple_entry = ['param', 'tparam']
 
     """
@@ -76,35 +79,36 @@ class ProcessedDoc:
 
       Replace latex with proper rst call in all fields.
     """
-    def __init__(self, node): 
+
+    def __init__(self, node):
         raw_doc = node.raw_comment
-        if not raw_doc : raw_doc = "\n\n" # default value
-        
+        if not raw_doc:
+            raw_doc = "\n\n"  # default value
+
         # Clean *, &&, /// and co.
         doc = clean_doc_string(raw_doc.strip())
-    
+
         # split : the first line is brief, and the rest
         doc = replace_latex(doc)
-        if '$' in doc : 
-            print "FAILED to process the latex for node %s"%CL.fully_qualified(node)
-            print doc
-        doc2 = doc.strip().split('@',1)[0] # Get rid of everything after the first @
-        spl = doc2.strip().split('\n',1) 
-        self.brief_doc, self.doc = spl[0], (spl[1] if len(spl)>1 else '') 
+        if '$' in doc:
+            print("FAILED to process the latex for node %s" % CL.fully_qualified(node))
+            print(doc)
+        doc2 = doc.strip().split('@', 1)[0]  # Get rid of everything after the first @
+        spl = doc2.strip().split('\n', 1)
+        self.brief_doc, self.doc = spl[0], (spl[1] if len(spl) > 1 else '')
         assert '@' not in self.doc, "ouch!"
 
         # Extract the @XXXX elements with a regex @XXXX YYYY (YYYY can be multiline).
-        d = dict( (key, []) for key in self.fields_with_multiple_entry)
+        d = dict((key, []) for key in self.fields_with_multiple_entry)
         regex = r'@(\w+)\s*([^@]*)'
         for m in re.finditer(regex, doc, re.DOTALL):
             key, val = m.group(1), replace_latex(m.group(2)).strip()
             if key not in self.fields_allowed_in_docs:
-                print "Field %s is not recognized"%key
+                print("Field %s is not recognized" % key)
             if key in self.fields_with_multiple_entry:
                 d[key].append(val)
             else:
                 d[key] = val
         self.elements = d
 
-        #print "Final", self.brief_doc, self.doc, self.elements
-
+        # print "Final", self.brief_doc, self.doc, self.elements

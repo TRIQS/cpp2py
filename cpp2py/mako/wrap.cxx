@@ -14,6 +14,7 @@ using dcomplex = std::complex<double>;
 #include <cpp2py/converters/function.hpp>
 #include <algorithm>
 
+
 //------------------------------------------------------------------------------------------------------
 //---------------------   includes and using  -------------------
 //------------------------------------------------------------------------------------------------------
@@ -52,18 +53,18 @@ ${module._preamble}
 
 
 //------------------------------------------------------------------------------------------------------
-// Second all the classes and enums wrapped by imported modules 
+// Second all the classes and enums wrapped by imported modules
 // Most converters will be automatically included
 //------------------------------------------------------------------------------------------------------
 
 <%
   cpp2py_imported_modules = [m for n, m in sys_modules.items() if hasattr(m,'_get_cpp2py_wrapped_class_enums')]
   cpp2py_imported_modules = dict((m.__name__.split('.')[-1], m) for m in cpp2py_imported_modules).values()
-%>  
+%>
 
 %for M in cpp2py_imported_modules:
- <% 
-   d = M._get_cpp2py_wrapped_class_enums() 
+ <%
+   d = M._get_cpp2py_wrapped_class_enums()
    wrapped_ens = eval(d.get('enums',"()"))
    includes = eval(d['includes'])
  %>
@@ -78,32 +79,32 @@ ${module._preamble}
   %endif
  %endfor
 
-namespace cpp2py { 
+namespace cpp2py {
 
 //--------------------- Converters of enums --------------------------
 
-%for (c_name_absolute, c_namespace, values) in wrapped_ens: 
+%for (c_name_absolute, c_namespace, values) in wrapped_ens:
 
 template <> struct py_converter<${c_name_absolute}> {
  static PyObject * c2py(${c_name_absolute} x) {
    %for n,val in enumerate(values[:-1]) :
-    if (x == ${c_namespace}${val}) return PyString_FromString("${val}");
+    if (x == ${c_namespace}${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyString_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${c_name_absolute} py2c(PyObject * ob){
-   std::string s=PyString_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(values[:-1]) :
     if (s == "${val}") return ${c_namespace}${val};
    %endfor
    return ${c_namespace}${values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob))  {
+   if (!PyUnicode_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${c_name_absolute} : the object is not a string");
      return false;
    }
-   std::string s=PyString_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(values) :
     if (s == "${val}") return true;
    %endfor
@@ -125,7 +126,7 @@ template <> struct py_converter<${c_name_absolute}> {
 //------------------------------------------------------------------------------------------------------
 
 //--------------------- Generated converters --------------------------
- 
+
 %for conv in module.converters.values():
  ${conv.generate()}
 %endfor
@@ -257,7 +258,7 @@ static PyObject* ${c.py_type}_new(PyTypeObject *type, PyObject *args, PyObject *
 // dealloc
 static void ${c.py_type}_dealloc(${c.py_type}* self) {
   if (self->_c != NULL) delete self->_c; // should never be null, but I protect it anyway
-  self->ob_type->tp_free((PyObject*)self);
+  Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 //--------------------- Iterator by wrapping the C++ -----------------------------
@@ -275,7 +276,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
  // dealloc
  static void  ${c.py_type}__iterator_dealloc(${c.py_type}__iterator * self) {
    Py_XDECREF(self->container);
-   self->ob_type->tp_free((PyObject*)self);
+   Py_TYPE(self)->tp_free((PyObject*)self);
  }
 
  // the __iter__ of the iterator type : returns itself
@@ -288,8 +289,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
  PyObject* ${c.py_type}__iterator__iternext__(PyObject *self);
 
  static PyTypeObject ${c.py_type}__iteratorType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
     "${module.name}.${c.py_type}__iterator",            /*tp_name*/
     sizeof(${c.py_type}__iterator),       /*tp_basicsize*/
     0,     /*tp_itemsize*/
@@ -308,7 +308,7 @@ static void ${c.py_type}_dealloc(${c.py_type}* self) {
     0,     /*tp_getattro*/
     0,     /*tp_setattro*/
     0,     /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER, /* tp_flags: Py_TPFLAGS_HAVE_ITER tells python to use tp_iter and tp_iternext fields. */
+    Py_TPFLAGS_DEFAULT, /* tp_flags */
     "Internal ${c.py_type} iterator object.",           /* tp_doc */
     0,  /* tp_traverse */
     0,  /* tp_clear */
@@ -328,15 +328,16 @@ PyObject* ${c.py_type}___iter__(PyObject *self);
 %if c.number_protocol :
 static PyNumberMethods ${c.py_type}_as_number = {
 
-%for op_name in ["add", "subtract", "multiply", "divide", "remainder", "divmod", "power", "negative", "positive", "absolute", "nonzero", "invert", "lshift", "rshift", "and", "xor", "or", "coerce", "int", "long", "float", "oct", "hex", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_divide", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide ", "true_divide ", "inplace_floor_divide ", "inplace_true_divide ", "index "] :
-% if op_name in c.number_protocol and c.number_protocol[op_name].arity==2 :
+%for op_name in ["add", "subtract", "multiply", "remainder", "divmod", "power", "negative", "positive", "absolute", "bool", "invert", "lshift", "rshift", "and", "xor", "or", "int", "reserved", "float", "inplace_add", "inplace_subtract", "inplace_multiply", "inplace_remainder", "inplace_power", "inplace_lshift", "inplace_rshift", "inplace_and", "inplace_xor", "inplace_or", "floor_divide", "true_divide", "inplace_floor_divide", "inplace_true_divide", "index", "matrix_multiply", "inplace_matrix_multiply"] :
+% if op_name in c.number_protocol and c.number_protocol[op_name].arity==2:
  (binaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
-%elif op_name in c.number_protocol and c.number_protocol[op_name].arity==1 :
+% elif op_name in c.number_protocol and c.number_protocol[op_name].arity==1:
  (unaryfunc)${c.py_type}_${op_name}, /*nb_${op_name}*/
-%else :
+% else:
  0, /*nb_${op_name}*/
-%endif
+% endif
 %endfor
+
 };
 %endif
 
@@ -401,9 +402,8 @@ static PyMethodDef ${c.py_type}_methods[] = {
 //--------------------- The xxxType table  -----------------------------
 
 static PyTypeObject ${c.py_type}Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "${module.full_name}.${c.py_type}",             /*tp_name*/
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "${module.full_name}.${c.py_type}",/*tp_name*/
     sizeof(${c.py_type}),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)${c.py_type}_dealloc, /*tp_dealloc*/
@@ -421,8 +421,8 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
-    "${c.doc.encode('string_escape')}", /* tp_doc */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+    "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     ${c.py_type + "_richcompare"},  /* tp_richcompare */
@@ -440,9 +440,9 @@ static PyTypeObject ${c.py_type}Type = {
     ${"(initproc)%s___init__"%c.py_type if c.constructor else 0},      /* tp_init */
     0,                         /* tp_alloc */
 %if c.constructor:
- ${c.py_type}_new,           /* tp_new */
+    (newfunc)${c.py_type}_new, /* tp_new */
 %else:
- 0,                          /* tp_new */
+    0,                         /* tp_new */
 %endif
 };
 
@@ -461,23 +461,23 @@ namespace cpp2py {
 template <> struct py_converter<${en.c_name}> {
  static PyObject * c2py(${en.c_name} x) {
    %for n,val in enumerate(en.values[:-1]) :
-    if (x == ${val}) return PyString_FromString("${val}");
+    if (x == ${val}) return PyUnicode_FromString("${val}");
    %endfor
-   return PyString_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
+   return PyUnicode_FromString("${en.values[-1]}"); // last case separate to avoid no return warning of compiler
  }
  static ${en.c_name} py2c(PyObject * ob){
-   std::string s=PyString_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(en.values[:-1]) :
     if (s == "${val}") return ${val};
    %endfor
    return ${en.values[-1]};
  }
  static bool is_convertible(PyObject *ob, bool raise_exception) {
-   if (!PyString_Check(ob))  {
+   if (!PyUnicode_Check(ob)) {
      if (raise_exception) PyErr_SetString(PyExc_ValueError, "Convertion of C++ enum ${en.c_name} : the object is not a string");
      return false;
    }
-   std::string s=PyString_AsString(ob);
+   std::string s = PyUnicode_AsUTF8(ob);
    %for n,val in enumerate(en.values) :
     if (s == "${val}") return true;
    %endfor
@@ -527,8 +527,8 @@ template <> struct py_converter<${en.c_name}> {
        static_assert(std::is_reference<decltype(${n})>::value || std::is_pointer<decltype(${n})>::value, "internal error");
        %endfor
       %endif
-     
-      // FIXME : calling_pattern ---> lambda -> auto , plus de self. 
+
+      // FIXME : calling_pattern ---> lambda -> auto , plus de self.
       %if overload.is_method and not overload.is_constructor and not overload.is_static :
       auto & self_c = convert_from_python<${self_c_type}>(self);
       %endif
@@ -590,9 +590,9 @@ template <> struct py_converter<${en.c_name}> {
    // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
    {
     std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
-    for (int i =0; i < errors.size(); ++i) { 
+    for (int i =0; i < errors.size(); ++i) {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
-      if (errors[i]) err_list += PyString_AsString((PyObject*)errors[i]);
+      if (errors[i]) err_list += PyUnicode_AsUTF8((PyObject*)errors[i]);
       err_list +="\n";
     }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
@@ -784,13 +784,12 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
       return NULL;
     }
     PyObject* global_dict = PyModule_GetDict(this_module); //borrowed
-    PyObject* s = PyTuple_GetItem(args,0); //borrowed 
-    if (!PyString_Check(s)) {
+    PyObject* s = PyTuple_GetItem(args,0); //borrowed
+    if (!PyUnicode_Check(s)) {
       PyErr_SetString(PyExc_RuntimeError, "Internal error");
       return NULL;
     }
-    pyref code1 = Py_CompileString(PyString_AsString (s), "nofile", Py_eval_input);
-    PyCodeObject* code = (PyCodeObject*)((PyObject *)(code1));
+    pyref code       = Py_CompileString(PyUnicode_AsUTF8(s), "nofile", Py_eval_input);
     pyref local_dict = PyDict_New();
     return PyEval_EvalCode(code, global_dict, local_dict);
   }
@@ -803,13 +802,13 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
 static PyObject* ${c.py_type}___repr__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 static PyObject* ${c.py_type}___str__ (PyObject *self) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
   std::stringstream fs; fs << self_c;
-  return PyString_FromString(fs.str().c_str());
+  return PyUnicode_FromString(fs.str().c_str());
 }
 
 %endif
@@ -898,12 +897,12 @@ static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
 // FIXME pass by the ordinary calls....
 // FIXME Py_RETURN_NONE : in the usual call.
 static PyObject* ${c.py_type}___write_hdf5__ (PyObject *self, PyObject *args) {
-  triqs::h5::group gr;
+  h5::group * gr_ptr;
   const char * key;
-  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<triqs::h5::group>, &gr, &key)) return NULL;
+  if (!PyArg_ParseTuple(args, "O&s", converter_for_parser<h5::group>, &gr_ptr, &key)) return NULL;
   auto & self_c = convert_from_python<${c.c_type}>(self);
   try {
-   h5_write(gr, key, self_c);
+    h5_write(*gr_ptr, key, self_c);
   }
   CATCH_AND_RETURN("in h5 writing of object ${c.py_type}",NULL);
   Py_RETURN_NONE;
@@ -923,7 +922,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject* v, PyObject *w){
   if (convertible_from_python<${overload.args[0][0]}>(v,false) && convertible_from_python<${overload.args[1][0]}>(w,false)) {
    try {
     %if not op_name.startswith("inplace") and not getattr(op, 'treat_as_inplace', False) :
-     cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r = 
+     cpp2py::regular_type_if_view_else_type_t<${overload.rtype}> r =
            convert_from_python<${overload.args[0][0]}>(v) ${overload._get_calling_pattern()} convert_from_python<${overload.args[1][0]}>(w);
      return convert_to_python(std::move(r)); // in two steps to force type for expression templates in C++
     %else:
@@ -1008,19 +1007,18 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   PyObject * d = PyDict_New();
 
   static const char * cls = "${repr( [ (c.c_type_absolute, c.implement_regular_type_converter) for c in module.classes.values() if c.export])}";
-  static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}"; 
-  static const char * inclu = "${repr( module.include_list)}"; 
-  
-  PyDict_SetItemString(d, "classes", pyref(PyString_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyString_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyString_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyString_FromString(inclu)));
+  static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
+  static const char * inclu = "${repr( module.include_list)}";
+
+  PyDict_SetItemString(d, "classes", pyref(PyUnicode_FromString(cls)));
+  PyDict_SetItemString(d, "enums", pyref(PyUnicode_FromString(ens)));
+  PyDict_SetItemString(d, "module_name", pyref(PyUnicode_FromString("${module.full_name}")));
+  PyDict_SetItemString(d, "includes", pyref(PyUnicode_FromString(inclu)));
 
   return d;
  }
- 
-//--------------------- module function table  -----------------------------
 
+//--------------------- module function table  -----------------------------
 // the table of the function of the module...
 static PyMethodDef module_methods[] = {
 %for pyf in module.functions.values():
@@ -1033,21 +1031,58 @@ static PyMethodDef module_methods[] = {
 %endif
 %endfor
     {"_get_cpp2py_wrapped_class_enums", (PyCFunction)_get_cpp2py_wrapped_class_enums, METH_VARARGS, "[Internal] Returns the list of wrapped objects  " },
-
-{NULL}  /* Sentinel */
+    {NULL}  /* Sentinel */
 };
 
-//--------------------- module init function -----------------------------
+//--------------------- module struct & init error definition ------------
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-init${module.name}(void)
+static struct PyModuleDef ${module.name}_def =
 {
+    PyModuleDef_HEAD_INIT,
+    "${module.name}", /* name of module */
+    "${module.doc}", /* module documentation, may be NULL */
+    -1,   /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    module_methods
+};
+
+//--------------------- hdf5 helper function -----------------------------
+#ifdef H5_INTERFACE_INCLUDED
+
+template <typename T, typename Enable = void>
+struct _regular {
+  using type = T;
+};
+template <typename T>
+struct _regular<T, std::void_t<typename T::regular_type>> {
+  using type = typename T::regular_type;
+};
+
+template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py_h5_reader(const char *) {
+
+  auto reader = [](PyObject *h5_gr, std::string const &name) -> PyObject * {
+    auto gr = convert_from_python<h5::group>(h5_gr);
+
+    // If T is a view type grab the regular_t of it
+    using c_type = typename _regular<T>::type;
+
+    try { // Now call the proper h5_read
+      return convert_to_python(T(h5::h5_read<c_type>(gr, name)));
+    }
+    CATCH_AND_RETURN("in h5 reading of object" + typeid(c_type).name(), NULL);
+  };
+
+  return {reader};
+}
+
+#endif
+
+//--------------------- module init function -----------------------------
+PyMODINIT_FUNC PyInit_${module.name}(void)
+{
+
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
     // import numpy
-    import_array();
+    import_array1(NULL);
 #endif
 
 %for c in module.imports :
@@ -1057,42 +1092,52 @@ init${module.name}(void)
     PyObject* m;
 
 %for c in module.classes.values() :
-    if (PyType_Ready(&${c.py_type}Type) < 0) return;
+    if (PyType_Ready(&${c.py_type}Type) < 0)
+      return NULL;
 
     %if c.iterator :
     // initializing the ${c.py_type}__iterator
     ${c.py_type}__iteratorType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)  return;
+    if (PyType_Ready(&${c.py_type}__iteratorType) < 0)
+      return NULL;
     Py_INCREF(&${c.py_type}__iteratorType);
     %endif
 %endfor
 
-    m = Py_InitModule3("${module.name}", module_methods, "${module.doc}");
-    if (m == NULL) return;
+    m = PyModule_Create(&${module.name}_def);
+    if (m == NULL)  
+      return NULL;
+
 
 %for c in module.classes.values() :
     Py_INCREF(&${c.py_type}Type);
     PyModule_AddObject(m, "${c.py_type}", (PyObject *)&${c.py_type}Type);
 %endfor
 
-#ifdef TRIQS_INCLUDED_H5
+#ifdef H5_INTERFACE_INCLUDED
     // hdf5 registration
-  pyref module = pyref::module("pytriqs.archive.hdf_archive_schemes");
-  pyref register_class = module.attr("register_class");
+    pyref module = pyref::module("h5.formats");
+    pyref register_class = module.attr("register_class");
 %for c in [c for c in module.classes.values() if c.hdf5]:
-  {   
-   pyref h5_reader = convert_to_python(cpp2py::make_py_h5_reader<${c.c_type}>("${c.py_type}"));
-   pyref ds =convert_to_python(triqs::h5::get_hdf5_scheme<${c.c_type}>());
-   pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
-  }
+    {
+      pyref h5_reader = convert_to_python(make_py_h5_reader<${c.c_type}>("${c.py_type}"));
+      pyref ds = convert_to_python(h5::get_hdf5_format<${c.c_type}>());
+      pyref res = PyObject_CallFunctionObjArgs(register_class, (PyObject*)(&${c.py_type}Type), Py_None, (PyObject*)h5_reader, (PyObject*)ds, NULL);
+    }
 %endfor
 #endif
 
+    cpp2py::init_conv_table();
+    //std::cout << " INIT Module " << "${module.name}" << std::endl;
+    //std::cout << " table ptr count " << cpp2py::conv_table_sptr.use_count() << std::endl;
     // register all the types
-    auto *table  = get_pytypeobject_table();
+    auto &conv_table  = *cpp2py::conv_table_sptr.get();
 %for c in module.classes.values() :
-    (*table)[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
+    conv_table[std::type_index(typeid(${c.c_type})).name()] = &${c.py_type}Type;
 %endfor
+    //for(auto & [k, v]: conv_table){
+      //std::cout << k << "\n";
+    //}
 
+    return m;
 }
-

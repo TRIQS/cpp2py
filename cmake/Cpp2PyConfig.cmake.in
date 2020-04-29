@@ -10,7 +10,8 @@ set(CPP2PY_GIT_HASH                     @CPP2PY_GIT_HASH@)
 set(CPP2PY_CXX_COMPILER                 @CMAKE_CXX_COMPILER@)
 
 # Python Interpreter
-set(CPP2PY_PYTHON_INTERPRETER           @PYTHON_INTERPRETER@)
+set(CPP2PY_PYTHON_EXECUTABLE            @PYTHON_EXECUTABLE@)
+set(CPP2PY_PYTHON_INTERPRETER           @PYTHON_EXECUTABLE@) # Backward Compat
 set(CPP2PY_PYTHON_LIB_DEST_ROOT         @PYTHON_LIB_DEST_ROOT@)
 set(CPP2PY_PYTHON_H5PY_HDF5VERSION      @PYTHON_H5PY_HDF5VERSION@)
 set(CPP2PY_PYTHON_NUMPY_VERSION_LT_17   @PYTHON_NUMPY_VERSION_LT_17@)
@@ -82,10 +83,10 @@ macro(add_cpp2py_module)
   set(wrap_name ${CMAKE_CURRENT_BINARY_DIR}/${module_name}_wrap.cxx)   # path to the wrapping code
 
   add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name} ${header_dependencies}
-   COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_INTERPRETER} ${desc_name} ${wrap_name})
+    COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
-  target_link_libraries(${module_name} python_and_numpy cpp2py)
+  target_link_libraries(${module_name} cpp2py)
 
   set_target_properties(${module_name}
     PROPERTIES
@@ -94,7 +95,7 @@ macro(add_cpp2py_module)
   )
 
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   target_link_libraries(${module_name} "-undefined dynamic_lookup")
+    target_link_libraries(${module_name} "-undefined dynamic_lookup")
   endif()
 
   # Keep a list of every module target.

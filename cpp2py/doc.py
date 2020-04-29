@@ -1,11 +1,12 @@
+
 # This module contains functions to process the documentation
 # of classes, functions, from C++ to Python
 # make_doc(x) is the general function, where x is a node.
 
 import re
 import cpp2py.clang_parser as CL
-import util
-from processed_doc import ProcessedDoc, replace_latex, clean_doc_string
+import cpp2py.util as util
+from cpp2py.processed_doc import ProcessedDoc, replace_latex, clean_doc_string
 
 def make_table(*list_of_list):
     """
@@ -18,20 +19,20 @@ def make_table(*list_of_list):
     form =  '| ' + " | ".join("{:<%s}"%x for x in lcols).strip() + ' |'
     sep = '+' + '+'.join((x+2) *'-' for x in lcols) + '+'
     r = [sep]
-    for li in list_of_list: r += [form.format(*li), sep] 
+    for li in list_of_list: r += [form.format(*li), sep]
     return '\n'.join(r) + '\n'
 
-def treat_member_list(member_list) : 
+def treat_member_list(member_list) :
     class _m:
       def __init__(self, m):
           self.spelling, self.type = m.spelling, m.type
-    
+
     member_list2 = []
     for m in member_list:
       mm = _m(m)
       mm.doc, doc_lines = "", [l.lstrip() for l in clean_doc_string(m.raw_comment).splitlines()]
 
-      #print m, doc_lines
+      #print(m, doc_lines)
       mm.initializer = CL.get_member_initializer(m)
       mm.ctype = m.type.spelling
       for l in doc_lines:
@@ -44,7 +45,7 @@ def treat_member_list(member_list) :
              mm.initializer = l[8:].lstrip()
              continue
           mm.doc += l + ' '
-      #print mm.spelling, mm.ctype, mm.initializer 
+      #print mm.spelling, mm.ctype, mm.initializer
       member_list2.append(mm)
     return member_list2
 
@@ -66,10 +67,10 @@ def doc_param_dict_format(member_list) :
     sep1 = '+' + '+'.join([ (x+2)*'=' for x in (n_lmax, type_lmax, opt_lmax, doc_lmax)]) + '+'
     sep2 = '+' + '+'.join([ (x+2)*'-' for x in (n_lmax, type_lmax, opt_lmax, doc_lmax)]) + '+'
     lines = [form.format(m.spelling, m.ctype, m.initializer.replace("res.","") if m.initializer else '--', m.doc) + '\n' + sep2 for m in member_list2]
-    #for x in lines : 
+    #for x in lines :
     #    print x
     r = '\n'.join(lines)
-    return sep2 + '\n' + header +'\n' + sep1 + '\n' + r 
+    return sep2 + '\n' + header +'\n' + sep1 + '\n' + r
 
 def decal(s, shift = 5):
     sep = shift * ' '
@@ -84,7 +85,7 @@ def make_doc_function(node):
     if util.use_parameter_class(node):
         member_list = CL.get_members(util.get_decl_param_class(node), True)
         table = doc_param_dict_format(member_list)
-        return "%s\n\n%s\n\n%s\n"%( pdoc.brief_doc, pdoc.doc, table) 
+        return "%s\n\n%s\n\n%s\n"%( pdoc.brief_doc, pdoc.doc, table)
 
         # member_list2 = treat_member_list(member_list)
         # h = ['Parameter Name','Type','Default', 'Documentation']
@@ -92,12 +93,12 @@ def make_doc_function(node):
         # table =  make_table(h, *l)
         # doc = clean_doc_string(node.raw_comment) + '\n' + table
         # return doc
-    
+
     # General case
 
     doc = "\n%s\n%s"%(pdoc.brief_doc, pdoc.doc)
     doc = doc.strip() + "\n"
-   
+
     params = pdoc.elements.pop('param', None) # parameters of the function
     if params:
        doc += "\nParameters\n----------\n"
@@ -109,7 +110,7 @@ def make_doc_function(node):
     if ret:
         _type = '' # FIXME : deduce the type ?
         doc += "Returns\n-------\nout  %s\n%s\n\n"%(_type, decal(ret))
-   
+
     return doc.strip()
 
 def make_doc_class(node):
@@ -118,5 +119,5 @@ def make_doc_class(node):
     return make_doc_function(node)
 
 
-def make_doc(node) : 
+def make_doc(node) :
     return clean_doc_string(node.raw_comment)

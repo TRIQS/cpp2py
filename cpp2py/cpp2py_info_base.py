@@ -9,7 +9,7 @@ class Cpp2pyInfoBase:
 
     def find_in_table(self, x, table):
         r = set()
-        for a,b in table.items() :
+        for a,b in list(table.items()) :
           if re.compile(a).search(x): r.add(b)
         return r
 
@@ -40,5 +40,5 @@ class Cpp2pyInfoStd(Cpp2pyInfoBase):
         'std::.*variant' : 'variant',
         }
 
-    table_converters = dict ( (k, "cpp2py/converters/%s.hpp"%v) for (k,v) in _table_converters.items())
+    table_converters = dict ( (k, "cpp2py/converters/%s.hpp"%v) for (k,v) in list(_table_converters.items()))
  

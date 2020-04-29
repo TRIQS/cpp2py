@@ -1,10 +1,10 @@
-#!@PYTHON_INTERPRETER@
+#!@PYTHON_EXECUTABLE@
 import os, sys, argparse
 from cpp2cxx import Cpp2Cxx
 import cpp2py.libclang_config as config
 
 #
-print "Welcome to C++2cxx"
+print("Welcome to C++2cxx")
 
 # --- Parsing the arguments of the script and options
 
@@ -23,16 +23,14 @@ parser.add_argument('--target_file_only', action='store_true', help='Disable rec
 
 args = parser.parse_args()
 
-#print args.includes
-
 # Add the environment variables
 cxx_env = os.getenv('CXXFLAGS').split() if os.getenv('CXXFLAGS') else []
 
 # ---------------------------------------------------------
-# Create the worker. It parses the file       
-W= Cpp2Cxx(filename = args.filename, 
-            namespaces= args.namespace, 
-            includes = args.includes or (), 
+# Create the worker. It parses the file
+W= Cpp2Cxx(filename = args.filename,
+            namespaces= args.namespace,
+            includes = args.includes or (),
             system_includes = args.system_includes or (),
             compiler_options = args.cxxflags.split(' ') + cxx_env,
             libclang_location = args.libclang_location,
@@ -43,4 +41,3 @@ filename_1 = os.path.split(args.filename)[1].split('.',1)[0]
 
 # Make the desc file
 W.run(output_filename = (args.outputname or filename_1) + ".cxx")
-

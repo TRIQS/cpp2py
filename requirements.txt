@@ -1,0 +1,4 @@
+mako
+h5py
+numpy
+scipy

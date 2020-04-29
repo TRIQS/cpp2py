@@ -18,7 +18,7 @@ make && make install
 This installs the library in `INSTALL_DIR`. You should now update your PYTHONPATH to make it available to the python interpreter:
 
 ```bash
-export PYTHONPATH=INSTALL_DIR/lib/python2.7/site-packages:$PYTHONPATH
+export PYTHONPATH=INSTALL_DIR/lib/python3.4/site-packages:$PYTHONPATH
 ```
 
 
@@ -47,7 +47,7 @@ In the same folder, create a file `CMakeLists.txt`:
 cmake_minimum_required(VERSION 3.5)
 find_package(Cpp2Py REQUIRED)
 
-set(CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH "INSTALL_DIR/lib/python2.7/site-packages/")
+set(CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH "INSTALL_DIR/lib/python3.4/site-packages/")
 
 include_directories(${Cpp2Py_DIR}/../../include)
 include_directories(.)

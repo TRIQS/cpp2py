@@ -1,5 +1,6 @@
 #pragma once
 #include <Python.h>
+#include <string>
 
 namespace cpp2py {
 
@@ -10,7 +11,6 @@ namespace cpp2py {
     PyObject *ob = NULL;
 
     public:
-   
     /// Null
     pyref() = default;
 
@@ -53,7 +53,7 @@ namespace cpp2py {
     }
 
     /// ref counting
-    int refcnt() const { return (ob !=NULL ? ob->ob_refcnt : -100);}
+    int refcnt() const { return (ob != NULL ? Py_REFCNT(ob) : -100); }
 
     /// True iif the object is not NULL
     explicit operator bool() const { return (ob != NULL); }
@@ -78,14 +78,24 @@ namespace cpp2py {
     } // NULL : pass the error in chain call x.attr().attr()....
 
     /// Import the module and returns a pyref to it
-    static pyref module(std::string const &module_name) { return PyImport_ImportModule(module_name.c_str()); }
+    static pyref module(std::string const &module_name) {
+      // Maybe the module was already imported?
+      PyObject *mod = PyImport_GetModule(PyUnicode_FromString(module_name.c_str()));
+
+      // If not, import normally
+      if (mod == NULL) mod = PyImport_ImportModule(module_name.c_str());
+
+      // Did we succeed?
+      if (mod == NULL) throw std::runtime_error(std::string{"Failed to import module "} + module_name);
+
+      return mod;
+    }
 
     /// Make a Python string from the C++ string
-    static pyref string(std::string const &s) { return PyString_FromString(s.c_str()); }
+    static pyref string(std::string const &s) { return PyUnicode_FromString(s.c_str()); }
 
     /// Make a Python Tuple from the C++ objects
-    template<typename ... T>
-    static pyref make_tuple(T const & ...x) { return PyTuple_Pack(sizeof...(T), static_cast<PyObject*>(x)...);}
+    template <typename... T> static pyref make_tuple(T const &... x) { return PyTuple_Pack(sizeof...(T), static_cast<PyObject *>(x)...); }
 
     /// gets a reference to the class cls_name in module_name
     static pyref get_class(const char *module_name, const char *cls_name, bool raise_exception) {
@@ -98,20 +108,24 @@ namespace cpp2py {
     }
 
     /// checks that ob is of type module_name.cls_name
-    static bool check_is_instance(PyObject *ob, const char *module_name, const char *cls_name, bool raise_exception) {
-      pyref cls = pyref::get_class(module_name, cls_name, raise_exception);
-      int i     = PyObject_IsInstance(ob, cls);
+    static bool check_is_instance(PyObject *ob, PyObject *cls, bool raise_exception) {
+      int i = PyObject_IsInstance(ob, cls);
       if (i == -1) { // an error has occurred
         i = 0;
         if (!raise_exception) PyErr_Clear();
       }
-      if ((i == 0) && (raise_exception)) PyErr_SetString(PyExc_TypeError, "Type error : a Gf is expected in Python -> C++ convertion");
+      if ((i == 0) && (raise_exception)) {
+        pyref cls_name_obj = PyObject_GetAttrString(cls, "__name__");
+        std::string err    = "Type error: Python object does not match expected type ";
+        err.append(PyUnicode_AsUTF8(cls_name_obj));
+        PyErr_SetString(PyExc_TypeError, err.c_str());
+      }
       return i;
     }
   };
 
   // FIXME : put static or the other functions inline ?
-  
+
   /// Returns a pyref from a borrowed ref
   inline pyref borrowed(PyObject *ob) {
     Py_XINCREF(ob);

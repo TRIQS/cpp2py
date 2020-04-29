@@ -1,4 +1,5 @@
 #pragma once
+#include <Python.h>
 
 namespace cpp2py {
 
@@ -14,7 +15,7 @@ namespace cpp2py {
       return PyFloat_AsDouble(ob);
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if (PyComplex_Check(ob) || PyFloat_Check(ob) || PyInt_Check(ob)) return true;
+      if (PyComplex_Check(ob) || PyFloat_Check(ob) || PyLong_Check(ob)) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to complex"); }
       return false;
     }
