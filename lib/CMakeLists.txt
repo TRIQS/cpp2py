@@ -1,5 +1,6 @@
 add_library(cpp2py signal_handler.cpp exceptions.cpp)
 target_compile_options(cpp2py PRIVATE -std=c++14 -fPIC)
+target_link_libraries(cpp2py PUBLIC python_and_numpy)
 target_include_directories(cpp2py
   PUBLIC
   	$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
