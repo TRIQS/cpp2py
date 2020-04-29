@@ -1,6 +1,6 @@
 # Start configuration
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
-project(CPP2PY VERSION 1.6.0 LANGUAGES C CXX)
+project(CPP2PY VERSION 2.0.0 LANGUAGES C CXX)
 get_directory_property(IS_SUBPROJECT PARENT_DIRECTORY)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
