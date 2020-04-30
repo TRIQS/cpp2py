@@ -1,26 +1,22 @@
 import re
-class Cpp2pyInfoBase:
-    """
-       Derive to implement table_converters, table_imports
-    """
-
-    def __init__(self):
-        pass
-
-    def find_in_table(self, x, table):
-        r = set()
-        for a,b in list(table.items()) :
-          if re.compile(a).search(x): r.add(b)
-        return r
-
-    def get_converters(self, can) : 
-        return self.find_in_table(can, self.table_converters)
-    
-    def get_imports(self, can) : 
-        return self.find_in_table(can, self.table_imports)
 
 
-class Cpp2pyInfoStd(Cpp2pyInfoBase):
+def find_in_table(x, table):
+    r = set()
+    for a,b in list(table.items()):
+        if re.compile(a).search(x): r.add(b)
+    return r
+
+
+def get_converters(info_cls, can):
+    return find_in_table(can, info_cls.table_converters)
+
+
+def get_imports(info_cls, can):
+    return find_in_table(can, info_cls.table_imports)
+
+
+class Cpp2pyInfoStd:
 
     # No Python module to import for std:: object
     table_imports = {}
@@ -41,4 +37,4 @@ class Cpp2pyInfoStd(Cpp2pyInfoBase):
         }
 
     table_converters = dict ( (k, "cpp2py/converters/%s.hpp"%v) for (k,v) in list(_table_converters.items()))
- 
+

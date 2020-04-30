@@ -1,5 +1,5 @@
 import cpp2py.util as util, importlib
-from .cpp2py_info_base import Cpp2pyInfoStd
+from .cpp2py_info_base import get_imports, get_converters, Cpp2pyInfoStd
   
 class DependencyAnalyzer:
     """
@@ -44,8 +44,8 @@ class DependencyAnalyzer:
             m1,c1 = set(), set()
             can = util.decay(x.get_canonical().spelling)
             for info_cls in self.get_imp_conv:
-                c1 |= set(info_cls().get_converters(can))
-                m1 |= set(info_cls().get_imports(can))
+                c1 |= set(get_converters(info_cls(), can))
+                m1 |= set(get_imports(info_cls(), can))
             if not (can in self.basic_types or can in ignored or c1 or m1) : 
                 unknown_types[util.decay(x.get_canonical().spelling)] = util.decay(x.spelling)
             c |= c1
