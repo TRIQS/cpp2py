@@ -4,6 +4,7 @@
 #include <string>
 #include <complex>
 #include <map>
+#include <memory>
 #include <typeindex>
 #include <exception>
 #include <iostream>
