@@ -694,7 +694,7 @@ class module_:
         ----------
 
         full_name : string
-                    complete name of the module (after install, e.g.  pytriqs.gf.local.gf)
+                    complete name of the module (after install, e.g.  triqs.gf)
 
         doc : string
               doc string

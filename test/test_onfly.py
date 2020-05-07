@@ -21,9 +21,9 @@ if 0:
     dcomplex f(gf_view<imfreq> g) { return g[0](0,0); }
     """
 
-    m2= M.compile(code, verbosity = 3, modules = ['pytriqs'], no_clean = True)
+    m2= M.compile(code, verbosity = 3, modules = ['triqs'], no_clean = True)
 
-    from pytriqs.gf import *
+    from triqs.gf import *
     gw = GfImFreq(indices = [1], beta = 50)
 
     print(m2.f(gw))
