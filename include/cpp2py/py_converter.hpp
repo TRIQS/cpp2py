@@ -63,9 +63,11 @@ namespace cpp2py {
     }
 
     // Return ptr from __cpp2py_table attribute if available
+    if(not PyObject_HasAttrString(mod, "__cpp2py_table"))
+      return {};
     pyref capsule = PyObject_GetAttrString(mod, "__cpp2py_table");
     if(capsule.is_null())
-      return {};
+      throw std::runtime_error("Severe internal error : can not load __main__.__cpp2py_table");
     void * ptr = PyCapsule_GetPointer(capsule, "__main__.__cpp2py_table"); 
     return {*static_cast<std::shared_ptr<conv_table_t> *>(ptr)}; 
   }
