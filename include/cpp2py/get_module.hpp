@@ -1,3 +1,5 @@
+#pragma once
+
 #if (PY_MAJOR_VERSION == 3) and (PY_MINOR_VERSION <= 6)
 
 inline PyObject *PyImport_GetModule(PyObject *name) {
