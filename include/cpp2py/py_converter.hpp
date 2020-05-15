@@ -1,6 +1,9 @@
 #pragma once
 #include <Python.h>
 #include "structmember.h"
+
+#include "./get_module.hpp"
+
 #include <string>
 #include <complex>
 #include <map>

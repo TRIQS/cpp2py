@@ -1,5 +1,8 @@
 #pragma once
 #include <Python.h>
+
+#include "./get_module.hpp"
+
 #include <string>
 
 namespace cpp2py {
