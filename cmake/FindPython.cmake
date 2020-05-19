@@ -32,7 +32,7 @@ endif()
 
 # IF PYTHON_EXECUTABLE is not defined, try to find a python
 if(NOT PYTHON_EXECUTABLE)
-  find_program(PYTHON_EXECUTABLE NAMES python python3 PATHS $ENV{PATH} DOC "Path to the Python interpreter")
+  find_program(PYTHON_EXECUTABLE NAMES python3 python PATHS $ENV{PATH} DOC "Path to the Python interpreter")
 endif(NOT PYTHON_EXECUTABLE)
 if(NOT PYTHON_EXECUTABLE)
  message(FATAL_ERROR "No python interpreter found")
