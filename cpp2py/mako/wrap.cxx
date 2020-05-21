@@ -1127,7 +1127,6 @@ PyMODINIT_FUNC PyInit_${module.name}(void)
 %endfor
 #endif
 
-    cpp2py::init_conv_table();
     //std::cout << " INIT Module " << "${module.name}" << std::endl;
     //std::cout << " table ptr count " << cpp2py::conv_table_sptr.use_count() << std::endl;
     // register all the types

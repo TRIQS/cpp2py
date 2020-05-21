@@ -50,10 +50,7 @@ namespace cpp2py {
   //   C++ type -> Python Type
   using conv_table_t = std::map<std::string, PyTypeObject *>;
 
-  // Each translation holds a shared pointer to the converter table
-  static std::shared_ptr<conv_table_t> conv_table_sptr = {};
-
-  // Access the table of the wrapped types, and creates if it does not exists.
+  // Fetch the pointer to the converter table from __main__
   inline std::shared_ptr<conv_table_t> get_conv_table_from_main() {
     // Fetch __main__ module
     pyref mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
@@ -72,23 +69,23 @@ namespace cpp2py {
     return {*static_cast<std::shared_ptr<conv_table_t> *>(ptr)}; 
   }
 
-  // Destructor used to clean the capsule later
+  // Destructor used to clean the capsule containing the converter table pointer
   inline void _table_destructor(PyObject *capsule) {
     auto *p = static_cast<std::shared_ptr<conv_table_t> *>(PyCapsule_GetPointer(capsule, "__main__.__cpp2py_table"));
     delete p;
   }
 
-  // Initialize the converter table
-  inline void init_conv_table() {
-    conv_table_sptr = get_conv_table_from_main();
+  // Get the converter table, initialize it if necessary
+  inline static std::shared_ptr<conv_table_t> get_conv_table() {
+    std::shared_ptr<conv_table_t> sptr = get_conv_table_from_main();
 
     // Init map if pointer in main is null
-    if(not conv_table_sptr){
-      conv_table_sptr = std::make_shared<conv_table_t>();
+    if(not sptr){
+      sptr = std::make_shared<conv_table_t>();
 
       // Now register the pointer in __main__
       PyObject * mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
-      auto * p = new std::shared_ptr<conv_table_t>{conv_table_sptr};
+      auto * p = new std::shared_ptr<conv_table_t>{sptr};
       pyref c = PyCapsule_New((void *)p, "__main__.__cpp2py_table", (PyCapsule_Destructor)_table_destructor);
       pyref s = PyUnicode_FromString("__cpp2py_table");
       int err = PyObject_SetAttr(mod, s, c);
@@ -97,7 +94,11 @@ namespace cpp2py {
         throw std::runtime_error("Can not add the __cpp2py_table to main");
       }
     }
+    return sptr;
   }
+
+  // Each translation holds a shared pointer to the converter table
+  static const std::shared_ptr<conv_table_t> conv_table_sptr = get_conv_table();
 
   // get the PyTypeObject from the table in __main__.
   // if the type was not wrapped, return nullptr and set up a Python exception
