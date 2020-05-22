@@ -44,7 +44,7 @@ using ${ns};
 %endif
 %endfor
 %if include_serialization==1 :
-#include <triqs/h5/serialization.hpp>
+#include <h5/serialization.hpp>
 %endif
 
 using namespace cpp2py;
@@ -721,15 +721,15 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
                    "Cannot find the reconstruction function ${module.full_name}.__reduce_reconstructor__${c.py_type}");
    return NULL;
   }
-  return Py_BuildValue("(NN)", r.new_ref() , Py_BuildValue("(N)", convert_to_python(triqs::h5::serialize(self_c))));
+  return Py_BuildValue("(NN)", r.new_ref() , Py_BuildValue("(N)", convert_to_python(h5::serialize(self_c))));
  }
 
  //
  static PyObject* ${c.py_type}___reduce_reconstructor__ (PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject* a1 = PyTuple_GetItem(args,0); // 
-    auto a = convert_from_python<triqs::arrays::array_const_view<triqs::h5::h5_serialization_char_t,1>>(a1);
+    auto a = convert_from_python<std::vector<unsigned char>>(a1);
     try {
-      return convert_to_python( triqs::h5::deserialize<${c.c_type}>(a));
+      return convert_to_python( h5::deserialize<${c.c_type}>(a));
     }
     CATCH_AND_RETURN("in unserialization of object ${c.py_type}",NULL);
   }
