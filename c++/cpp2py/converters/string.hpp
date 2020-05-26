@@ -29,6 +29,19 @@ namespace cpp2py {
     }
   };
 
+  template <> struct py_converter<unsigned char> {
+
+    static PyObject *c2py(unsigned char c) { return PyBytes_FromStringAndSize(reinterpret_cast<char *>(&c), 1); }
+
+    static unsigned char py2c(PyObject *ob) { return static_cast<unsigned char>(PyBytes_AsString(ob)[0]); }
+
+    static bool is_convertible(PyObject *ob, bool raise_exception) {
+      if (PyBytes_Check(ob) and PyBytes_Size(ob) == 1) return true;
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to unsigned char"); }
+      return false;
+    }
+  };
+
   template <> struct py_converter<const char *> {
 
     static PyObject *c2py(const char *x) { return PyUnicode_FromString(x); }

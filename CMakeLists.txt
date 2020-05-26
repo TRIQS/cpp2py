@@ -51,8 +51,10 @@ MESSAGE(STATUS "LibClang additional flags: ${LIBCLANG_CXX_FLAGS}")
 set(LIBCLANG_CXX_FLAGS "${LIBCLANG_CXX_FLAGS}" CACHE STRING "Additional flags to be passed to libclang when parsing with clang")
 set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libclang library")
 
-# Detect Python
+# --- Python ---
+
 find_package(Python)
+add_library(cpp2py::python_and_numpy ALIAS python_and_numpy)
 install(TARGETS python_and_numpy EXPORT cpp2py-targets)
 
 # find_package(Python3 COMPONENTS Development Interpreter)
@@ -74,8 +76,7 @@ install(TARGETS python_and_numpy EXPORT cpp2py-targets)
 # subdirs
 add_subdirectory(bin)            # Executables
 add_subdirectory(cmake)          # Exported Cpp2Py-Config
-add_subdirectory(include)
-add_subdirectory(lib)
+add_subdirectory(c++/cpp2py)
 
 # The python modules
 add_subdirectory(cpp2py)

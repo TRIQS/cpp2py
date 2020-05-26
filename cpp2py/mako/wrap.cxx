@@ -5,7 +5,7 @@
 using dcomplex = std::complex<double>;
 
 // first the basic stuff
-#include <cpp2py.hpp>
+#include <cpp2py/cpp2py.hpp>
 #include <cpp2py/converters/string.hpp>
 
 // for converters
@@ -111,7 +111,7 @@ template <> struct py_converter<${c_name_absolute}> {
    if (raise_exception) {
     auto err = "Convertion of C++ enum ${c_name_absolute} : \nThe string \"" + s +"\" is not in [${','.join([str(x) for x in values])}]";
     PyErr_SetString(PyExc_ValueError, err.c_str());
-#include <cpp2py.hpp>
+#include <cpp2py/cpp2py.hpp>
    }
    return false;
  }
