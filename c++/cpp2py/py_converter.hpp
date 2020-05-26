@@ -116,20 +116,36 @@ namespace cpp2py {
 
   // default version is that the type is wrapped.
   // Will be specialized for type which are just converted.
-  template <typename T> struct py_converter {
+  template <typename TUREF> struct py_converter {
+
+    using T                      = std::decay_t<TUREF>;
+    static constexpr bool is_ref = std::is_reference_v<TUREF>;
 
     typedef struct {
       PyObject_HEAD;
       T *_c;
+      PyObject *parent = nullptr;
     } py_type;
 
     using is_wrapped_type = void; // to recognize
 
-    template <typename U> static PyObject *c2py(U &&x) {
+    template <typename U> static PyObject *c2py(U &&x, PyObject *parent = nullptr) {
       PyTypeObject *p = get_type_ptr(typeid(T));
       if (p == nullptr) return NULL;
       py_type *self = (py_type *)p->tp_alloc(p, 0);
-      if (self != NULL) { self->_c = new T{std::forward<U>(x)}; }
+      if (self != NULL) {
+        if constexpr (is_ref) {
+	  // Keep parent alive for lifetime of self
+          if (parent != nullptr) {
+            self->parent = parent;
+            Py_INCREF(parent);
+            self->_c = &x;
+	    return (PyObject *)self;
+	  }
+        }
+	// Create heap copy of x to guarantee lifetime
+        self->_c = new T{std::forward<U>(x)};
+      }
       return (PyObject *)self;
     }
 
@@ -147,7 +163,7 @@ namespace cpp2py {
       if (p == nullptr) return false;
       if (PyObject_TypeCheck(ob, p)) {
         if (((py_type *)ob)->_c != NULL) return true;
-	auto err = std::string{"Severe internal error : Python object of "} + p->tp_name + " has a _c NULL pointer !!";
+        auto err = std::string{"Severe internal error : Python object of "} + p->tp_name + " has a _c NULL pointer !!";
         if (raise_exception) PyErr_SetString(PyExc_TypeError, err.c_str());
         return false;
       }
@@ -156,6 +172,12 @@ namespace cpp2py {
       return false;
     }
   };
+
+  // is_wrapped<T>  if py_converter has been reimplemented.
+  template <typename T, class = void> struct is_wrapped : std::false_type {};
+  template <typename T> struct is_wrapped<T, typename py_converter<T>::is_wrapped_type> : std::true_type {};
+
+  template <typename T> constexpr bool is_wrapped_v = is_wrapped<T>::value;
 
   // helpers for better error message
   // some class (e.g. range !) only have ONE conversion, i.e. C -> Py, but not both
@@ -168,9 +190,15 @@ namespace cpp2py {
   struct does_have_a_converterC2Py<T, std::void_t<decltype(py_converter<std::decay_t<T>>::c2py(std::declval<T>()))>> : std::true_type {};
 
   // We only use these functions in the code, not directly the converter
-  template <typename T> static PyObject *convert_to_python(T &&x) {
+  template <typename T> static PyObject *convert_to_python(T &&x, PyObject *parent = nullptr) {
     static_assert(does_have_a_converterC2Py<T>::value, "The type does not have a converter from C++ to Python");
-    return py_converter<std::decay_t<T>>::c2py(std::forward<T>(x));
+    PyObject *r;
+    if constexpr (is_wrapped_v<std::decay_t<T>>) {
+      r = py_converter<T>::c2py(std::forward<T>(x), parent);
+    } else { // Converted type
+      r = py_converter<std::decay_t<T>>::c2py(std::forward<T>(x));
+    }
+    return r;
   }
   template <typename T> static bool convertible_from_python(PyObject *ob, bool raise_exception) {
     return py_converter<T>::is_convertible(ob, raise_exception);
@@ -187,12 +215,6 @@ namespace cpp2py {
  * U*            U*           U*                        U*                       U**                               *p = py_converter<T>::p2yc(ob))
  *
  */
-
-  // is_wrapped<T>  if py_converter has been reimplemented.
-  template <typename T, class = void> struct is_wrapped : std::false_type {};
-  template <typename T> struct is_wrapped<T, typename py_converter<T>::is_wrapped_type> : std::true_type {};
-
-  template <typename T> constexpr bool is_wrapped_v = is_wrapped<T>::value;
 
   template <typename T> static auto convert_from_python(PyObject *ob) -> decltype(py_converter<T>::py2c(ob)) {
     static_assert(does_have_a_converterPy2C<T>::value, "The type does not have a converter from Python to C++");

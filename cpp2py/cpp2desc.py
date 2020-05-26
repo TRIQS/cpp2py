@@ -60,7 +60,7 @@ class Cpp2Desc:
            target_file_only : bool
                       Neglect any included files during desc generation [default = False]
         """
-        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc',
+        for x in ['filename', 'namespaces', 'classes', 'namespace_to_factor', 'appname', 'modulename', 'moduledoc', 
                   'use_properties', 'members_read_only', 'shell_command', 'target_file_only']:
             setattr(self, x, locals()[x])
         self.DE = dependency_analyzer.DependencyAnalyzer(converters)

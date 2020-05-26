@@ -242,6 +242,7 @@ static PyObject* ${c.py_type}_richcompare (PyObject *a, PyObject *b, int op);
 typedef struct {
     PyObject_HEAD
     ${c.c_type} * _c;
+    PyObject * parent = nullptr;
 } ${c.py_type};
 
 ## The new function, only if there is constructor
@@ -257,7 +258,8 @@ static PyObject* ${c.py_type}_new(PyTypeObject *type, PyObject *args, PyObject *
 
 // dealloc
 static void ${c.py_type}_dealloc(${c.py_type}* self) {
-  if (self->_c != NULL) delete self->_c; // should never be null, but I protect it anyway
+  if ((self->_c != NULL) and (self->parent == nullptr)) delete self->_c; // should never be null, but I protect it anyway
+  Py_XDECREF(self->parent);
   Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -612,7 +614,7 @@ template <> struct py_converter<${en.c_name}> {
 
 static PyObject * ${c.py_type}__get_member_${m.py_name} (PyObject *self, void *closure) {
   auto & self_c = convert_from_python<${c.c_type}>(self);
-  return convert_to_python(self_c.${m.c_name});
+  return convert_to_python(self_c.${m.c_name}, self);
 }
 
 %if not m.read_only:
