@@ -3,6 +3,7 @@
 #include "structmember.h"
 
 #include "./get_module.hpp"
+#include "./macros.hpp"
 
 #include <string>
 #include <complex>
