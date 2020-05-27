@@ -4,8 +4,8 @@ add_library(cpp2py::cpp2py ALIAS cpp2py)
 target_compile_options(cpp2py PRIVATE -std=c++14 -fPIC)
 target_include_directories(cpp2py
   PUBLIC
-  	$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/c++>
-	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/c++>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/c++>
   )
 
 # Install the library in lib and export the cpp2py target
