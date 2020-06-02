@@ -134,7 +134,13 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
 
  # Define python_and_numpy interface target
  add_library(python_and_numpy INTERFACE)
- target_link_libraries(python_and_numpy INTERFACE ${PYTHON_LIBRARY} "${PYTHON_EXTRA_LIBS}")
+ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+   # On OSX missing python symbols should be resolved at runtime through '-undefined dynamic_lookup'
+   # as the interperter shipped with e.g. anaconda provides all relevant symbols statically
+   target_link_libraries(python_and_numpy INTERFACE "-undefined dynamic_lookup" "${PYTHON_EXTRA_LIBS}")
+ else()
+   target_link_libraries(python_and_numpy INTERFACE ${PYTHON_LIBRARY} "${PYTHON_EXTRA_LIBS}")
+ endif()
  target_include_directories(python_and_numpy SYSTEM INTERFACE ${PYTHON_INCLUDE_DIRS} ${PYTHON_NUMPY_INCLUDE_DIR})
  target_compile_options(python_and_numpy INTERFACE -Wno-register) # Some version of Python.h still use register
 

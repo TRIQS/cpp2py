@@ -93,10 +93,6 @@ macro(add_cpp2py_module)
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
 
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(${module_name} "-undefined dynamic_lookup")
-  endif()
-
   # Keep a list of every module target.
   # Usage : e.g.  Documentation top target depends on them being built first
   set_property(GLOBAL APPEND PROPERTY CPP2PY_MODULES_LIST ${module_name})
