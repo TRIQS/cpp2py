@@ -54,7 +54,8 @@ namespace cpp2py {
   // Fetch the pointer to the converter table from __main__
   inline std::shared_ptr<conv_table_t> get_conv_table_from_main() {
     // Fetch __main__ module
-    pyref mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
+    pyref str_main = PyUnicode_FromString("__main__");
+    pyref mod = PyImport_GetModule(str_main);
     if (mod == NULL) {
       PyErr_SetString(PyExc_RuntimeError, "Severe internal error : can not load __main__");
       throw std::runtime_error("Severe internal error : can not load __main__");
