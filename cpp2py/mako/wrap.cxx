@@ -1077,7 +1077,7 @@ template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py
 #endif
 
 //--------------------- module init function -----------------------------
-PyMODINIT_FUNC PyInit_${module.name}(void)
+extern "C" __attribute__((visibility("default"))) PyObject* PyInit_${module.name}(void)
 {
 
 #ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
