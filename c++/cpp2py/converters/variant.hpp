@@ -45,18 +45,14 @@ namespace cpp2py {
     }
 
     struct _visitor {
-      template <typename U> PyObject *operator()(U const &x) { return py_converter<U>::c2py(x); }
+      template <typename U> PyObject *operator()(U x) { return py_converter<std::decay_t<U>>::c2py(std::move(x)); }
     };
 
     public:
-    static PyObject *c2py(std::variant<T...> const &v) {
-      //auto l = [](auto const &x) -> PyObject * { return py_converter<decltype(x)>::c2py(x); };
-      return visit(_visitor{}, v);
-      //return visit(_visitor{}, v);
-    }
+    static PyObject *c2py(std::variant<T...> v) { return visit(_visitor{}, std::move(v)); }
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      if ((...  or py_converter<T>::is_convertible(ob, false))) return true;
+      if ((... or py_converter<std::decay_t<T>>::is_convertible(ob, false))) return true;
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::variant"); }
       return false;
     }

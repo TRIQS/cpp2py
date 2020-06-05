@@ -9,20 +9,19 @@
 namespace cpp2py {
 
   template <typename T> static void delete_pycapsule(PyObject *capsule) {
-    auto *ptr = static_cast<std::unique_ptr<T[]> *>(PyCapsule_GetPointer(capsule, "guard"));
+    auto *ptr = static_cast<std::vector<T> *>(PyCapsule_GetPointer(capsule, "guard"));
     delete ptr;
   }
 
   // Convert vector to numpy_proxy, WARNING: Deep Copy
-  template <typename T> numpy_proxy make_numpy_proxy_from_vector(std::vector<T> const &v) {
+  template <typename T> numpy_proxy make_numpy_proxy_from_vector(std::vector<T> v) {
 
-    auto *data_ptr = new std::unique_ptr<T[]>{new T[v.size()]};
-    std::copy(begin(v), end(v), data_ptr->get());
-    auto capsule = PyCapsule_New(data_ptr, "guard", &delete_pycapsule<T>);
+    auto *vec_heap = new std::vector<T>{std::move(v)};
+    auto capsule   = PyCapsule_New(vec_heap, "guard", &delete_pycapsule<T>);
 
     return {1, // rank
             npy_type<std::remove_const_t<T>>,
-            (void *)data_ptr->get(),
+            (void *)vec_heap->data(),
             std::is_const_v<T>,
             v_t{static_cast<long>(v.size())}, // extents
             v_t{sizeof(T)},                   // strides
@@ -46,14 +45,14 @@ namespace cpp2py {
 
   template <typename T> struct py_converter<std::vector<T>> {
 
-    static PyObject *c2py(std::vector<T> const &v) {
+    static PyObject *c2py(std::vector<T> v) {
 
       if constexpr (has_npy_type<T>) {
-        return make_numpy_proxy_from_vector(v).to_python();
+        return make_numpy_proxy_from_vector(std::move(v)).to_python();
       } else { // Convert to Python List
         PyObject *list = PyList_New(0);
         for (auto const &x : v) {
-          pyref y = py_converter<T>::c2py(x);
+          pyref y = py_converter<T>::c2py(std::move(x));
           if (y.is_null() or (PyList_Append(list, y) == -1)) {
             Py_DECREF(list);
             return NULL;

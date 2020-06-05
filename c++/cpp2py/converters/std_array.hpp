@@ -6,10 +6,10 @@ namespace cpp2py {
   template <typename T, size_t R> struct py_converter<std::array<T, R>> {
     // --------------------------------------
 
-    static PyObject *c2py(std::array<T, R> const &v) {
+    static PyObject *c2py(std::array<T, R> v) {
       PyObject *list = PyList_New(0);
-      for (auto const &x : v) {
-        pyref y = py_converter<T>::c2py(x);
+      for (auto &x : v) {
+        pyref y = py_converter<std::decay_t<T>>::c2py(std::move(x));
         if (y.is_null() or (PyList_Append(list, y) == -1)) {
           Py_DECREF(list);
           return NULL;

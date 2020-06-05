@@ -5,13 +5,13 @@ namespace cpp2py {
 
   template <typename K, typename V> struct py_converter<std::map<K, V>> {
 
-    static PyObject *c2py(std::map<K, V> const &m) {
+    static PyObject *c2py(std::map<K, V> m) {
       PyObject *d = PyDict_New();
       for (auto &x : m) {
-        pyref k = py_converter<K>::c2py(x.first);
+        pyref k = py_converter<std::decay_t<K>>::c2py(std::move(x.first));
         // if the K is a list, we transform into a tuple
         if (PyList_Check(k)) k = PyList_AsTuple(k);
-        pyref v = py_converter<V>::c2py(x.second);
+        pyref v = py_converter<std::decay_t<V>>::c2py(std::move(x.second));
         if (k.is_null() or v.is_null() or (PyDict_SetItem(d, k, v) == -1)) {
           Py_DECREF(d);
           return NULL;

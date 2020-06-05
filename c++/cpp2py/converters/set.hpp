@@ -5,10 +5,10 @@ namespace cpp2py {
 
   template <typename K> struct py_converter<std::set<K>> {
 
-    static PyObject *c2py(std::set<K> const &s) {
+    static PyObject *c2py(std::set<K> s) {
       PyObject *set = PySet_New(NULL);
       for (auto &x : s) {
-        pyref y = py_converter<K>::c2py(x);
+        pyref y = py_converter<std::decay_t<K>>::c2py(std::move(x));
         if (y.is_null() or (PySet_Add(set, y) == -1)) {
           Py_DECREF(set);
           return NULL;
