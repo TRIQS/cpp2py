@@ -23,8 +23,8 @@ namespace cpp2py {
             npy_type<std::remove_const_t<T>>,
             (void *)vec_heap->data(),
             std::is_const_v<T>,
-            v_t{static_cast<long>(v.size())}, // extents
-            v_t{sizeof(T)},                   // strides
+            v_t{static_cast<long>(vec_heap->size())}, // extents
+            v_t{sizeof(T)},                           // strides
             capsule};
   }
 
@@ -52,7 +52,7 @@ namespace cpp2py {
       } else { // Convert to Python List
         PyObject *list = PyList_New(0);
         for (auto const &x : v) {
-          pyref y = py_converter<T>::c2py(std::move(x));
+          pyref y = py_converter<std::decay_t<T>>::c2py(std::move(x));
           if (y.is_null() or (PyList_Append(list, y) == -1)) {
             Py_DECREF(list);
             return NULL;
