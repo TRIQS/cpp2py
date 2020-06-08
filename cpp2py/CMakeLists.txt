@@ -29,20 +29,21 @@ execute_process(COMMAND ${PROJECT_BINARY_DIR}/bin/cp_rs ${CMAKE_CURRENT_SOURCE_D
 #	* Compiles the wrapper-code into the module ${module_name}.so
 #
 ###################################################################################
-macro(add_cpp2py_module)
+function(add_cpp2py_module)
 
   if(${ARGC} EQUAL 1)
     set(module_name ${ARGV0})
   else()
-    cmake_parse_arguments(add_cpp2py_module "" "NAME" "DEPENDS" ${ARGN})
-    set(module_name ${add_cpp2py_module_NAME})
-    set(header_dependencies ${add_cpp2py_module_DEPENDS})
+    cmake_parse_arguments(ARG "" "NAME;DIRECTORY" "DEPENDS" ${ARGN})
+    set(module_name ${ARG_NAME})
+    set(module_dir ${ARG_DIRECTORY})
+    set(header_dependencies ${ARG_DEPENDS})
   endif()
 
   message(STATUS "Adding cpp2py Python module ${module_name}")
 
-  set(desc_name ${CMAKE_CURRENT_SOURCE_DIR}/${module_name}_desc.py)    # the desc file
-  set(wrap_name ${CMAKE_CURRENT_BINARY_DIR}/${module_name}_wrap.cxx)   # path to the wrapping code
+  set(desc_name ${CMAKE_CURRENT_SOURCE_DIR}/${module_dir}/${module_name}_desc.py)    # the desc file
+  set(wrap_name ${CMAKE_CURRENT_BINARY_DIR}/${module_dir}/${module_name}_wrap.cxx)   # path to the wrapping code
 
   add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name} ${header_dependencies}
     COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_BINARY_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
@@ -56,11 +57,11 @@ macro(add_cpp2py_module)
   set_target_properties(${module_name}
     PROPERTIES
     PREFIX ""  #eliminate the lib in front of the module name
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${module_dir}
   )
 
   # Keep a list of every module target.
   # Usage : e.g.  Documentation top target depends on them being built first
   set_property(GLOBAL APPEND PROPERTY CPP2PY_MODULES_LIST ${module_name})
 
-endmacro(add_cpp2py_module)
+endfunction(add_cpp2py_module)
