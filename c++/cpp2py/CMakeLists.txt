@@ -9,7 +9,7 @@ target_include_directories(cpp2py
   )
 
 # Install the library in lib and export the cpp2py target
-install(TARGETS cpp2py EXPORT cpp2py-targets DESTINATION lib)
+install(TARGETS cpp2py EXPORT Cpp2PyTargets DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h" PATTERN "*.hxx")
 
 # --- Python ---
@@ -19,4 +19,4 @@ target_link_libraries(cpp2py PUBLIC python_and_numpy)
 # ---------------
 
 # Install the exported targets
-install(EXPORT cpp2py-targets NAMESPACE cpp2py:: DESTINATION lib/cmake/cpp2py)
+install(EXPORT Cpp2PyTargets NAMESPACE cpp2py:: DESTINATION lib/cmake/Cpp2Py)

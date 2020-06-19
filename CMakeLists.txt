@@ -55,7 +55,7 @@ set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libcl
 
 find_package(Python)
 add_library(cpp2py::python_and_numpy ALIAS python_and_numpy)
-install(TARGETS python_and_numpy EXPORT cpp2py-targets)
+install(TARGETS python_and_numpy EXPORT Cpp2PyTargets)
 
 # find_package(Python3 COMPONENTS Development Interpreter)
 # set(PYTHON_VERSION_MAJOR ${Python3_VERSION_MAJOR})
