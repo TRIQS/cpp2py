@@ -36,7 +36,12 @@ namespace cpp2py {
     }
 
     /// No copy assign.
-    pyref &operator=(pyref const &) = delete;
+    pyref &operator=(pyref const & p) {
+      Py_XDECREF(ob);
+      ob = p.ob;
+      Py_XINCREF(ob);
+      return *this;
+    }
 
     /// Move assign
     pyref &operator=(pyref &&p) {
