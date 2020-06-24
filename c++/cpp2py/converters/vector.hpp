@@ -32,13 +32,17 @@ namespace cpp2py {
   // Make a new vector from numpy view
   template <typename T> std::vector<T> make_vector_from_numpy_proxy(numpy_proxy const &p) {
     EXPECTS(p.extents.size() == 1);
-    EXPECTS(p.strides == v_t{sizeof(T)});
+    EXPECTS(p.strides[0] % sizeof(T) == 0);
 
-    T *data   = static_cast<T *>(p.data);
     long size = p.extents[0];
+    long step = p.strides[0] / sizeof(T);
 
     std::vector<T> v(size);
-    std::copy(data, data + size, begin(v));
+
+    T *data   = static_cast<T *>(p.data);
+    for(long i = 0; i < size; ++i)
+      v[i] = *(data + i * step);
+
     return v;
   }
 
