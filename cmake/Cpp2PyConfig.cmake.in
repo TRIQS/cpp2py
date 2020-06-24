@@ -19,7 +19,7 @@ set(CPP2PY_PYTHON_NUMPY_VERSION_LT_17 @PYTHON_NUMPY_VERSION_LT_17@ CACHE BOOL "T
 # Root of the Cpp2Py installation
 set(CPP2PY_ROOT @CMAKE_INSTALL_PREFIX@ CACHE PATH "Root of Cpp2Py")
 
-MESSAGE(STATUS "Found Cpp2PyConfig.cmake with version ${CPP2PY_VERSION}, hash = ${CPP2PY_GIT_HASH}")
+MESSAGE(STATUS "Found Cpp2PyConfig.cmake with version ${CPP2PY_VERSION}, hash = ${CPP2PY_GIT_HASH}, root = ${CPP2PY_ROOT}")
 
 # Mac specific
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
