@@ -131,6 +131,7 @@ namespace cpp2py {
       return i;
     }
   };
+  static_assert(sizeof(pyref) == sizeof(PyObject *), "pyref must contain only a PyObject *");
 
   // FIXME : put static or the other functions inline ?
 

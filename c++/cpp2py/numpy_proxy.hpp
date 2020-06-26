@@ -9,15 +9,13 @@
 
 namespace cpp2py {
 
-  using v_t = std::vector<long>;
-
   // the basic information for a numpy array
   struct numpy_proxy {
     int rank          = 0;
     long element_type = 0;
     void *data        = nullptr;
     bool is_const     = false;
-    v_t extents, strides;
+    std::vector<long> extents, strides;
     PyObject *base = nullptr; // The ref. counting guard typically
 
     // Returns a new ref (or NULL if failure) with a new numpy.

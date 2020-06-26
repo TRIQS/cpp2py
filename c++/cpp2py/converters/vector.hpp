@@ -3,29 +3,30 @@
 #include <string>
 #include <numpy/arrayobject.h>
 
+#include "../traits.hpp"
 #include "../macros.hpp"
 #include "../numpy_proxy.hpp"
 
 namespace cpp2py {
 
-  template <typename T> static void delete_pycapsule(PyObject *capsule) {
-    auto *ptr = static_cast<std::unique_ptr<T[]> *>(PyCapsule_GetPointer(capsule, "guard"));
-    delete ptr;
-  }
-
   // Convert vector to numpy_proxy, WARNING: Deep Copy
-  template <typename T> numpy_proxy make_numpy_proxy_from_vector(std::vector<T> const &v) {
+  template <typename V> numpy_proxy make_numpy_proxy_from_vector(V &&v) {
+    static_assert(is_instantiation_of_v<std::vector, std::decay_t<V>>, "Logic error");
+    using value_type = typename std::remove_reference_t<V>::value_type;
 
-    auto *data_ptr = new std::unique_ptr<T[]>{new T[v.size()]};
-    std::copy(begin(v), end(v), data_ptr->get());
-    auto capsule = PyCapsule_New(data_ptr, "guard", &delete_pycapsule<T>);
+    auto *vec_heap        = new std::vector<value_type>{std::forward<V>(v)};
+    auto delete_pycapsule = [](PyObject *capsule) {
+      auto *ptr = static_cast<std::vector<value_type> *>(PyCapsule_GetPointer(capsule, "guard"));
+      delete ptr;
+    };
+    PyObject *capsule = PyCapsule_New(vec_heap, "guard", delete_pycapsule);
 
     return {1, // rank
-            npy_type<std::remove_const_t<T>>,
-            (void *)data_ptr->get(),
-            std::is_const_v<T>,
-            v_t{static_cast<long>(v.size())}, // extents
-            v_t{sizeof(T)},                   // strides
+            npy_type<value_type>,
+            (void *)vec_heap->data(),
+            std::is_const_v<value_type>,
+            std::vector<long>{long(vec_heap->size())}, // extents
+            std::vector<long>{sizeof(value_type)},     // strides
             capsule};
   }
 
@@ -50,14 +51,21 @@ namespace cpp2py {
 
   template <typename T> struct py_converter<std::vector<T>> {
 
-    static PyObject *c2py(std::vector<T> const &v) {
+    template <typename V> static PyObject *c2py(V &&v) {
+      static_assert(is_instantiation_of_v<std::vector, std::decay_t<V>>, "Logic error");
+      using value_type = typename std::remove_reference_t<V>::value_type;
 
-      if constexpr (has_npy_type<T>) {
-        return make_numpy_proxy_from_vector(v).to_python();
+      if constexpr (has_npy_type<value_type>) {
+        return make_numpy_proxy_from_vector(std::forward<V>(v)).to_python();
       } else { // Convert to Python List
         PyObject *list = PyList_New(0);
-        for (auto const &x : v) {
-          pyref y = py_converter<T>::c2py(x);
+        for (auto &x : v) {
+	  pyref y;
+	  if constexpr(std::is_reference_v<V>){
+            y = py_converter<value_type>::c2py(x);
+	  } else { // Vector passed as rvalue
+            y = py_converter<value_type>::c2py(std::move(x));
+	  }
           if (y.is_null() or (PyList_Append(list, y) == -1)) {
             Py_DECREF(list);
             return NULL;
@@ -122,7 +130,7 @@ namespace cpp2py {
       std::vector<T> res;
       pyref seq = PySequence_Fast(ob, "expected a sequence");
       int len   = PySequence_Size(ob);
-      for (int i = 0; i < len; i++) res.push_back(py_converter<T>::py2c(PySequence_Fast_GET_ITEM((PyObject *)seq, i))); //borrowed ref
+      for (int i = 0; i < len; i++) res.push_back(py_converter<std::decay_t<T>>::py2c(PySequence_Fast_GET_ITEM((PyObject *)seq, i))); //borrowed ref
       return res;
     }
   };
