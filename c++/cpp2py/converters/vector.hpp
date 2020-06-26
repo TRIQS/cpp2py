@@ -7,6 +7,7 @@
 #include "../pyref.hpp"
 #include "../macros.hpp"
 #include "../numpy_proxy.hpp"
+#include "../py_converter.hpp"
 
 namespace cpp2py {
 
@@ -15,35 +16,54 @@ namespace cpp2py {
     static_assert(is_instantiation_of_v<std::vector, std::decay_t<V>>, "Logic error");
     using value_type = typename std::remove_reference_t<V>::value_type;
 
-    auto *vec_heap        = new std::vector<value_type>{std::forward<V>(v)};
-    auto delete_pycapsule = [](PyObject *capsule) {
-      auto *ptr = static_cast<std::vector<value_type> *>(PyCapsule_GetPointer(capsule, "guard"));
-      delete ptr;
-    };
-    PyObject *capsule = PyCapsule_New(vec_heap, "guard", delete_pycapsule);
+    if constexpr (has_npy_type<value_type>) {
+      auto *vec_heap        = new std::vector<value_type>{std::forward<V>(v)};
+      auto delete_pycapsule = [](PyObject *capsule) {
+        auto *ptr = static_cast<std::vector<value_type> *>(PyCapsule_GetPointer(capsule, "guard"));
+        delete ptr;
+      };
+      PyObject *capsule = PyCapsule_New(vec_heap, "guard", delete_pycapsule);
 
-    return {1, // rank
-            npy_type<value_type>,
-            (void *)vec_heap->data(),
-            std::is_const_v<value_type>,
-            std::vector<long>{long(vec_heap->size())}, // extents
-            std::vector<long>{sizeof(value_type)},     // strides
-            capsule};
+      return {1, // rank
+              npy_type<value_type>,
+              (void *)vec_heap->data(),
+              std::is_const_v<value_type>,
+              std::vector<long>{long(vec_heap->size())}, // extents
+              std::vector<long>{sizeof(value_type)},     // strides
+              capsule};
+    } else {
+      std::vector<pyref> vobj(v.size());
+      std::transform(begin(v), end(v), begin(vobj), [](auto &&x) {
+        if constexpr (std::is_reference_v<V>) {
+          return convert_to_python(x);
+        } else { // vector passed as rvalue
+          return convert_to_python(std::move(x));
+        }
+      });
+      return make_numpy_proxy_from_vector(std::move(vobj));
+    }
   }
 
   // Make a new vector from numpy view
   template <typename T> std::vector<T> make_vector_from_numpy_proxy(numpy_proxy const &p) {
     EXPECTS(p.extents.size() == 1);
-    EXPECTS(p.strides[0] % sizeof(T) == 0);
 
     long size = p.extents[0];
-    long step = p.strides[0] / sizeof(T);
 
     std::vector<T> v(size);
 
-    T *data   = static_cast<T *>(p.data);
-    for(long i = 0; i < size; ++i)
-      v[i] = *(data + i * step);
+    if (p.element_type == npy_type<pyref>) {
+      long step = p.strides[0] / sizeof(pyref);
+      auto **data = static_cast<PyObject **>(p.data);
+      for(long i = 0; i < size; ++i)
+        v[i] = py_converter<std::decay_t<T>>::py2c(data[i * step]);
+    } else {
+      EXPECTS(p.strides[0] % sizeof(T) == 0);
+      long step = p.strides[0] / sizeof(T);
+      T *data = static_cast<T *>(p.data);
+      for(long i = 0; i < size; ++i)
+        v[i] = data[i * step];
+    }
 
     return v;
   }
@@ -54,26 +74,7 @@ namespace cpp2py {
 
     template <typename V> static PyObject *c2py(V &&v) {
       static_assert(is_instantiation_of_v<std::vector, std::decay_t<V>>, "Logic error");
-      using value_type = typename std::remove_reference_t<V>::value_type;
-
-      if constexpr (has_npy_type<value_type>) {
-        return make_numpy_proxy_from_vector(std::forward<V>(v)).to_python();
-      } else { // Convert to Python List
-        PyObject *list = PyList_New(0);
-        for (auto &x : v) {
-	  pyref y;
-	  if constexpr(std::is_reference_v<V>){
-            y = py_converter<value_type>::c2py(x);
-	  } else { // Vector passed as rvalue
-            y = py_converter<value_type>::c2py(std::move(x));
-	  }
-          if (y.is_null() or (PyList_Append(list, y) == -1)) {
-            Py_DECREF(list);
-            return NULL;
-          } // error
-        }
-        return list;
-      }
+      return make_numpy_proxy_from_vector(std::forward<V>(v)).to_python();
     }
 
     // --------------------------------------
@@ -100,7 +101,8 @@ namespace cpp2py {
       pyref seq = PySequence_Fast(ob, "expected a sequence");
       int len   = PySequence_Size(ob);
       for (int i = 0; i < len; i++) {
-        if (!py_converter<T>::is_convertible(PySequence_Fast_GET_ITEM((PyObject *)seq, i), raise_exception)) { // borrowed ref
+        if (!py_converter<std::decay_t<T>>::is_convertible(PySequence_Fast_GET_ITEM((PyObject *)seq, i), raise_exception)) { // borrowed ref
+          if (PyErr_Occurred()) PyErr_Print();
           return false;
         }
       }
