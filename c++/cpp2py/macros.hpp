@@ -1,39 +1,77 @@
-/*******************************************************************************
- *
- * TRIQS: a Toolbox for Research in Interacting Quantum Systems
- *
- * Copyright (C) 2011 by O. Parcollet
- *
- * TRIQS is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * TRIQS is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with
- * TRIQS. If not, see <http://www.gnu.org/licenses/>.
- *
- ******************************************************************************/
-#pragma once
+#ifndef _CCQ_MACROS_GUARD_H
+#define _CCQ_MACROS_GUARD_H
 
-#include <iostream>
+// CCQ, TRIQS general macros
+// GUARD IT do not use pragma once
+// hence one can simply include them in every projects
+
+// --- Stringify macros -----
 
 #define AS_STRING(...) AS_STRING2(__VA_ARGS__)
 #define AS_STRING2(...) #__VA_ARGS__
 
+#define PRINT(X) std::cerr << AS_STRING(X) << " = " << X << "      at " << __FILE__ << ":" << __LINE__ << '\n'
+#define NDA_PRINT(X) std::cerr << AS_STRING(X) << " = " << X << "      at " << __FILE__ << ":" << __LINE__ << '\n'
+
+// --- Concept macros -----
+
+#if (__cplusplus > 201703L)
+
+// C++20
+// REQUIRES17 : only in 17, same for 20
+// REQUIRES : in both
+
+#define AUTO(X) X auto
+#define CONCEPT(X) X
+
+#define REQUIRES17(...)
+#define REQUIRES requires
+#define REQUIRES20 requires
+
+// C++20 explicit(bool) : degrade it NOTHING in c++17, we can not check easily
+#define EXPLICIT explicit
+
+// WARNING : it is critical for our doctools to have REQUIRES as requires, NOT a (...) with __VA_ARGS__
+// It is the same effect, but raises unnecessary complications in traversing the AST in libtooling with macros.
+
+#else
+
+// C++17 backward compat mode
+
+#define AUTO(X) auto
+#define CONCEPT(X) typename
+#define REQUIRES20(...)
+
+#define EXPLICIT(...)
+
 #ifdef __clang__
+#define REQUIRES17(...) __attribute__((enable_if(__VA_ARGS__, AS_STRING(__VA_ARGS__))))
 #define REQUIRES(...) __attribute__((enable_if(__VA_ARGS__, AS_STRING(__VA_ARGS__))))
 #elif __GNUC__
-#define REQUIRES(...) requires(__VA_ARGS__)
+// with the -fconcepts TS only. A degraded concept mode, not exactly the C++20. We return to C++17 + basic require
+#define REQUIRES17 requires
+#define REQUIRES requires
+
 #endif
 
-#define PRINT(X) std::cerr << AS_STRING(X) << " = " << X << "      at " << __FILE__ << ":" << __LINE__ << '\n'
+#endif
+
+// -----------------------------------------------------------
 
 #define FORCEINLINE __inline__ __attribute__((always_inline))
+
+#ifdef NDEBUG
+
+#define EXPECTS(X)
+#define ASSERT(X)
+#define ENSURES(X)
+#define EXPECTS_WITH_MESSAGE(X, ...)
+#define ASSERT_WITH_MESSAGE(X, ...)
+#define ENSURES_WITH_MESSAGE(X, ...)
+
+#else
+
+#include <iostream>
 
 #define EXPECTS(X)                                                                                                                                   \
   if (!(X)) {                                                                                                                                        \
@@ -69,3 +107,8 @@
     std::cerr << "Error message : " << __VA_ARGS__ << std::endl;                                                                                     \
     std::terminate();                                                                                                                                \
   }
+
+#endif
+
+#endif
+
