@@ -38,6 +38,7 @@ namespace cpp2py {
 
 #define NPY_CONVERT(C, P) template <> inline constexpr long npy_type<C> = P;
   NPY_CONVERT(pyref, NPY_OBJECT)
+  NPY_CONVERT(PyObject*, NPY_OBJECT)
   NPY_CONVERT(bool, NPY_BOOL)
   NPY_CONVERT(char, NPY_STRING)
   NPY_CONVERT(signed char, NPY_BYTE)
