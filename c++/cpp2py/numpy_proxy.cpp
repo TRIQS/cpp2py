@@ -78,10 +78,6 @@ namespace cpp2py {
     }
 #endif
 
-    //PRINT(result.rank);
-    //PRINT(result.element_type);
-    //PRINT(result.data);
-
     return result;
   }
 
