@@ -99,11 +99,7 @@ namespace cpp2py {
       pyref seq = PySequence_Fast(ob, "expected a sequence");
       int len   = PySequence_Size(ob);
       for (int i = 0; i < len; i++) {
-        if (!py_converter<T>::is_convertible(PySequence_Fast_GET_ITEM((PyObject *)seq, i), false)) { // borrowed ref
-          if (raise_exception) {
-            auto err = std::string{"Cannot convert sequence to std::vector due to element at position "} + std::to_string(i);
-            PyErr_SetString(PyExc_TypeError, err.c_str());
-          }
+        if (!py_converter<T>::is_convertible(PySequence_Fast_GET_ITEM((PyObject *)seq, i), raise_exception)) { // borrowed ref
           return false;
         }
       }
