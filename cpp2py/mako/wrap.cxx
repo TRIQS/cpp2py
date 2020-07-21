@@ -584,7 +584,7 @@ template <> struct py_converter<${en.c_name}> {
     } // end overload ${overload._get_c_signature()}
   %endfor # overload
 
-   static const char * overloads_signatures[] = {${'"' + ','.join(ov._get_c_signature() for ov in py_meth.overloads) + '"'}};
+   static const char * overloads_signatures[] = {${'"' + '", "'.join(ov._get_c_signature() for ov in py_meth.overloads) + '"'}};
 
    // FIXME Factorize this
    // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
