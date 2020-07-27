@@ -256,8 +256,9 @@ static PyObject* ${c.py_type}_new(PyTypeObject *type, PyObject *args, PyObject *
 %endif
 
 // dealloc
-static void ${c.py_type}_dealloc(${c.py_type}* self) {
-  if (self->_c != NULL) delete self->_c; // should never be null, but I protect it anyway
+static void ${c.py_type}_dealloc(PyObject* self) {
+  auto * c_ptr = ((${c.py_type}*)self)->_c;
+  if (c_ptr != NULL) delete c_ptr; // should never be null, but I protect it anyway
   Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
