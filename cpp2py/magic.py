@@ -87,7 +87,7 @@ class Cpp2pyMagics(Magics):
             if not k.startswith('_'):
                 self.shell.push({k: v})
                 imported.append(k)
-        if args.verbosity > 0 and imported:
+        if args.verbosity and args.verbosity > 0 and imported:
             print_out("Success", "The following objects are ready to use: %s" % ", ".join(imported))
 
 __doc__ = __doc__.format(CPP2PY_DOC=' ' * 8 + Cpp2pyMagics.cpp2py.__doc__)
