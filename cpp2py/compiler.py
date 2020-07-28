@@ -4,19 +4,15 @@ import cpp2py.libclang_config as Config
 cxx_compiler = Config.CXX_COMPILER
 
 def print_out (m, out) :
-   l = (70 - len(m))/2
+   l = (70 - len(m))//2
    print(l*'-' + m + l*'-' + '\n' + out)
 
 def execute(command, message):
-    #print("EXEC", command)
     try:
        out = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-    except subprocess.CalledProcessError as E :
-       print_out (message + " error ", E.output)
+    except subprocess.CalledProcessError as E:
+       print_out (message + " error ", E.output.decode('utf8'))
        raise RuntimeError("Error")
-    #if verbosity>0:
-    #print_out(message, out)
-    #print(message)
 
 def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir = '/tmp', recompile = False, no_clean = False):
     """
@@ -90,6 +86,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
         except: # we clean if fail
             os.chdir(old_cwd)
             if not no_clean : shutil.rmtree(module_dirname)
+            raise
 
         finally:
             os.chdir(old_cwd)
