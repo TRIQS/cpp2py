@@ -1,5 +1,8 @@
 #pragma once
+#include "./../pyref.hpp"
 #include "./complex.hpp"
+
+#include <numpy/arrayobject.h>
 
 namespace cpp2py {
 
@@ -28,17 +31,26 @@ namespace cpp2py {
 
   // --- long
 
-  namespace details{
+  namespace details {
     template <typename I> struct py_converter_impl {
       static PyObject *c2py(I i) { return PyLong_FromLong(long(i)); }
-      static I py2c(PyObject *ob) { return I(PyLong_AsLong(ob)); }
+      static I py2c(PyObject *ob) {
+        if (PyLong_Check(ob)) { return I(PyLong_AsLong(ob)); }
+        // Convert NPY Scalar Type to Builtin Type
+        pyref py_builtin = PyObject_CallMethod(ob, "item", NULL);
+        return I(PyLong_AsLong(py_builtin));
+      }
       static bool is_convertible(PyObject *ob, bool raise_exception) {
         if (PyLong_Check(ob)) return true;
+        if (PyArray_CheckScalar(ob)) {
+          pyref py_arr = PyArray_FromScalar(ob, NULL);
+          if (PyArray_ISINTEGER((PyObject *)py_arr)) return true;
+        }
         if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to integer type"); }
         return false;
       }
     };
-  }
+  } // namespace details
 
   template <> struct py_converter<long> : details::py_converter_impl<long> {};
   template <> struct py_converter<int> : details::py_converter_impl<int> {};
@@ -50,9 +62,18 @@ namespace cpp2py {
 
   template <> struct py_converter<double> {
     static PyObject *c2py(double x) { return PyFloat_FromDouble(x); }
-    static double py2c(PyObject *ob) { return PyFloat_AsDouble(ob); }
+    static double py2c(PyObject *ob) {
+      if (PyFloat_Check(ob) || PyLong_Check(ob)) { return PyFloat_AsDouble(ob); }
+      // Convert NPY Scalar Type to Builtin Type
+      pyref py_builtin = PyObject_CallMethod(ob, "item", NULL);
+      return PyFloat_AsDouble(py_builtin);
+    }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyFloat_Check(ob) || PyLong_Check(ob)) return true;
+      if (PyArray_CheckScalar(ob)) {
+        pyref py_arr = PyArray_FromScalar(ob, NULL);
+        if (PyArray_ISINTEGER((PyObject*)py_arr) or PyArray_ISFLOAT((PyObject*)py_arr)) return true;
+      }
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to double"); }
       return false;
     }
