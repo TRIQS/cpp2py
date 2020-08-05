@@ -4,6 +4,7 @@
 #include <numeric>
 
 #include "../traits.hpp"
+#include "../pyref.hpp"
 
 namespace cpp2py {
 
@@ -37,13 +38,13 @@ namespace cpp2py {
     public:
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (not PySequence_Check(ob)) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert non-sequence to std::tuple"); }
+        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple as it is not a sequence"s).c_str()); }
         return false;
       }
       pyref seq = PySequence_Fast(ob, "expected a sequence");
       // Sizes must match! Could we relax this condition to '<'?
       if (PySequence_Fast_GET_SIZE((PyObject *)seq) != std::tuple_size<tuple_t>::value) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::tuple due to improper length"); }
+        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple due to improper length"s).c_str()); }
         return false;
       }
       return is_convertible_impl((PyObject *)seq, raise_exception, std::make_index_sequence<sizeof...(Types)>());

@@ -3,6 +3,7 @@
 #include <variant>
 
 #include "../traits.hpp"
+#include "../pyref.hpp"
 
 namespace cpp2py {
 
@@ -58,7 +59,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if ((... or py_converter<std::decay_t<T>>::is_convertible(ob, false))) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::variant"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::variant"s).c_str()); }
       return false;
     }
 

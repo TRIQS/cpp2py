@@ -4,6 +4,7 @@
 
 #include "./get_module.hpp"
 #include "./macros.hpp"
+#include "./pyref.hpp"
 
 #include <string>
 #include <complex>
@@ -246,7 +247,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (conv_t::is_convertible(ob, false)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to ... failed"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to ... failed"s).c_str()); }
       return false;
     }
 
@@ -267,7 +268,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (conv_t::is_convertible(ob, false)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to ... failed"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to ... failed"s).c_str()); }
       return false;
     }
 
