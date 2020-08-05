@@ -1,5 +1,6 @@
 #pragma once
 #include "../traits.hpp"
+#include "../pyref.hpp"
 
 namespace cpp2py {
 
@@ -23,7 +24,7 @@ namespace cpp2py {
         return true;
       }
     _false:
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::pair"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::pair"s).c_str()); }
       return false;
     }
 

@@ -4,6 +4,7 @@
 #include <numpy/arrayobject.h>
 
 #include "../traits.hpp"
+#include "../pyref.hpp"
 #include "../macros.hpp"
 #include "../numpy_proxy.hpp"
 
@@ -92,7 +93,7 @@ namespace cpp2py {
       }
 
       if (!PySequence_Check(ob)) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert a non-sequence to std::vector"); }
+        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector as it is not a sequence"s).c_str()); }
         return false;
       }
 

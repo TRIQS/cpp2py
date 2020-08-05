@@ -4,6 +4,7 @@
 #include "./get_module.hpp"
 
 #include <string>
+using namespace std::string_literals;
 
 namespace cpp2py {
 
@@ -140,4 +141,10 @@ namespace cpp2py {
     Py_XINCREF(ob);
     return {ob};
   }
+
+  inline std::string to_string(PyObject * ob){
+    pyref py_str = PyObject_Str(ob);
+    return PyUnicode_AsUTF8(py_str);
+  }
+
 } // namespace cpp2py

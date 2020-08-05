@@ -1,5 +1,5 @@
 #pragma once
-#include "./../pyref.hpp"
+#include "../pyref.hpp"
 
 #include <numpy/arrayobject.h>
 
@@ -34,7 +34,7 @@ namespace cpp2py {
         pyref py_arr = PyArray_FromScalar(ob, NULL);
         if (PyArray_ISINTEGER((PyObject*)py_arr) or PyArray_ISFLOAT((PyObject*)py_arr) or PyArray_ISCOMPLEX((PyObject*)py_arr)) return true;
       }
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to complex"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to complex"s).c_str()); }
       return false;
     }
   };

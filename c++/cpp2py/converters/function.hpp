@@ -1,6 +1,6 @@
 #pragma once
 #include <functional>
-#include "./../misc.hpp"
+#include "../pyref.hpp"
 
 namespace cpp2py {
 
@@ -172,7 +172,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyCallable_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to std::function a non callable object"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " std::function as it is not callable"s).c_str()); }
       return false;
     }
 

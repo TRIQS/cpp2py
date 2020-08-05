@@ -1,5 +1,5 @@
 #pragma once
-//#include <string>
+#include "../pyref.hpp"
 
 namespace cpp2py {
 
@@ -11,7 +11,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyUnicode_Check(ob) or PyUnicode_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to string"s).c_str()); }
       return false;
     }
   };
@@ -24,7 +24,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyUnicode_Check(ob) and PyUnicode_GET_LENGTH(ob) == 1) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to char"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to char"s).c_str()); }
       return false;
     }
   };
@@ -37,7 +37,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyBytes_Check(ob) and PyBytes_Size(ob) == 1) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to unsigned char"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to unsigned char"s).c_str()); }
       return false;
     }
   };
@@ -50,7 +50,7 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyUnicode_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to string"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to string"s).c_str()); }
       return false;
     }
   };

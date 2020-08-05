@@ -1,5 +1,5 @@
 #pragma once
-#include "./../pyref.hpp"
+#include "../pyref.hpp"
 #include "./complex.hpp"
 
 #include <numpy/arrayobject.h>
@@ -24,7 +24,7 @@ namespace cpp2py {
     static bool py2c(PyObject *ob) { return ob == Py_True; }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyBool_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to bool"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to bool"s).c_str()); }
       return false;
     }
   };
@@ -46,7 +46,7 @@ namespace cpp2py {
           pyref py_arr = PyArray_FromScalar(ob, NULL);
           if (PyArray_ISINTEGER((PyObject *)py_arr)) return true;
         }
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to integer type"); }
+        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to integer type"s).c_str()); }
         return false;
       }
     };
@@ -74,7 +74,7 @@ namespace cpp2py {
         pyref py_arr = PyArray_FromScalar(ob, NULL);
         if (PyArray_ISINTEGER((PyObject*)py_arr) or PyArray_ISFLOAT((PyObject*)py_arr)) return true;
       }
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, "Cannot convert to double"); }
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to double"s).c_str()); }
       return false;
     }
   };
