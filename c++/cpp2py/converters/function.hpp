@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include "./../misc.hpp"
 
 namespace cpp2py {
 
@@ -185,6 +186,9 @@ namespace cpp2py {
       pyref py_fnt = borrowed(ob);
       auto l       = [py_fnt](T... x) mutable -> R { // py_fnt is a pyref, it will keep the ref and manage the ref counting...
         pyref ret  = PyObject_CallFunctionObjArgs(py_fnt, (PyObject *)pyref(convert_to_python(x))..., NULL);
+        if (not py_converter<R>::is_convertible(ret, false)) {
+          CPP2PY_RUNTIME_ERROR << "\n Cannot convert function result " << to_string(ret) << " from python to C++";
+        }
         return py_converter<R>::py2c(ret);
       };
       return l;
