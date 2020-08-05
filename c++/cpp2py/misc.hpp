@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "./exceptions.hpp"
+#include "./pyref.hpp"
 #include <time.h>
 
 // silence warning on intel
@@ -10,6 +12,11 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 namespace cpp2py {
+
+  inline std::string to_string(PyObject * ob){
+    pyref py_str = PyObject_Str(ob);
+    return PyUnicode_AsUTF8(py_str);
+  }
 
   inline char *get_current_time() { // helper function to print the time in the CATCH_AND_RETURN macro
     time_t rawtime;
