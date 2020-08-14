@@ -1,10 +1,7 @@
-
-      ALPHA: BEING TESTED
-
-Cpp2Py is the Python-C++ interfacing tool of the TRIQS project, provided here as a standalone project. (The TRIQS website is under http://ipht.cea.fr/triqs. Start there to learn about TRIQS.)
+Cpp2Py is the Python-C++ interfacing tool of the [TRIQS](https://triqs.github.io) project, provided here as a standalone project.
 
 Installation
-====================
+============
 
 To install Cpp2Py, follow the installation steps:
 
@@ -15,50 +12,48 @@ cmake -DCMAKE_INSTALL_PREFIX=INSTALL_DIR ../cpp2py
 make && make install
 ```
 
-This installs the library in `INSTALL_DIR`. You should now update your PYTHONPATH to make it available to the python interpreter:
+This installs the library in `INSTALL_DIR`.
+In order to make Cpp2Py available in your current environment you should run
 
 ```bash
-export PYTHONPATH=INSTALL_DIR/lib/python3.4/site-packages:$PYTHONPATH
+source INSTALL_DIR/share/cpp2pyvars.sh
 ```
 
 
-
 Example
-================
+=======
 
-Suppose you have created a c++ source file `mymodule.hpp` in a folder `SRC`:
+Make sure that you have loaded Cpp2Py into your environment as instructed above.
+Created a C++ source file `mymodule.hpp` in a folder `SRC`:
 
 ```c++
 ///A wonderful little class
 class myclass{
-	int a,b;
+  int a, b;
 
-	public:
-		myclass(int a_, int b_):a(a_),b(b_){}
+  public:
+    myclass(int a_, int b_) : a(a_), b(b_) {}
 
-	///getter for member a
-	int get_a() const { return a;} 
+    ///getter for member a
+    int get_a() const { return a;}
 };
 ```
 
 In the same folder, create a file `CMakeLists.txt`:
 
 ```cmake
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.0.2)
 find_package(Cpp2Py REQUIRED)
 
-set(CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH "INSTALL_DIR/lib/python3.4/site-packages/")
-
-include_directories(${Cpp2Py_DIR}/../../include)
-include_directories(.)
-
 add_cpp2py_module(mymodule)
+target_compile_options(mymodule PRIVATE -std=c++17)
+target_include_directories(mymodule PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 ```
 
 Then, in the `SRC` folder, issue the command
 
 ```
-INSTALL_DIR/bin/c++2py mymodule.hpp 
+c++2py mymodule.hpp
 ```
 
 This creates a file `mymodule_desc.py`.
@@ -67,8 +62,8 @@ Exit the `SRC` folder and create a `BUILD` folder. Then, issue the following com
 
 ```bash
 cd BUILD
-cmake -DCMAKE_PREFIX_PATH=INSTALL_DIR/lib/cmake/cpp2py ../SRC
-make 
+cmake ../SRC
+make
 ```
 
 In the `BUILD` dir, you should see a `mymodule.so` file. You can now use your c++ class in Python:
@@ -76,7 +71,7 @@ In the `BUILD` dir, you should see a `mymodule.so` file. You can now use your c+
 ```python
 import mymodule
 A = mymodule.Myclass(4,5)
-A.get_a() #outputs 4
+print(A.get_a())
 ```
 
 By convention, c++ classes of the type `my_little_class` are converted in python classes of the type `MyLittleClass`.
