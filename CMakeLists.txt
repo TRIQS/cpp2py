@@ -55,6 +55,7 @@ set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libcl
 
 find_package(Python)
 set(CPP2PY_PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} CACHE FILEPATH "Python Executable")
+set(CPP2PY_PYTHON_LIB_DEST_ROOT ${PYTHON_LIB_DEST_ROOT} CACHE FILEPATH "Python module directory")
 add_library(cpp2py::python_and_numpy ALIAS python_and_numpy)
 install(TARGETS python_and_numpy EXPORT Cpp2PyTargets)
 
