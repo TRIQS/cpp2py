@@ -287,7 +287,7 @@ class Cpp2Desc:
         types_being_wrapped_or_converted = param_cls_list + self.all_classes + self.all_enums
         import_list, converters_list = self.DE(self.get_all_params_ret_type(param_cls_list), types_being_wrapped_or_converted)
         if any(map(self.has_hdf5_format, self.all_classes)):
-            import_list.append("_h5py")
+            import_list.append("h5._h5py")
 
         # Reporting
         if self.all_classes:
