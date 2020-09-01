@@ -52,7 +52,11 @@ function(add_cpp2py_module)
   target_link_libraries(${module_name} cpp2py)
 
   # We expose only the modules init function in the dynamic symbol table
-  target_compile_options(${module_name} PRIVATE -fvisibility=hidden -fvisibility-inlines-hidden)
+  # Use only for Linux as OSX Generates various linker warnings
+  target_compile_options(${module_name} PRIVATE
+    $<$<PLATFORM_ID:Linux>:-fvisibility=hidden>
+    $<$<PLATFORM_ID:Linux>:-fvisibility-inlines-hidden>
+  )
 
   set_target_properties(${module_name}
     PROPERTIES
