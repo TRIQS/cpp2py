@@ -1,5 +1,3 @@
-#!@PYTHON_EXECUTABLE@
-
 # Acts as cp -rs on Linux
 # Workaround for the absence of this option on OS X
 # Usage cp_rs SRC DEST

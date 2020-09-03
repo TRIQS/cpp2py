@@ -41,9 +41,6 @@ set_property(TARGET c++2rst PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/b
 add_executable(c++2cxx IMPORTED GLOBAL)
 set_property(TARGET c++2cxx PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/c++2cxx")
 
-add_executable(cp_rs IMPORTED GLOBAL)
-set_property(TARGET cp_rs PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/bin/cp_rs")
-
 # include the exported targets of this project
 include(@CMAKE_INSTALL_PREFIX@/lib/cmake/Cpp2Py/Cpp2PyTargets.cmake)
 

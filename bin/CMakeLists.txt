@@ -1,4 +1,4 @@
-set(scripts c++2py c++2rst c++2cxx cp_rs)
+set(scripts c++2py c++2rst c++2cxx)
 
 foreach(script ${scripts})
   configure_file(${script}.in ${script} @ONLY)
