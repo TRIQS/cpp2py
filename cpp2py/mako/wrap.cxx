@@ -687,14 +687,14 @@ static Py_ssize_t ${c.py_type}___len__(PyObject *self) {
 // after rebuilding args.
 %if "__getitem__impl" in c.methods :
 static PyObject* ${c.py_type}___getitem__(PyObject *self, PyObject *key) {
- pyref args =  (PyTuple_Check(key) ? borrowed(key) : pyref(PyTuple_Pack(1,key)));
+ pyref args =  (PyTuple_Check(key) ? cpp2py::borrowed(key) : pyref(PyTuple_Pack(1,key)));
  return ${c.py_type}___getitem__impl(self,args,NULL);
 }
 %endif
 
 %if "__setitem__impl" in c.methods :
 static int ${c.py_type}___setitem__(PyObject *self, PyObject *key, PyObject *v) {
- pyref args =  (PyTuple_Check(key) ? borrowed(key) : pyref(PyTuple_Pack(1,key)));
+ pyref args =  (PyTuple_Check(key) ? cpp2py::borrowed(key) : pyref(PyTuple_Pack(1,key)));
  pyref args2 = PySequence_Concat(args, pyref(PyTuple_Pack(1,v)));
  pyref res =  ${c.py_type}___setitem__impl(self,args2,NULL);
  return (res.is_null() ? -1 : 0); // the function will return None, we want to change to an int
