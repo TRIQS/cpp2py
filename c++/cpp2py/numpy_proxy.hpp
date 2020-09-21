@@ -48,6 +48,7 @@ namespace cpp2py {
 
   //
   template <typename T> inline constexpr long npy_type = -1;
+  template <typename T> inline constexpr long npy_type<T const> = npy_type<T>;
   template <typename T> inline constexpr bool has_npy_type = (npy_type<T> >= 0);
 
 #define NPY_CONVERT(C, P) template <> inline constexpr long npy_type<C> = P;
