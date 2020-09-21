@@ -31,7 +31,7 @@ namespace cpp2py {
     long element_type = 0;
     void *data        = nullptr;
     bool is_const     = false;
-    std::vector<long> extents, strides;
+    std::vector<npy_intp> extents, strides;
     PyObject *base = nullptr; // The ref. counting guard typically
 
     // Returns a new ref (or NULL if failure) with a new numpy.

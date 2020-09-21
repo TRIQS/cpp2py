@@ -84,13 +84,13 @@ namespace cpp2py {
 
 #ifdef PYTHON_NUMPY_VERSION_LT_17
     for (long i = 0; i < result.rank; ++i) {
-      result.extents[i] = size_t(arr->dimensions[i]);
-      result.strides[i] = std::ptrdiff_t(arr->strides[i]);
+      result.extents[i] = arr->dimensions[i];
+      result.strides[i] = arr->strides[i];
     }
 #else
     for (size_t i = 0; i < result.rank; ++i) {
-      result.extents[i] = size_t(PyArray_DIMS(arr)[i]);
-      result.strides[i] = std::ptrdiff_t(PyArray_STRIDES(arr)[i]);
+      result.extents[i] = PyArray_DIMS(arr)[i];
+      result.strides[i] = PyArray_STRIDES(arr)[i];
     }
 #endif
 
