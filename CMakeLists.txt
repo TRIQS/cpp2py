@@ -104,20 +104,23 @@ endif()
 #   Remind the user how to set up his/her variables
 #--------------------------------------------------------
 
-if(NOT IS_SUBPROJECT)
+if(NOT IS_SUBPROJECT
+  AND NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
+  AND NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr/local"
+)
   # Configure and install the file to source to setup the environment variables
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2pyvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh @ONLY)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cpp2py.modulefile.in ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile @ONLY)
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION  ${CMAKE_INSTALL_PREFIX}/share)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cpp2pyvars.sh DESTINATION share/Cpp2Py)
   message(STATUS "***************************************************************")
   message(STATUS "* Use :                                                        ")
-  message(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/cpp2pyvars.sh         ")
+  message(STATUS "*   source ${CMAKE_INSTALL_PREFIX}/share/Cpp2Py/cpp2pyvars.sh  ")
   message(STATUS "*   to set up the environment variables                        ")
   if(DEFINED ENV{MODULEPATH})
-    message(STATUS "*                                                              ")
-    message(STATUS "* Consider adding ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile")
-    message(STATUS "*   to your environment modules                                ")
+    message(STATUS "*                                                                ")
+    message(STATUS "* Consider copying ${CMAKE_CURRENT_BINARY_DIR}/cpp2py.modulefile ")
+    message(STATUS "*   into your environment module directories                     ")
   endif()
   message(STATUS "***************************************************************")
 endif()
