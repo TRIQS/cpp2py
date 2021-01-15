@@ -52,6 +52,15 @@ using namespace cpp2py;
 ${module._preamble}
 
 
+<%
+  import re
+  def get_c_str_literal(s):
+      s = repr(s)[1:-1] # Remove ' ' from repr
+      s = re.sub(r"(?<!\\)\"",r"\"", s) # Escape double quotes
+      s = re.sub(r"\'",r"'", s) # Unescape single quotes
+      return s
+%>
+
 //------------------------------------------------------------------------------------------------------
 // Second all the classes and enums wrapped by imported modules
 // Most converters will be automatically included
@@ -369,19 +378,19 @@ NULL     /* mp_ass_subscript*/
 static PyGetSetDef ${c.py_type}_getseters[] = {
 
 %for mb in [m for m in c.members if not m.read_only] :
-{"${mb.py_name}", (getter)${c.py_type}__get_member_${mb.py_name}, ${c.py_type}__set_member_${mb.py_name}, "${mb._generate_doc()}", NULL},
+{"${mb.py_name}", (getter)${c.py_type}__get_member_${mb.py_name}, ${c.py_type}__set_member_${mb.py_name}, "${get_c_str_literal(mb._generate_doc())}", NULL},
 %endfor
 
 %for mb in [m for m in c.members if m.read_only] :
-{"${mb.py_name}", (getter)${c.py_type}__get_member_${mb.py_name}, NULL, "${mb._generate_doc()}", NULL},
+{"${mb.py_name}", (getter)${c.py_type}__get_member_${mb.py_name}, NULL, "${get_c_str_literal(mb._generate_doc())}", NULL},
 %endfor
 
 %for p in [p for p in c.properties if p.setter ] :
-{"${p.name}", (getter)${c.py_type}__get_prop_${p.name}, ${c.py_type}__set_prop_${p.name}, "${p._generate_doc()}", NULL},
+{"${p.name}", (getter)${c.py_type}__get_prop_${p.name}, ${c.py_type}__set_prop_${p.name}, "${get_c_str_literal(p._generate_doc())}", NULL},
 %endfor
 
 %for p in [p for p in c.properties if not p.setter ] :
-{"${p.name}", (getter)${c.py_type}__get_prop_${p.name}, NULL, "${p._generate_doc()}", NULL},
+{"${p.name}", (getter)${c.py_type}__get_prop_${p.name}, NULL, "${get_c_str_literal(p._generate_doc())}", NULL},
 %endfor
 
 {NULL}  /* Sentinel */
@@ -392,7 +401,7 @@ static PyGetSetDef ${c.py_type}_getseters[] = {
 static PyMethodDef ${c.py_type}_methods[] = {
    %for meth_name, meth in c.methods.items():
     %if not meth_name.startswith('__') :
-    {"${meth_name}", (PyCFunction)${c.py_type}_${meth_name}, METH_VARARGS| METH_KEYWORDS ${"|METH_STATIC" if meth.is_static else ""}, "${c.methods[meth_name]._generate_doc()}" },
+    {"${meth_name}", (PyCFunction)${c.py_type}_${meth_name}, METH_VARARGS| METH_KEYWORDS ${"|METH_STATIC" if meth.is_static else ""}, "${get_c_str_literal(c.methods[meth_name]._generate_doc())}" },
     %endif
    %endfor
     {"__reduce__", (PyCFunction)${c.py_type}___reduce__, METH_VARARGS, "Internal  " },
@@ -423,7 +432,7 @@ static PyTypeObject ${c.py_type}Type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "${c.doc.encode('unicode_escape').decode('utf-8')}", /* tp_doc */
+    "${get_c_str_literal(c.doc.encode('unicode_escape').decode('utf-8'))}", /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     ${c.py_type + "_richcompare"},  /* tp_richcompare */
@@ -569,9 +578,9 @@ template <> struct py_converter<${en.c_name}> {
         return ${'py_result' if not py_meth.is_constructor else '0'};
       }
       %if not py_meth.is_constructor:
-      CATCH_AND_RETURN(".. calling C++ overload \n.. ${overload._get_c_signature()} \n.. in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}", NULL);
+      CATCH_AND_RETURN(".. calling C++ overload \n.. ${get_c_str_literal(overload._get_c_signature())} \n.. in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}", NULL);
       %else:
-      CATCH_AND_RETURN (".. in calling C++ overload of constructor :\n.. ${overload._get_c_signature()}",-1);
+      CATCH_AND_RETURN (".. in calling C++ overload of constructor :\n.. ${get_c_str_literal(overload._get_c_signature())}",-1);
       %endif
      }
      %if not overload._dict_call :
@@ -585,7 +594,7 @@ template <> struct py_converter<${en.c_name}> {
     } // end overload ${overload._get_c_signature()}
   %endfor # overload
 
-   static const char * overloads_signatures[] = {${'"' + '", "'.join(ov._get_c_signature() for ov in py_meth.overloads) + '"'}};
+   static const char * overloads_signatures[] = {${'"' + '", "'.join(get_c_str_literal(ov._get_c_signature()) for ov in py_meth.overloads) + '"'}};
 
    // FIXME Factorize this
    // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
@@ -679,7 +688,7 @@ static Py_ssize_t ${c.py_type}___len__(PyObject *self) {
   ${c.methods['__len__impl'].overloads[0]._get_calling_pattern()};
   return result;
  }
- CATCH_AND_RETURN("in calling C++ function for __len__  :\n${overload._get_c_signature()}", -1);
+ CATCH_AND_RETURN("in calling C++ function for __len__  :\n${get_c_str_literal(overload._get_c_signature())}", -1);
 }
 %endif
 
@@ -932,7 +941,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject* v, PyObject *w){
      return v;
     %endif
    }
-   CATCH_AND_RETURN("in calling C++ overload \n  ${overload._get_c_signature()} \nin implementation of operator ${overload._get_calling_pattern()} ", NULL)
+   CATCH_AND_RETURN("in calling C++ overload \n  ${get_c_str_literal(overload._get_c_signature())} \nin implementation of operator ${overload._get_calling_pattern()} ", NULL)
   }
   %endfor
   //PyErr_SetString(PyExc_RuntimeError,"Error: no C++ overload found in implementation of operator ${overload._get_calling_pattern()} ");
@@ -950,7 +959,7 @@ static PyObject * ${c.py_type}_${op_name} (PyObject *v){
          ${overload._get_calling_pattern()}(convert_from_python<${overload.args[0][0]}>(v));
     return convert_to_python(std::move(r)); // in two steps to force type for expression templates in C++
    }
-   CATCH_AND_RETURN("in calling C++ overload \n  ${overload._get_c_signature()} \nin implementation of operator ${overload._get_calling_pattern()} ", NULL)
+   CATCH_AND_RETURN("in calling C++ overload \n  ${get_c_str_literal(overload._get_c_signature())} \nin implementation of operator ${overload._get_calling_pattern()} ", NULL)
   }
   %endfor
   //PyErr_SetString(PyExc_RuntimeError,"Error: no C++ overload found in implementation of operator ${overload._get_calling_pattern()} ");
@@ -1023,7 +1032,7 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
 // the table of the function of the module...
 static PyMethodDef module_methods[] = {
 %for pyf in module.functions.values():
-    {"${pyf.py_name}", (PyCFunction)${module.name}_${pyf.py_name}, METH_VARARGS| METH_KEYWORDS, "${pyf._generate_doc()}"},
+    {"${pyf.py_name}", (PyCFunction)${module.name}_${pyf.py_name}, METH_VARARGS| METH_KEYWORDS, "${get_c_str_literal(pyf._generate_doc())}"},
 %endfor
 
 %for c in module.classes.values() :
