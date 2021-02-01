@@ -124,6 +124,13 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  message(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}")
  mark_as_advanced(PYTHON_EXTRA_LIBS)
 
+ #
+ # c-api module extension
+ #
+ EXEC_PYTHON_SCRIPT("from distutils.sysconfig import *; print(get_config_var('EXT_SUFFIX'))"
+   PYTHON_MODULE_EXT)
+ set(PYTHON_MODULE_EXT ${PYTHON_MODULE_EXT} CACHE STRING "Extension of compiled Python modules")
+
  # FIXME : No clue why this is here ?? Why separate_arguments ?
  # added from issue 181. Does not work on Mac, because of -framework CoreFoundation.
  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

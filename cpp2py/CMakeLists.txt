@@ -49,7 +49,8 @@ function(add_cpp2py_module)
     COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_BINARY_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
-  target_link_libraries(${module_name} cpp2py)
+  set_target_properties(${module_name} PROPERTIES SUFFIX ${PYTHON_MODULE_EXT})
+  target_link_libraries(${module_name} cpp2py::cpp2py)
 
   # We expose only the modules init function in the dynamic symbol table
   # Use only for Linux as OSX Generates various linker warnings
