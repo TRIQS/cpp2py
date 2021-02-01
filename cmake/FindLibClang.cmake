@@ -8,27 +8,34 @@
 #
 
 include(FindPackageHandleStandardArgs)
-# First find libclang if it is not provided
 
-if( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+find_program(LLVM_CONFIG_BIN llvm-config)
+if(LLVM_CONFIG_BIN)
+  execute_process(COMMAND ${LLVM_CONFIG_BIN} --libdir OUTPUT_VARIABLE LLVM_LIBDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
-  find_library(LIBCLANG_LOCATION
-    NAMES libclang.dylib
-    HINTS
-      ENV LIBRARY_PATH
-      /usr/local/opt/llvm/lib/
-      /usr/local/Cellar/llvm/12.0.0/lib/
-      /usr/local/Cellar/llvm/11.0.0/lib/
-      /usr/local/Cellar/llvm/10.0.0/lib/
-      /usr/local/Cellar/llvm/9.0.0/lib/
-      /usr/local/Cellar/llvm/8.0.1/lib/
-      /usr/local/Cellar/llvm/8.0.0/lib/
-      /usr/local/Cellar/llvm/7.0.0/lib/
-      /usr/local/Cellar/llvm/6.0.0/lib/
-      /usr/local/Cellar/llvm/5.0.1/lib/
-      /usr/local/lib/
-      /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
-    DOC "Location of the libclang library")
+if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  if(NOT LIBCLANG_LOCATION)
+    find_library(LIBCLANG_LOCATION
+      NAMES clang
+      HINTS
+        ${LLVM_LIBDIR}
+        ENV LIBRARY_PATH
+        /usr/local/opt/llvm/lib/
+        /usr/local/Cellar/llvm/12.0.0/lib/
+        /usr/local/Cellar/llvm/11.0.0/lib/
+        /usr/local/Cellar/llvm/10.0.0/lib/
+        /usr/local/Cellar/llvm/9.0.0/lib/
+        /usr/local/Cellar/llvm/8.0.1/lib/
+        /usr/local/Cellar/llvm/8.0.0/lib/
+        /usr/local/Cellar/llvm/7.0.0/lib/
+        /usr/local/Cellar/llvm/6.0.0/lib/
+        /usr/local/Cellar/llvm/5.0.1/lib/
+        /usr/local/lib/
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
+      DOC "Location of the libclang library"
+    )
+  endif()
 
   set(LIBCLANG_CXX_FLAGS "" CACHE STRING "Additional flags to be passed to libclang when parsing with clang")
 
@@ -39,8 +46,9 @@ else()
 
   if(NOT LIBCLANG_LOCATION)
     find_library(LIBCLANG_LOCATION
-      NAMES libclang.so
+      NAMES clang
       HINTS
+        ${LLVM_LIBDIR}
         ENV LIBRARY_PATH
         ENV LD_LIBRARY_PATH
         /usr/lib
@@ -55,7 +63,8 @@ else()
         /usr/lib/llvm-5.0/lib
         /usr/lib/llvm-4.0/lib
         /usr/lib64/llvm
-      DOC "Location of the libclang library")
+      DOC "Location of the libclang library"
+    )
   endif()
 
   set(LIBCLANG_CXX_FLAGS "${LIBCLANG_CXX_FLAGS}")
