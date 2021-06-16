@@ -46,6 +46,7 @@ class Cpp2pyInfoStd:
         'std::.*map' : 'map',
         'std::.*set' : 'set',
         'std::.*vector' : 'vector',
+        'std::.*span' : 'span',
         'std::.*string' : 'string',
         'std::.*function' : 'function',
         'std::.*pair' : 'pair',
