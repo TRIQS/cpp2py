@@ -58,6 +58,7 @@ namespace cpp2py {
   NPY_CONVERT(char, NPY_STRING)
   NPY_CONVERT(signed char, NPY_BYTE)
   NPY_CONVERT(unsigned char, NPY_UBYTE)
+  NPY_CONVERT(std::byte, NPY_UBYTE)
   NPY_CONVERT(short, NPY_SHORT)
   NPY_CONVERT(unsigned short, NPY_USHORT)
   NPY_CONVERT(int, NPY_INT)
