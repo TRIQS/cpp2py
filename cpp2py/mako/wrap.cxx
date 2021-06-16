@@ -737,7 +737,7 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
  //
  static PyObject* ${c.py_type}___reduce_reconstructor__ (PyObject *self, PyObject *args, PyObject *keywds) {
     PyObject* a1 = PyTuple_GetItem(args,0); // 
-    auto a = convert_from_python<std::vector<char>>(a1);
+    auto a = convert_from_python<std::vector<std::byte>>(a1);
     try {
       return convert_to_python( h5::deserialize<${c.c_type}>(a));
     }

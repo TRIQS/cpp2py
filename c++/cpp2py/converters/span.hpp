@@ -22,7 +22,7 @@
 
 namespace cpp2py {
 
-  template <> struct py_converter<std::span<char>> {
+  template <> struct py_converter<std::span<std::byte>> {
     // --------------------------------------
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
@@ -31,9 +31,9 @@ namespace cpp2py {
 
     // --------------------------------------
 
-    static std::span<char> py2c(PyObject *ob) {
+    static std::span<std::byte> py2c(PyObject *ob) {
       auto size = PyBytes_Size(ob);
-      char * buffer = PyBytes_AsString(ob);
+      auto * buffer = reinterpret_cast<std::byte *>(PyBytes_AsString(ob));
       return {buffer, size_t(size)};
     }
   };

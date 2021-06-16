@@ -77,6 +77,19 @@ namespace cpp2py {
   template <> struct py_converter<unsigned long> : details::py_converter_impl<unsigned long> {};
   template <> struct py_converter<unsigned long long> : details::py_converter_impl<unsigned long long> {};
 
+
+  // --- byte
+
+  template <> struct py_converter<std::byte> {
+    static PyObject *c2py(std::byte b) { return PyBytes_FromStringAndSize(reinterpret_cast<char *>(&b), 1); }
+    static std::byte py2c(PyObject *ob) { return static_cast<std::byte>(PyBytes_AsString(ob)[0]); }
+    static bool is_convertible(PyObject *ob, bool raise_exception) {
+      if (PyBytes_Check(ob) and PyBytes_Size(ob) == 1) return true;
+      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to byte"s).c_str()); }
+      return false;
+    }
+  };
+
   // --- double
 
   template <> struct py_converter<double> {
