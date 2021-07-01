@@ -66,6 +66,32 @@ namespace cpp2py {
     return v;
   }
 
+  // --- Special Case: vector<bytes> <-> PyBytes
+
+  template <> struct py_converter<std::vector<std::byte>> {
+
+    static PyObject *c2py(std::vector<std::byte> const & v) {
+      auto * char_ptr = reinterpret_cast<const char *>(v.data());
+      return PyBytes_FromStringAndSize(char_ptr, v.size());
+    }
+
+    // --------------------------------------
+
+    static bool is_convertible(PyObject *ob, bool raise_exception) {
+      bool is_bytes_ob = PyBytes_Check(ob);
+      if (raise_exception and not is_bytes_ob) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector<byte> as it is not a python bytes object"s).c_str()); }
+      return is_bytes_ob;
+    }
+
+    // --------------------------------------
+
+    static std::vector<std::byte> py2c(PyObject *ob) {
+      auto size = PyBytes_Size(ob);
+      auto * buffer = reinterpret_cast<std::byte *>(PyBytes_AsString(ob));
+      return {buffer, buffer + size};
+    }
+  };
+
   // --------------------------------------
 
   template <typename T> struct py_converter<std::vector<T>> {
