@@ -524,9 +524,9 @@ template <> struct py_converter<${en.c_name}> {
      using _type_${p} = std::conditional_t<is_wrapped_v<${t}>, ${t} *, ${t}>;
      _type_${p} __${n} = ${d if d else '_type_%s{}'%p}; // not default for wrapped type please
      %endfor
-     static char *kwlist[] = {${",".join([ '"%s"'%n for t,n,d in overload.args] + ["NULL"])}};
+     static const char *kwlist[] = {${",".join([ '"%s"'%n for t,n,d in overload.args] + ["NULL"])}};
      static const char * format = "${overload._parsing_format()}";
-     if (PyArg_ParseTupleAndKeywords(args, keywds, format, kwlist
+     if (PyArg_ParseTupleAndKeywords(args, keywds, format, const_cast<char **>(kwlist)
        	${"".join([ ('' if t in ['double', 'int'] else ',converter_for_parser<'+t+'>') + ' ,&__%s'%n for t,n,d in overload.args])}))
      %endif
      {
