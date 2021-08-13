@@ -125,6 +125,7 @@ def make_synopsis_one_function(f, number):
     #r = ('%s:cppbrief:`%s`\n'%(sep,brief) if brief else '') + ('%s:green:`%s`\n'%(sep,template) if template else '')  + res + ') ' + qualif
     r =  ('%s:green:`%s`\n'%(sep,template) if template else '')  + res + ') ' + qualif
 
+    r = r.replace('*','\*')
     return r.strip()
 
 
