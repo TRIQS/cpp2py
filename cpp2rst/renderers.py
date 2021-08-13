@@ -80,9 +80,10 @@ def render_table(list_of_list):
     lcols = [len(x) for x in list_of_list[0]]
     for li in list_of_list : # compute the max length of the columns
         lcols = [ max(len(x), y) for x,y in zip(li, lcols)]
-    form =  '| ' + " | ".join("{:<%s}"%x for x in lcols).strip() + ' |'
-    sep = '+' + '+'.join((x+2) *'-' for x in lcols) + '+'
-    r = [sep]
+    form =  '   | ' + " | ".join("{:<%s}"%x for x in lcols).strip() + ' |'
+    sep = '   +' + '+'.join((x+2) *'-' for x in lcols) + '+'
+    r = [".. table::\n   :widths: 40 60\n\n"]
+    r += [sep]
     for li in list_of_list: r += [form.format(*li), sep]
     return '\n'.join(r) + '\n'
 
@@ -363,7 +364,6 @@ def render_ns(ns, all_functions, all_classes, all_usings):
 
     if all_classes:
         R += make_header('Classes')
-        R += ".. table::\n   :width: 50% 50%\n\n"
         #R += render_table([(":ref:`%s <_%s_%s>`"%(cls.spelling,escape_lg(ns), escape_lg(cls.spelling)), cls.processed_doc.elements['brief']) for cls in all_classes ])
         R += render_table([(":ref:`%s <%s>`"%(escape_lg(cls.name), cls.name_for_label), cls.processed_doc.elements['brief']) for cls in all_classes ])
         R += toctree_hidden
