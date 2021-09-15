@@ -19,6 +19,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <cstddef>
 #include <numpy/arrayobject.h>
 
 #include "../traits.hpp"

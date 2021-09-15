@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <complex>
+#include <cstddef>
 
 #include "pyref.hpp"
 

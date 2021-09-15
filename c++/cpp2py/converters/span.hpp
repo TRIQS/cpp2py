@@ -18,6 +18,7 @@
 
 #pragma once
 #include <span>
+#include <cstddef>
 #include "../pyref.hpp"
 
 namespace cpp2py {

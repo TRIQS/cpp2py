@@ -20,6 +20,8 @@
 #include "../pyref.hpp"
 #include "./complex.hpp"
 
+#include <cstddef>
+
 #include <numpy/arrayobject.h>
 
 namespace cpp2py {
