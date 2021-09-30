@@ -14,15 +14,16 @@
 //
 // Authors: Nils Wentzell
 
+// C.f. https://numpy.org/doc/1.21/reference/c-api/array.html#importing-the-api
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL _cpp2py_ARRAY_API
+
 #include "numpy_proxy.hpp"
 
 namespace cpp2py {
 
   // Make a new view_info
   PyObject *numpy_proxy::to_python() {
-
-    // Apparently we can not get rid of this
-    _import_array();
 
 #ifdef PYTHON_NUMPY_VERSION_LT_17
     int flags = NPY_BEHAVED & ~NPY_OWNDATA;
@@ -58,9 +59,6 @@ namespace cpp2py {
 
   // Extract a view_info from python
   numpy_proxy make_numpy_proxy(PyObject *obj) {
-
-    // Apparently we can not get rid of this
-    _import_array();
 
     if (obj == NULL) return {};
     if (not PyArray_Check(obj)) return {};

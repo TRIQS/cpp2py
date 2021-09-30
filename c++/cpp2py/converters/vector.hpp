@@ -124,8 +124,6 @@ namespace cpp2py {
     // --------------------------------------
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      _import_array();
-
       // Special case: 1-d ndarray of builtin type
       if (PyArray_Check(ob)) {
         PyArrayObject *arr = (PyArrayObject *)(ob);
@@ -155,8 +153,6 @@ namespace cpp2py {
     // --------------------------------------
 
     static std::vector<T> py2c(PyObject *ob) {
-      _import_array();
-
       // Special case: 1-d ndarray of builtin type
       if (PyArray_Check(ob)) {
         PyArrayObject *arr = (PyArrayObject *)(ob);

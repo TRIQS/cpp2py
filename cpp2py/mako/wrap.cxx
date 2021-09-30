@@ -5,6 +5,9 @@
 #include<cstddef>
 using dcomplex = std::complex<double>;
 
+// C.f. https://numpy.org/doc/1.21/reference/c-api/array.html#importing-the-api
+#define PY_ARRAY_UNIQUE_SYMBOL _cpp2py_ARRAY_API
+
 // first the basic stuff
 #include <cpp2py/cpp2py.hpp>
 #include <cpp2py/converters/string.hpp>
@@ -1091,9 +1094,9 @@ template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py
 extern "C" __attribute__((visibility("default"))) PyObject* PyInit_${module.name}(void)
 {
 
-#ifdef TRIQS_IMPORTED_CONVERTERS_ARRAYS
-    // import numpy
-    import_array1(NULL);
+// import numpy iff 'numpy/arrayobject.h' included
+#ifdef Py_ARRAYOBJECT_H
+    import_array();
 #endif
 
 %for c in module.imports :

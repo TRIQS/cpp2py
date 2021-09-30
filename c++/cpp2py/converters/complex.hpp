@@ -28,8 +28,6 @@ namespace cpp2py {
   template <> struct py_converter<std::complex<double>> {
     static PyObject *c2py(std::complex<double> x) { return PyComplex_FromDoubles(x.real(), x.imag()); }
     static std::complex<double> py2c(PyObject *ob) {
-
-      _import_array();
       if (PyArray_CheckScalar(ob)) {
         // Convert NPY Scalar Type to Builtin Type
         pyref py_builtin = PyObject_CallMethod(ob, "item", NULL);
@@ -49,8 +47,6 @@ namespace cpp2py {
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyComplex_Check(ob) || PyFloat_Check(ob) || PyLong_Check(ob)) return true;
-
-      _import_array();
       if (PyArray_CheckScalar(ob)) {
         pyref py_arr = PyArray_FromScalar(ob, NULL);
         if (PyArray_ISINTEGER((PyObject*)py_arr) or PyArray_ISFLOAT((PyObject*)py_arr) or PyArray_ISCOMPLEX((PyObject*)py_arr)) return true;

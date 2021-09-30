@@ -61,7 +61,6 @@ namespace cpp2py {
         return I(PyLong_AsLong(py_builtin));
       }
       static bool is_convertible(PyObject *ob, bool raise_exception) {
-        _import_array();
         if (PyLong_Check(ob)) return true;
         if (PyArray_CheckScalar(ob)) {
           pyref py_arr = PyArray_FromScalar(ob, NULL);
@@ -103,7 +102,6 @@ namespace cpp2py {
       return PyFloat_AsDouble(py_builtin);
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) {
-      _import_array();
       if (PyFloat_Check(ob) || PyLong_Check(ob)) return true;
       if (PyArray_CheckScalar(ob)) {
         pyref py_arr = PyArray_FromScalar(ob, NULL);
