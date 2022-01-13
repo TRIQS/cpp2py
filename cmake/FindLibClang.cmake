@@ -22,15 +22,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         ${LLVM_LIBDIR}
         ENV LIBRARY_PATH
         /usr/local/opt/llvm/lib/
-        /usr/local/Cellar/llvm/12.0.0/lib/
-        /usr/local/Cellar/llvm/11.0.0/lib/
-        /usr/local/Cellar/llvm/10.0.0/lib/
-        /usr/local/Cellar/llvm/9.0.0/lib/
-        /usr/local/Cellar/llvm/8.0.1/lib/
-        /usr/local/Cellar/llvm/8.0.0/lib/
-        /usr/local/Cellar/llvm/7.0.0/lib/
-        /usr/local/Cellar/llvm/6.0.0/lib/
-        /usr/local/Cellar/llvm/5.0.1/lib/
         /usr/local/lib/
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
       DOC "Location of the libclang library"
@@ -46,22 +37,24 @@ else()
 
   if(NOT LIBCLANG_LOCATION)
     find_library(LIBCLANG_LOCATION
-      NAMES clang
+      NAMES
+        clang
+        clang-16
+        clang-15
+        clang-14
+        clang-13
+        clang-12
+        clang-11
+        clang-10
+        clang-9
+        clang-8
+        clang-7
       HINTS
         ${LLVM_LIBDIR}
         ENV LIBRARY_PATH
         ENV LD_LIBRARY_PATH
         /usr/lib
         /usr/lib/x86_64-linux-gnu
-        /usr/lib/llvm-12/lib
-        /usr/lib/llvm-11/lib
-        /usr/lib/llvm-10/lib
-        /usr/lib/llvm-9/lib
-        /usr/lib/llvm-8/lib
-        /usr/lib/llvm-7/lib
-        /usr/lib/llvm-6.0/lib
-        /usr/lib/llvm-5.0/lib
-        /usr/lib/llvm-4.0/lib
         /usr/lib64/llvm
       DOC "Location of the libclang library"
     )
@@ -75,15 +68,16 @@ else()
     find_program(CLANG_COMPILER
       NAMES
         clang++
+        clang++-16
+        clang++-15
+        clang++-14
+        clang++-13
         clang++-12
         clang++-11
         clang++-10
         clang++-9
         clang++-8
         clang++-7
-        clang++-6.0
-        clang++-5.0
-        clang++-4.0
       HINTS
         ENV PATH
         /usr/bin
