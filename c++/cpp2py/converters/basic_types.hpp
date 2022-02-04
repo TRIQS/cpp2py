@@ -78,7 +78,6 @@ namespace cpp2py {
   template <> struct py_converter<unsigned long> : details::py_converter_impl<unsigned long> {};
   template <> struct py_converter<unsigned long long> : details::py_converter_impl<unsigned long long> {};
 
-
   // --- byte
 
   template <> struct py_converter<std::byte> {
@@ -105,7 +104,7 @@ namespace cpp2py {
       if (PyFloat_Check(ob) || PyLong_Check(ob)) return true;
       if (PyArray_CheckScalar(ob)) {
         pyref py_arr = PyArray_FromScalar(ob, NULL);
-        if (PyArray_ISINTEGER((PyObject*)py_arr) or PyArray_ISFLOAT((PyObject*)py_arr)) return true;
+        if (PyArray_ISINTEGER((PyObject *)py_arr) or PyArray_ISFLOAT((PyObject *)py_arr)) return true;
       }
       if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to double"s).c_str()); }
       return false;

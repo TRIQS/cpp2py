@@ -61,7 +61,7 @@ namespace cpp2py {
       if (conv::is_convertible(ob, false)) return conv::py2c(ob);
       if constexpr (N < sizeof...(T) - 1)
         return py2c_impl<N + 1>(ob);
-      else  
+      else
         CPP2PY_RUNTIME_ERROR << "Internal error: py2c called for a Python object incompatible with std::variant";
     }
 

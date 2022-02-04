@@ -89,9 +89,9 @@ namespace cpp2py {
 namespace cpp2py {
 
   bool exception::show_cpp_trace = false;
- 
+
   exception::exception() : std::exception() { _trace = stack_trace(); }
-  
+
   const char *exception::what() const noexcept {
     std::stringstream out;
     out << acc.str() << "\n.. Error occurred ";
@@ -108,9 +108,4 @@ namespace cpp2py {
     return _what.c_str();
   }
 
-
-
 } // namespace cpp2py
-
-
-

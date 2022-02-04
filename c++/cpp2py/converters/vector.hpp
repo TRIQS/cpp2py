@@ -60,9 +60,8 @@ namespace cpp2py {
 
     std::vector<T> v(size);
 
-    T *data   = static_cast<T *>(p.data);
-    for(long i = 0; i < size; ++i)
-      v[i] = *(data + i * step);
+    T *data = static_cast<T *>(p.data);
+    for (long i = 0; i < size; ++i) v[i] = *(data + i * step);
 
     return v;
   }
@@ -71,8 +70,8 @@ namespace cpp2py {
 
   template <> struct py_converter<std::vector<std::byte>> {
 
-    static PyObject *c2py(std::vector<std::byte> const & v) {
-      auto * char_ptr = reinterpret_cast<const char *>(v.data());
+    static PyObject *c2py(std::vector<std::byte> const &v) {
+      auto *char_ptr = reinterpret_cast<const char *>(v.data());
       return PyBytes_FromStringAndSize(char_ptr, v.size());
     }
 
@@ -80,15 +79,17 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       bool is_bytes_ob = PyBytes_Check(ob);
-      if (raise_exception and not is_bytes_ob) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector<byte> as it is not a python bytes object"s).c_str()); }
+      if (raise_exception and not is_bytes_ob) {
+        PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector<byte> as it is not a python bytes object"s).c_str());
+      }
       return is_bytes_ob;
     }
 
     // --------------------------------------
 
     static std::vector<std::byte> py2c(PyObject *ob) {
-      auto size = PyBytes_Size(ob);
-      auto * buffer = reinterpret_cast<std::byte *>(PyBytes_AsString(ob));
+      auto size    = PyBytes_Size(ob);
+      auto *buffer = reinterpret_cast<std::byte *>(PyBytes_AsString(ob));
       return {buffer, buffer + size};
     }
   };
@@ -106,12 +107,12 @@ namespace cpp2py {
       } else { // Convert to Python List
         PyObject *list = PyList_New(0);
         for (auto &x : v) {
-	  pyref y;
-	  if constexpr(std::is_reference_v<V>){
+          pyref y;
+          if constexpr (std::is_reference_v<V>) {
             y = py_converter<value_type>::c2py(x);
-	  } else { // Vector passed as rvalue
+          } else { // Vector passed as rvalue
             y = py_converter<value_type>::c2py(std::move(x));
-	  }
+          }
           if (y.is_null() or (PyList_Append(list, y) == -1)) {
             Py_DECREF(list);
             return NULL;
@@ -136,7 +137,9 @@ namespace cpp2py {
       }
 
       if (!PySequence_Check(ob)) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector as it is not a sequence"s).c_str()); }
+        if (raise_exception) {
+          PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::vector as it is not a sequence"s).c_str());
+        }
         return false;
       }
 

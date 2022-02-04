@@ -115,57 +115,57 @@ namespace cpp2py {
 
     static PyTypeObject get_type() {
       return {
-         PyVarObject_HEAD_INIT(NULL, 0)       /*ob_size*/
-         "std_function",                      /*tp_name*/
-         sizeof(std_function),                /*tp_basicsize*/
-         0,                                   /*tp_itemsize*/
+         PyVarObject_HEAD_INIT(NULL, 0) /*ob_size*/
+         "std_function",                /*tp_name*/
+         sizeof(std_function),          /*tp_basicsize*/
+         0,                             /*tp_itemsize*/
 
-         (destructor)std_function_dealloc,    /*tp_dealloc*/
-         0,                                   /*tp_print*/
-         0,                                   /*tp_getattr*/
-         0,                                   /*tp_setattr*/
-         0,                                   /*tp_compare in py2, tp_as_async in py3*/
+         (destructor)std_function_dealloc, /*tp_dealloc*/
+         0,                                /*tp_print*/
+         0,                                /*tp_getattr*/
+         0,                                /*tp_setattr*/
+         0,                                /*tp_compare in py2, tp_as_async in py3*/
 
-         0,                                   /*tp_repr*/
+         0, /*tp_repr*/
 
-         0,                                   /*tp_as_number*/
-         0,                                   /*tp_as_sequence*/
-         0,                                   /*tp_as_mapping*/
+         0, /*tp_as_number*/
+         0, /*tp_as_sequence*/
+         0, /*tp_as_mapping*/
 
-         0,                                   /*tp_hash */
-         (ternaryfunc)std_function_call,      /*tp_call*/
-         0,                                   /*tp_str*/
-         0,                                   /*tp_getattro*/
-         0,                                   /*tp_setattro*/
+         0,                              /*tp_hash */
+         (ternaryfunc)std_function_call, /*tp_call*/
+         0,                              /*tp_str*/
+         0,                              /*tp_getattro*/
+         0,                              /*tp_setattro*/
 
-         0,                                   /*tp_as_buffer*/
+         0, /*tp_as_buffer*/
 
-         Py_TPFLAGS_DEFAULT,                  /*tp_flags*/
+         Py_TPFLAGS_DEFAULT, /*tp_flags*/
 
          "Internal wrapper of std::function", /* tp_doc */
 
-         0,                                   /* tp_traverse */
+         0, /* tp_traverse */
 
-         0,                                   /* tp_clear */
+         0, /* tp_clear */
 
-         0,                                   /* tp_richcompare */
+         0, /* tp_richcompare */
 
-         0,                                   /* tp_weaklistoffset */
+         0, /* tp_weaklistoffset */
 
-         0,                                   /* tp_iter */
-         0,                                   /* tp_iternext */
+         0, /* tp_iter */
+         0, /* tp_iternext */
 
-         0,                                   /* tp_methods */
-         0,                                   /* tp_members */
-         0,                                   /* tp_getset */
-         0,                                   /* tp_base */
-         0,                                   /* tp_dict */
-         0,                                   /* tp_descr_get */
-         0,                                   /* tp_descr_set */
-         0,                                   /* tp_dictoffset */
-         0,                                   /* tp_init */
-         0,                                   /* tp_alloc */
-         (newfunc)std_function_new,           /* tp_new */
+         0,                         /* tp_methods */
+         0,                         /* tp_members */
+         0,                         /* tp_getset */
+         0,                         /* tp_base */
+         0,                         /* tp_dict */
+         0,                         /* tp_descr_get */
+         0,                         /* tp_descr_set */
+         0,                         /* tp_dictoffset */
+         0,                         /* tp_init */
+         0,                         /* tp_alloc */
+         (newfunc)std_function_new, /* tp_new */
       };
     }
 
@@ -190,7 +190,9 @@ namespace cpp2py {
 
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (PyCallable_Check(ob)) return true;
-      if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " std::function as it is not callable"s).c_str()); }
+      if (raise_exception) {
+        PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " std::function as it is not callable"s).c_str());
+      }
       return false;
     }
 
@@ -203,9 +205,9 @@ namespace cpp2py {
       // otherwise, we build a new std::function around the python function
       pyref py_fnt = borrowed(ob);
       auto l       = [py_fnt](T... x) mutable -> R { // py_fnt is a pyref, it will keep the ref and manage the ref counting...
-        pyref ret  = PyObject_CallFunctionObjArgs(py_fnt, (PyObject *)pyref(convert_to_python(x))..., NULL);
+        pyref ret = PyObject_CallFunctionObjArgs(py_fnt, (PyObject *)pyref(convert_to_python(x))..., NULL);
         if (not py_converter<R>::is_convertible(ret, false)) {
-          CPP2PY_RUNTIME_ERROR << "\n Cannot convert function result " << to_string(ret) << " from python to C++";
+                CPP2PY_RUNTIME_ERROR << "\n Cannot convert function result " << to_string(ret) << " from python to C++";
         }
         return py_converter<R>::py2c(ret);
       };

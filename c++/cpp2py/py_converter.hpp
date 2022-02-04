@@ -74,20 +74,18 @@ namespace cpp2py {
   inline std::shared_ptr<conv_table_t> get_conv_table_from_main() {
     // Fetch __main__ module
     pyref str_main = PyUnicode_FromString("__main__");
-    pyref mod = PyImport_GetModule(str_main);
+    pyref mod      = PyImport_GetModule(str_main);
     if (mod == nullptr) {
       PyErr_SetString(PyExc_RuntimeError, "Severe internal error : can not load __main__");
       throw std::runtime_error("Severe internal error : can not load __main__");
     }
 
     // Return ptr from __cpp2py_table attribute if available
-    if(not PyObject_HasAttrString(mod, "__cpp2py_table"))
-      return {};
+    if (not PyObject_HasAttrString(mod, "__cpp2py_table")) return {};
     pyref capsule = PyObject_GetAttrString(mod, "__cpp2py_table");
-    if(capsule.is_null())
-      throw std::runtime_error("Severe internal error : can not load __main__.__cpp2py_table");
-    void * ptr = PyCapsule_GetPointer(capsule, "__main__.__cpp2py_table"); 
-    return {*static_cast<std::shared_ptr<conv_table_t> *>(ptr)}; 
+    if (capsule.is_null()) throw std::runtime_error("Severe internal error : can not load __main__.__cpp2py_table");
+    void *ptr = PyCapsule_GetPointer(capsule, "__main__.__cpp2py_table");
+    return {*static_cast<std::shared_ptr<conv_table_t> *>(ptr)};
   }
 
   // Destructor used to clean the capsule containing the converter table pointer
@@ -101,15 +99,15 @@ namespace cpp2py {
     std::shared_ptr<conv_table_t> sptr = get_conv_table_from_main();
 
     // Init map if pointer in main is null
-    if(not sptr){
+    if (not sptr) {
       sptr = std::make_shared<conv_table_t>();
 
       // Now register the pointer in __main__
-      PyObject * mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
-      auto * p = new std::shared_ptr<conv_table_t>{sptr};
-      pyref c = PyCapsule_New((void *)p, "__main__.__cpp2py_table", (PyCapsule_Destructor)_table_destructor);
-      pyref s = PyUnicode_FromString("__cpp2py_table");
-      int err = PyObject_SetAttr(mod, s, c);
+      PyObject *mod = PyImport_GetModule(PyUnicode_FromString("__main__"));
+      auto *p       = new std::shared_ptr<conv_table_t>{sptr};
+      pyref c       = PyCapsule_New((void *)p, "__main__.__cpp2py_table", (PyCapsule_Destructor)_table_destructor);
+      pyref s       = PyUnicode_FromString("__cpp2py_table");
+      int err       = PyObject_SetAttr(mod, s, c);
       if (err) {
         PyErr_SetString(PyExc_RuntimeError, "Can not add the __cpp2py_table to main");
         throw std::runtime_error("Can not add the __cpp2py_table to main");
@@ -125,7 +123,7 @@ namespace cpp2py {
   // if the type was not wrapped, return nullptr and set up a Python exception
   inline PyTypeObject *get_type_ptr(std::type_index const &ind) {
     conv_table_t &conv_table = *conv_table_sptr.get();
-    PyTypeObject *r = nullptr;
+    PyTypeObject *r          = nullptr;
 
     auto it = conv_table.find(ind.name());
     if (it != conv_table.end()) return it->second;
@@ -170,7 +168,7 @@ namespace cpp2py {
       if (p == nullptr) return false;
       if (PyObject_TypeCheck(ob, p)) {
         if (((py_type *)ob)->_c != NULL) return true;
-	auto err = std::string{"Severe internal error : Python object of "} + p->tp_name + " has a _c NULL pointer !!";
+        auto err = std::string{"Severe internal error : Python object of "} + p->tp_name + " has a _c NULL pointer !!";
         if (raise_exception) PyErr_SetString(PyExc_TypeError, err.c_str());
         return false;
       }

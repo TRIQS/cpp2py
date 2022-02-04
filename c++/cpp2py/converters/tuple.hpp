@@ -48,11 +48,8 @@ namespace cpp2py {
     // -----------------------------------------
 
     private:
-
     // Helper function needed due to clang v6 and v7 parameter pack issue
-    static auto py_seq_fast_get_item(PyObject *seq, Py_ssize_t i) {
-      return PySequence_Fast_GET_ITEM(seq, i);
-    }
+    static auto py_seq_fast_get_item(PyObject *seq, Py_ssize_t i) { return PySequence_Fast_GET_ITEM(seq, i); }
 
     // is_convertible implementation
     template <auto... Is> static bool is_convertible_impl(PyObject *seq, bool raise_exception, std::index_sequence<Is...>) {
@@ -62,13 +59,17 @@ namespace cpp2py {
     public:
     static bool is_convertible(PyObject *ob, bool raise_exception) {
       if (not PySequence_Check(ob)) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple as it is not a sequence"s).c_str()); }
+        if (raise_exception) {
+          PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple as it is not a sequence"s).c_str());
+        }
         return false;
       }
       pyref seq = PySequence_Fast(ob, "expected a sequence");
       // Sizes must match! Could we relax this condition to '<'?
       if (PySequence_Fast_GET_SIZE((PyObject *)seq) != std::tuple_size<tuple_t>::value) {
-        if (raise_exception) { PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple due to improper length"s).c_str()); }
+        if (raise_exception) {
+          PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to std::tuple due to improper length"s).c_str());
+        }
         return false;
       }
       return is_convertible_impl((PyObject *)seq, raise_exception, std::make_index_sequence<sizeof...(Types)>());

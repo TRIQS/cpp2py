@@ -48,13 +48,13 @@ namespace cpp2py {
   PyObject *make_numpy_copy(PyObject *obj, int rank, long elements_type);
 
   //
-  template <typename T> inline constexpr long npy_type = -1;
+  template <typename T> inline constexpr long npy_type          = -1;
   template <typename T> inline constexpr long npy_type<T const> = npy_type<T>;
-  template <typename T> inline constexpr bool has_npy_type = (npy_type<T> >= 0);
+  template <typename T> inline constexpr bool has_npy_type      = (npy_type<T> >= 0);
 
 #define NPY_CONVERT(C, P) template <> inline constexpr long npy_type<C> = P;
   NPY_CONVERT(pyref, NPY_OBJECT)
-  NPY_CONVERT(PyObject*, NPY_OBJECT)
+  NPY_CONVERT(PyObject *, NPY_OBJECT)
   NPY_CONVERT(bool, NPY_BOOL)
   NPY_CONVERT(char, NPY_STRING)
   NPY_CONVERT(signed char, NPY_BYTE)

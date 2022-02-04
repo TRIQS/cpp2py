@@ -125,4 +125,4 @@ namespace cpp2py {
     return PyArray_FromAny(obj, PyArray_DescrFromType(element_type), rank, rank, flags, NULL); // new ref
   }
 
-} // namespace nda::python
+} // namespace cpp2py

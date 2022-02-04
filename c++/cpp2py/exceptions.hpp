@@ -39,8 +39,8 @@ namespace cpp2py {
 
     public:
     exception();
-    exception(exception const& e) throw() : acc(e.acc.str()), _trace(e._trace), _what(e._what) {}
-    exception(exception &&e)      = default;
+    exception(exception const &e) throw() : acc(e.acc.str()), _trace(e._trace), _what(e._what) {}
+    exception(exception &&e) = default;
     virtual ~exception() {}
 
     static bool show_cpp_trace;
