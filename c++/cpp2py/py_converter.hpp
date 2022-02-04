@@ -75,7 +75,7 @@ namespace cpp2py {
     // Fetch __main__ module
     pyref str_main = PyUnicode_FromString("__main__");
     pyref mod = PyImport_GetModule(str_main);
-    if (mod == NULL) {
+    if (mod == nullptr) {
       PyErr_SetString(PyExc_RuntimeError, "Severe internal error : can not load __main__");
       throw std::runtime_error("Severe internal error : can not load __main__");
     }
@@ -139,19 +139,19 @@ namespace cpp2py {
   // Will be specialized for type which are just converted.
   template <typename T> struct py_converter {
 
-    typedef struct {
+    using py_type = struct {
       PyObject_HEAD;
       T *_c;
-    } py_type;
+    };
 
     using is_wrapped_type = void; // to recognize
 
-    static_assert(not std::is_reference_v<T>, "Not implemented");
+    static_assert(not std::is_reference<T>, "Not implemented");
 
     template <typename U> static PyObject *c2py(U &&x) {
       PyTypeObject *p = get_type_ptr(typeid(T));
-      if (p == nullptr) return NULL;
-      py_type *self = (py_type *)p->tp_alloc(p, 0);
+      if (p == nullptr) return nullptr;
+      auto *self = (py_type *)p->tp_alloc(p, 0);
       if (self != NULL) { self->_c = new T{std::forward<U>(x)}; }
       return (PyObject *)self;
     }

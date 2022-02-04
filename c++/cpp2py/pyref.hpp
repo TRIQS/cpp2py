@@ -30,7 +30,7 @@ namespace cpp2py {
    * A class to own a reference PyObject *, with proper reference counting.
    */
   class pyref {
-    PyObject *ob = NULL;
+    PyObject *ob = nullptr;
 
     public:
     /// Null
@@ -43,15 +43,13 @@ namespace cpp2py {
     ~pyref() { Py_XDECREF(ob); }
 
     /// Copy constructor
-    pyref(pyref const &p) {
-      ob = p.ob;
+    pyref(pyref const &p) : ob(p.ob) {
       Py_XINCREF(ob);
     }
 
     /// Move constructor
-    pyref(pyref &&p) {
-      ob   = p.ob;
-      p.ob = NULL;
+    pyref(pyref &&p) : ob(p.ob) {
+      p.ob = nullptr;
     }
 
     /// No copy assign.
@@ -66,7 +64,7 @@ namespace cpp2py {
     pyref &operator=(pyref &&p) {
       Py_XDECREF(ob);
       ob   = p.ob;
-      p.ob = NULL;
+      p.ob = nullptr;
       return *this;
     }
 
@@ -74,34 +72,34 @@ namespace cpp2py {
     operator PyObject *() const { return ob; }
 
     /// Returns a new reference to the object
-    PyObject *new_ref() const {
+    [[nodiscard]] PyObject *new_ref() const {
       Py_XINCREF(ob);
       return ob;
     }
 
     /// ref counting
-    int refcnt() const { return (ob != NULL ? Py_REFCNT(ob) : -100); }
+    [[nodiscard]] int refcnt() const { return (ob != nullptr ? Py_REFCNT(ob) : -100); }
 
     /// True iif the object is not NULL
-    explicit operator bool() const { return (ob != NULL); }
+    explicit operator bool() const { return (ob != nullptr); }
 
     /// Is object NULL
-    bool is_null() const { return ob == NULL; }
+    [[nodiscard]] bool is_null() const { return ob == nullptr; }
 
     /// Is it Py_None
-    bool is_None() const { return ob == Py_None; }
+    [[nodiscard]] bool is_None() const { return ob == Py_None; }
 
     /// Returns the attribute of this. Null if error, or if is_null.
-    pyref attr(const char *s) { return (ob ? PyObject_GetAttrString(ob, s) : NULL); } // NULL : pass the error in chain call x.attr().attr()....
+    pyref attr(const char *s) { return (ob ? PyObject_GetAttrString(ob, s) : nullptr); } // NULL : pass the error in chain call x.attr().attr()....
 
     /// Call
     pyref operator()(PyObject *a1) {
-      return (ob ? PyObject_CallFunctionObjArgs(ob, a1, NULL) : NULL);
+      return (ob ? PyObject_CallFunctionObjArgs(ob, a1, NULL) : nullptr);
     } // NULL : pass the error in chain call x.attr().attr()....
 
     ///  Call
     pyref operator()(PyObject *a1, PyObject *a2) {
-      return (ob ? PyObject_CallFunctionObjArgs(ob, a1, a2, NULL) : NULL);
+      return (ob ? PyObject_CallFunctionObjArgs(ob, a1, a2, NULL) : nullptr);
     } // NULL : pass the error in chain call x.attr().attr()....
 
     /// Import the module and returns a pyref to it
@@ -110,10 +108,10 @@ namespace cpp2py {
       PyObject *mod = PyImport_GetModule(PyUnicode_FromString(module_name.c_str()));
 
       // If not, import normally
-      if (mod == NULL) mod = PyImport_ImportModule(module_name.c_str());
+      if (mod == nullptr) mod = PyImport_ImportModule(module_name.c_str());
 
       // Did we succeed?
-      if (mod == NULL) throw std::runtime_error(std::string{"Failed to import module "} + module_name);
+      if (mod == nullptr) throw std::runtime_error(std::string{"Failed to import module "} + module_name);
 
       return mod;
     }
