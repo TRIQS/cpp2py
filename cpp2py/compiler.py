@@ -16,7 +16,7 @@
 #
 # Authors: Gregory Kramida, Olivier Parcollet, Nils Wentzell, tayral
 
-import imp, os, sys, shutil, subprocess, hashlib, re, tempfile
+import importlib, os, sys, shutil, subprocess, hashlib, re, tempfile
 import cpp2py.libclang_config as Config
 
 cxx_compiler = Config.CXX_COMPILER
@@ -56,9 +56,8 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
     # key for hash
     key = code, sys.version_info, sys.executable, cxxflags, modules, only
     dir_name = hashlib.md5(str(key).encode('utf-8')).hexdigest().strip()
-    module_name = "ext"
+    module_name = "cpp2py_ipython_magic"
     module_dirname = moduledir + '/cpp2py_' + dir_name
-    module_path = os.path.join(module_dirname, 'ext.so')
 
     if not os.path.exists(module_dirname) or recompile:
         try :
@@ -70,7 +69,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
         try:
             os.chdir(module_dirname)
 
-            with open('ext.cpp', 'w') as f:
+            with open('{}.cpp'.format(module_name), 'w') as f:
                 f.write("#include <cpp2py/py_stream.hpp>\n")
                 f.write(code)
 
@@ -80,13 +79,13 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
                 project(cpp2py_magic CXX)
                 set(CMAKE_BUILD_TYPE Release)
                 set(BUILD_SHARED_LIBS ON)
-                add_compile_options( %s )
+                add_compile_options({})
                 find_package(Cpp2Py REQUIRED)
-                include_directories(${CMAKE_SOURCE_DIR})
-                add_cpp2py_module(ext)
+                include_directories(${{CMAKE_SOURCE_DIR}})
+                add_cpp2py_module({m})
                 find_package(TRIQS REQUIRED)
-                target_link_libraries(ext triqs)
-            """%cxxflags
+                target_link_libraries({m} triqs)
+            """.format(cxxflags, m = module_name)
 
             with open('CMakeLists.txt', 'w') as f: f.write(cmakelist)
             execute("cmake . -Wno-dev  -DCMAKE_CXX_COMPILER="+ cxx_compiler, "cmake")
@@ -94,7 +93,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
             # Call cpp2py
             only_list = ','.join(only)
             only_list = (" --only " + only_list) if only_list else ''
-            execute("c++2py ./ext.cpp --cxxflags='" + cxxflags + "' -p -m ext -N __cpp2py_anonymous -o ext "  + ''.join('-C %s'%x for x in modules if x) + only_list, "c++2py")
+            execute("c++2py ./{m}.cpp --cxxflags='{}' -p -m {m} -N __cpp2py_anonymous -o {m} ".format(cxxflags, m = module_name) + ''.join('-C %s'%x for x in modules if x) + only_list, "c++2py")
 
             # Call make
             execute ("make -j2  ", "make")
@@ -108,6 +107,7 @@ def compile(code, verbosity =0, only=(), modules = '', cxxflags= '', moduledir =
         finally:
             os.chdir(old_cwd)
 
-    module = imp.load_dynamic(module_name, module_path)
+    sys.path.insert(0, module_dirname)
+    module = importlib.import_module(module_name)
     module.workdir = module_dirname
     return module
