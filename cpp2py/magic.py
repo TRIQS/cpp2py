@@ -97,7 +97,8 @@ class Cpp2pyMagics(Magics):
 
         args = magic_arguments.parse_argstring(self.cpp2py, line)
         code = cell if cell.endswith('\n') else cell + '\n'
-        module = compile(code, verbosity = args.verbosity, only = args.only, cxxflags = ''.join(args.cxxflags), modules = ''.join(args.converters), no_clean = args.no_clean)
+        cxxflags = ''.join([fl.strip('"').strip("'") for fl in args.cxxflags])
+        module = compile(code, verbosity = args.verbosity, only = args.only, cxxflags = cxxflags, modules = ''.join(args.converters), no_clean = args.no_clean)
 
         # import all object and function in the main namespace
         imported = []
