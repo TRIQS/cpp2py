@@ -35,17 +35,6 @@ from IPython.paths import get_ipython_cache_dir
 __version__ = '0.3.0'
 
 from .compiler import compile, print_out
-from IPython.core.display import display_javascript
-
-js = """
-require(['notebook/js/codecell'], function(codecell) {
-  codecell.CodeCell.options_default.highlight_modes['text/x-c++src'] = {'reg':[/^%%cpp2py/]};
-  Jupyter.notebook.events.one('kernel_ready.Kernel', function(){
-      Jupyter.notebook.get_cells().map(function(cell){
-          if (cell.cell_type == 'code'){ cell.auto_highlight(); } }) ;
-  });
-});
-"""
 
 @magics_class
 class Cpp2pyMagics(Magics):
@@ -57,7 +46,6 @@ class Cpp2pyMagics(Magics):
         self._lib_dir = os.path.join(get_ipython_cache_dir(), 'cpp2py')
         if not os.path.exists(self._lib_dir):
             os.makedirs(self._lib_dir)
-        display_javascript(js, raw=True)
 
     @magic_arguments.magic_arguments()
     @magic_arguments.argument( "-v", "--verbosity", type=int, help="increase output verbosity")
