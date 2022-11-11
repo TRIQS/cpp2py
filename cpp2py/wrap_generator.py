@@ -124,7 +124,7 @@ class cfunction:
             acc = ''
             for s in args.split(',') :
                 acc += (',' if acc else '') + s.strip()
-                if acc.count('<') == acc.count('>') :
+                if acc.count('<') == acc.count('>') and acc.count('{') == acc.count('}') :
                     r, acc = acc,''
                     yield r
         def g(a) :
