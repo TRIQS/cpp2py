@@ -591,8 +591,14 @@ template <> struct py_converter<${en.c_name}> {
      else { // the overload does not parse the arguments. Keep the error set by python, for later use, and clear it.
       PyObject * ptype,  *ptraceback, *err; // unused.
       PyErr_Fetch(&ptype, &err, &ptraceback);
-      errors[${n_overload}] = pyref{err};
-      Py_XDECREF(ptype); Py_XDECREF(ptraceback);
+      // catch here all non defined errors and print instead generic warning
+      if (err == NULL) {
+        errors[${n_overload}] = pyref{PyUnicode_FromString("unkown error check converter")};
+      } else {
+        errors[${n_overload}] = pyref{err};
+      }
+      Py_XDECREF(ptype);
+      Py_XDECREF(ptraceback);
      }
      %endif
     } // end overload ${overload._get_c_signature()}
@@ -603,12 +609,15 @@ template <> struct py_converter<${en.c_name}> {
    // FIXME Factorize this
    // finally, no overload was successful. Composing a detailed error message, with the reason of failure of each overload
    {
-    std::string err_list = "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
-    for (int i =0; i < errors.size(); ++i) {
+     std::string err_list =
+        "Error: no suitable C++ overload found in implementation of ${'method' if py_meth.is_method else 'function'} ${module_or_class_name}.${py_meth.py_name}\n";
+     for (int i = 0; i < errors.size(); ++i) {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
-      if (errors[i]) err_list += PyUnicode_AsUTF8((PyObject*)errors[i]);
-      err_list +="\n";
-    }
+      // check if error is not NULL and can be converted at all
+      // otherwise unconvertible erros can lead to SegFaults
+      if (errors[i] and PyUnicode_Check((PyObject *)errors[i])) { err_list += PyUnicode_AsUTF8((PyObject *)errors[i]); }
+      err_list += "\n";
+     }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
    }
    error_return :
