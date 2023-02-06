@@ -615,7 +615,11 @@ template <> struct py_converter<${en.c_name}> {
       err_list = err_list + "\n" + overloads_signatures[i] + " \n failed with the error : \n  ";
       // check if error is not NULL and can be converted at all
       // otherwise unconvertible erros can lead to SegFaults
-      if (errors[i] and PyUnicode_Check((PyObject *)errors[i])) { err_list += PyUnicode_AsUTF8((PyObject *)errors[i]); }
+      if (errors[i] and PyUnicode_Check((PyObject *)errors[i])) {
+        err_list += PyUnicode_AsUTF8((PyObject *)errors[i]);
+      } else {
+        err_list += "Error message was not convertible to raw string.";
+      }
       err_list += "\n";
      }
     PyErr_SetString(PyExc_TypeError,err_list.c_str());
