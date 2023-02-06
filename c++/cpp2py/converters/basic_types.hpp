@@ -61,7 +61,19 @@ namespace cpp2py {
         return I(PyLong_AsLong(py_builtin));
       }
       static bool is_convertible(PyObject *ob, bool raise_exception) {
-        if (PyLong_Check(ob)) return true;
+        // first check if ob is a python long
+        if (PyLong_Check(ob)) {
+          // now check that the int from python is within the limits of the C++ type
+          if (PyLong_AsLong(ob) < std::numeric_limits<I>::min() or PyLong_AsLong(ob) > std::numeric_limits<I>::max()) {
+            if (raise_exception) {
+              PyErr_SetString(PyExc_TypeError, ("Cannot convert "s + to_string(ob) + " to integer type, out of bounds"s).c_str());
+            }
+            // write also to std err to show the conversion error
+            std::cerr << ("Cannot convert "s + to_string(ob) + " to integer type, out of bounds"s).c_str() << std::endl;
+            return false;
+          } else
+            return true;
+        }
         if (PyArray_CheckScalar(ob)) {
           pyref py_arr = PyArray_FromScalar(ob, NULL);
           if (PyArray_ISINTEGER((PyObject *)py_arr)) return true;
