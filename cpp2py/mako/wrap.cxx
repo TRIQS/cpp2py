@@ -284,7 +284,8 @@ static void ${c.py_type}_dealloc(PyObject* self) {
  typedef struct {
   PyObject_HEAD
   PyObject * container;
-  ${c.c_type}::${c.iterator.c_type} iter, end;
+  decltype(std::cbegin(std::declval<${c.c_type}>())) iter;
+  decltype(std::cend(std::declval<${c.c_type}>())) end;
  } ${c.py_type}__iterator;
 
  // dealloc
