@@ -26,6 +26,11 @@ from mako.template import Template
 from clang.cindex import CursorKind, LibclangError
 from . import libclang_config
 
+# Protect against unknown kinds:
+def get_children(node):
+    for c in node.get_children():
+        if c._kind_id != 604:
+            yield c
 
 def pretty_print(x, keep=None, s='...'):
     print(x)
@@ -44,7 +49,7 @@ def decay(s):
 
 
 def get_annotations(node):
-    return [c.displayname for c in node.get_children() if c.kind == CursorKind.ANNOTATE_ATTR]
+    return [c.displayname for c in get_children(node) if c.kind == CursorKind.ANNOTATE_ATTR]
 
 
 def get_tokens(node):
@@ -125,7 +130,7 @@ def get_template_params(node):
         tokens = get_tokens(c)
         return ''.join(tokens[tokens.index('=') + 1:-1]) if '=' in tokens else None
 
-    for c in node.get_children():
+    for c in get_children(node):
         if c.kind == CursorKind.TEMPLATE_TYPE_PARAMETER:
             tparams.append(("typename", c.spelling, get_default(c)))
         elif c.kind == CursorKind.TEMPLATE_NON_TYPE_PARAMETER:
@@ -144,7 +149,7 @@ def get_params(node):
     Precondition : node is a function/method
     Yields the node of the parameters of the function
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if c.kind == CursorKind.PARM_DECL:
             yield c
 
@@ -184,7 +189,7 @@ def get_base_classes(node, keep=keep_all):
     node is a class
     yields the nodes to the public base class.
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if c.kind == CursorKind.CXX_BASE_SPECIFIER and keep(c):
             yield jump_to_declaration(c.type)
 
@@ -199,7 +204,7 @@ def get_members(node, with_inherited, keep=keep_all):
         for m in get_members(b, with_inherited, keep):
             yield m
 
-    for c in node.get_children():
+    for c in get_children(node):
         if c.kind == CursorKind.FIELD_DECL and keep(c):
             yield c
 
@@ -238,7 +243,7 @@ def get_methods(node, with_inherited=True, keep=keep_all):
         for m in get_methods(b, with_inherited, keep):
             yield m
 
-    for c in node.get_children():
+    for c in get_children(node):
         ok = c.kind == CursorKind.CXX_METHOD or (c.kind == CursorKind.FUNCTION_TEMPLATE and not is_constructor(node, c))
         if ok and keep(c):
             yield c
@@ -262,7 +267,7 @@ def get_friend_functions(node, keep=keep_all):
     node is a class
     yields the nodes to the friend functions
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if c.kind == CursorKind.FRIEND_DECL and keep(c):
             yield next(c.get_children())
 
@@ -306,7 +311,7 @@ def get_enums(node, keep=keep_all, traverse_namespaces=False, keep_ns=keep_all):
     traverse_namespaces : traverse the namespaces, with keep_ns
     yields the classes/struct in node
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
             for x in get_enums(c, keep, traverse_namespaces, keep_ns):
                 yield x
@@ -327,7 +332,7 @@ def get_classes(node, keep=keep_all, traverse_namespaces=False, keep_ns=keep_all
     traverse_namespaces : traverse the namespaces, with keep_ns
     yields the classes/struct in node
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
             for x in get_classes(c, keep, traverse_namespaces, keep_ns):
                 yield x
@@ -346,7 +351,7 @@ def get_functions(node, keep=keep_all, traverse_namespaces=False, keep_ns=keep_a
     keep_ns : predicate
     traverse_namespaces : traverse the namespaces, with keep_ns
      """
-    for c in node.get_children():
+    for c in get_children(node):
         if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
             for x in get_functions(c, keep, traverse_namespaces, keep_ns):
                 yield x
@@ -360,7 +365,7 @@ def get_usings(node, keep=keep_all, traverse_namespaces=False, keep_ns=keep_all)
     node is a class, or a namespace or root
     yields the nodes to the usings
     """
-    for c in node.get_children():
+    for c in get_children(node):
         if traverse_namespaces and c.kind is CursorKind.NAMESPACE and keep_ns(c):
             for x in get_usings(c, keep, traverse_namespaces, keep_ns):
                 yield x
