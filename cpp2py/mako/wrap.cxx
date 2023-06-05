@@ -1017,8 +1017,9 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   if (!p) return NULL;
   p->container = self;
   Py_INCREF(self); // We keep an owned reference to the container object (e.g. [x for x in g.mesh], if the container is a temporary and the iterator lives longer than its python reference).
-  p->iter = ${c.iterator.begin}(self_c);
-  p->end = ${c.iterator.end}(self_c);
+  // Initialize the memory of p->iter and p->end with placement new
+  new (&p->iter) auto(${c.iterator.begin}(self_c));
+  new (&p->end) auto(${c.iterator.end}(self_c));
   return (PyObject *)p;
 }
 
