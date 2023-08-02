@@ -156,6 +156,7 @@ namespace cpp2py {
 
   inline std::string to_string(PyObject *ob) {
     pyref py_str = PyObject_Str(ob);
+    if (py_str.is_null()) return "[unprintable]";
     return PyUnicode_AsUTF8(py_str);
   }
 
