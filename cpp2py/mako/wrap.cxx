@@ -664,7 +664,7 @@ static int ${c.py_type}__set_member_${m.py_name} (PyObject *self, PyObject *valu
 static PyObject * ${c.py_type}__get_prop_${p.name} (PyObject *self, void *closure) {
   %if isinstance(p.getter, str):
     // pure python call
-    static pyref py_fnt = pyref::module("${p.getter.rsplit('.',1)[0]}").attr("${p.getter.rsplit('.',1)[1]}");
+    pyref py_fnt = pyref::module("${p.getter.rsplit('.',1)[0]}").attr("${p.getter.rsplit('.',1)[1]}");
     return py_fnt(self).new_ref();
   %else:
     auto & self_c = convert_from_python<${c.c_type}>(self);
