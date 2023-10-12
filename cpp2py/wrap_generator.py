@@ -16,7 +16,7 @@
 #
 # Authors: Gregory Kramida, Olivier Parcollet, Nils Wentzell, tayral
 
-import sys, imp
+import sys
 import re
 import os
 from mako.template import Template
