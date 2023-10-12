@@ -63,7 +63,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  EXEC_PYTHON_SCRIPT("import sys; print(sys.version_info[1])" PYTHON_VERSION_MINOR)
 
  EXEC_PYTHON_SCRIPT("import mako.template" nulle) # check that Mako is there...
- EXEC_PYTHON_SCRIPT("import distutils " nulle) # check that distutils is there...
+ EXEC_PYTHON_SCRIPT("import sysconfig " nulle) # check that sysconfig is there...
  EXEC_PYTHON_SCRIPT("import numpy" nulle) # check that numpy is there...
  EXEC_PYTHON_SCRIPT("import scipy" nulle) # check that scipy is there...
 
@@ -76,8 +76,8 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  #
  # Check for Python include path
  #
- EXEC_PYTHON_SCRIPT("import distutils ; from distutils.sysconfig import * ; print(distutils.sysconfig.get_python_inc())"  PYTHON_INCLUDE_DIRS )
- message(STATUS "PYTHON_INCLUDE_DIRS =  ${PYTHON_INCLUDE_DIRS}" )
+ EXEC_PYTHON_SCRIPT("import sysconfig; print(sysconfig.get_path('include'))"  PYTHON_INCLUDE_DIRS)
+ message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
  mark_as_advanced(PYTHON_INCLUDE_DIRS)
  find_path(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
  if(NOT TEST_PYTHON_INCLUDE)
@@ -88,29 +88,28 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  #
  # include files for numpy
  #
- EXEC_PYTHON_SCRIPT("import numpy;print(numpy.get_include())" PYTHON_NUMPY_INCLUDE_DIR)
+ EXEC_PYTHON_SCRIPT("import numpy; print(numpy.get_include())" PYTHON_NUMPY_INCLUDE_DIR)
  message(STATUS "PYTHON_NUMPY_INCLUDE_DIR = ${PYTHON_NUMPY_INCLUDE_DIR}")
  mark_as_advanced(PYTHON_NUMPY_INCLUDE_DIR)
 
  #
  # include files for numpy
  #
- EXEC_PYTHON_SCRIPT("import numpy;print(numpy.version.version)" PYTHON_NUMPY_VERSION)
+ EXEC_PYTHON_SCRIPT("import numpy; print(numpy.version.version)" PYTHON_NUMPY_VERSION)
  message(STATUS "PYTHON_NUMPY_VERSION = ${PYTHON_NUMPY_VERSION}")
  mark_as_advanced(PYTHON_NUMPY_VERSION)
 
  #
  # Check for site packages
  #
- EXEC_PYTHON_SCRIPT("from distutils.sysconfig import * ;print(get_python_lib(0,0))"
-  PYTHON_SITE_PKG)
+ EXEC_PYTHON_SCRIPT("import sysconfig; print(sysconfig.get_path('platlib'))" PYTHON_SITE_PKG)
  message(STATUS "PYTHON_SITE_PKG = ${PYTHON_SITE_PKG}")
  mark_as_advanced(PYTHON_SITE_PKG)
 
  #
  # Check for Python library path
  #
- EXEC_PYTHON_SCRIPT("import string; from distutils.sysconfig import *; print('%s' % get_python_lib(0,1))" PYTHON_LIBRARY_BASE_PATH)
+ EXEC_PYTHON_SCRIPT("import sysconfig; print(sysconfig.get_path('stdlib'))" PYTHON_LIBRARY_BASE_PATH)
  set(PYTHON_LIBRARY_SEARCH_PATHS "${PYTHON_LIBRARY_BASE_PATH}/.." "${PYTHON_LIBRARY_BASE_PATH}/../x86_64-linux-gnu" "${PYTHON_LIBRARY_BASE_PATH}/../i386-linux-gnu" "${PYTHON_LIBRARY_BASE_PATH}/../aarch64-linux-gnu")
  find_library(PYTHON_LIBRARY NAMES python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m python${PYTHON_VERSION_MAJOR} PATHS ${PYTHON_LIBRARY_SEARCH_PATHS} NO_DEFAULT_PATH)
  message(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
@@ -119,7 +118,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  #
  # libraries which must be linked in when embedding
  #
- EXEC_PYTHON_SCRIPT("from distutils.sysconfig import * ;print((str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS'))).strip())"
+ EXEC_PYTHON_SCRIPT("import sysconfig; print((str(sysconfig.get_config_var('LOCALMODLIBS')) + ' ' + str(sysconfig.get_config_var('LIBS'))).strip())"
   PYTHON_EXTRA_LIBS)
  message(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}")
  mark_as_advanced(PYTHON_EXTRA_LIBS)
@@ -127,7 +126,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  #
  # c-api module extension
  #
- EXEC_PYTHON_SCRIPT("from distutils.sysconfig import *; print(get_config_var('EXT_SUFFIX'))"
+ EXEC_PYTHON_SCRIPT("import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))"
    PYTHON_MODULE_EXT)
  set(PYTHON_MODULE_EXT ${PYTHON_MODULE_EXT} CACHE STRING "Extension of compiled Python modules")
 
