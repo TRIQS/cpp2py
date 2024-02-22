@@ -1,4 +1,4 @@
-set(DEST ${PYTHON_LIB_DEST_ROOT})
+set(DEST ${CPP2PY_PYTHON_LIB_DEST_ROOT})
 
 configure_file(libclang_config.py.in libclang_config.py @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libclang_config.py DESTINATION ${DEST}/cpp2py)
@@ -7,7 +7,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${DEST} FILES_MATCHING
 
 # Link all files with relevant extensions into binary tree
 # This allows us to get a working cpp2py Setup already after the build stage
-execute_process(COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/bin/cp_rs.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} "py cxx rst")
+execute_process(COMMAND ${CPP2PY_PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/bin/cp_rs.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} "py cxx rst")
 
 ###################################################################################
 #
@@ -46,10 +46,10 @@ function(add_cpp2py_module)
   set(wrap_name ${CMAKE_CURRENT_BINARY_DIR}/${module_dir}/${module_name}_wrap.cxx)   # path to the wrapping code
 
   add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name} ${header_dependencies}
-    COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_BINARY_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
+    COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_BINARY_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
-  set_target_properties(${module_name} PROPERTIES SUFFIX ${PYTHON_MODULE_EXT})
+  set_target_properties(${module_name} PROPERTIES SUFFIX ${CPP2PY_PYTHON_MODULE_EXT})
   target_link_libraries(${module_name} cpp2py::cpp2py)
 
   # We expose only the modules init function in the dynamic symbol table

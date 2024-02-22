@@ -10,6 +10,6 @@ LIBCLANG_CXX_FLAGS = os.getenv('LIBCLANG_CXX_FLAGS', '@LIBCLANG_CXX_FLAGS@').str
 #print("LIBCLANG_CXX_FLAGS ", LIBCLANG_CXX_FLAGS, "@LIBCLANG_CXX_FLAGS@")
 
 # FIXME Should go when including triqs will not require Python.h any more
-LIBCLANG_CXX_FLAGS  += ["-isystem@PYTHON_INCLUDE_DIRS@", "-isystem@PYTHON_NUMPY_INCLUDE_DIR@"]
+LIBCLANG_CXX_FLAGS  += ["-isystem@Python_INCLUDE_DIRS@", "-isystem@Python_NumPy_INCLUDE_DIRS@"]
 
 CXX_COMPILER = "@CMAKE_CXX_COMPILER@"
