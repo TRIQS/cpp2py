@@ -1,4 +1,4 @@
-set(DEST ${PYTHON_LIB_DEST_ROOT}/cpp2cxx)
+set(DEST ${CPP2PY_PYTHON_LIB_DEST_ROOT}/cpp2cxx)
 install(FILES __init__.py DESTINATION ${DEST})
 install(FILES cpp2cxx.py DESTINATION ${DEST})
 

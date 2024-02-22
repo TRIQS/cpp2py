@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@CPP2PY_PYTHON_EXECUTABLE@
 import os, sys, argparse
 from cpp2rst import Cpp2Rst
 import cpp2py.libclang_config as config

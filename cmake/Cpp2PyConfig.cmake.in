@@ -11,11 +11,11 @@ set(CPP2PY_GIT_HASH @CPP2PY_GIT_HASH@ CACHE STRING "Cpp2Py Git Hash")
 set(CPP2PY_CXX_COMPILER @CMAKE_CXX_COMPILER@ CACHE FILEPATH "C++ compiler used by Cpp2Py")
 
 # Python Interpreter
-set(CPP2PY_PYTHON_EXECUTABLE @PYTHON_EXECUTABLE@ CACHE FILEPATH "Python Executable")
-set(CPP2PY_PYTHON_INTERPRETER @PYTHON_EXECUTABLE@ CACHE FILEPATH "Python Executable") # Backward Compat
-set(CPP2PY_PYTHON_LIB_DEST_ROOT @PYTHON_LIB_DEST_ROOT@ CACHE PATH "Python module directory relative to install directory")
-set(CPP2PY_PYTHON_MODULE_EXT @PYTHON_MODULE_EXT@ CACHE FILEPATH "Extension of compiled Python modules")
-set(CPP2PY_MODULE_DIR @CMAKE_INSTALL_PREFIX@/@PYTHON_LIB_DEST_ROOT@ CACHE PATH "The Cpp2Py Python module directory")
+set(CPP2PY_PYTHON_EXECUTABLE @CPP2PY_PYTHON_EXECUTABLE@ CACHE FILEPATH "Python Executable")
+set(CPP2PY_PYTHON_INTERPRETER @CPP2PY_PYTHON_EXECUTABLE@ CACHE FILEPATH "Python Executable") # Backward Compat
+set(CPP2PY_PYTHON_LIB_DEST_ROOT @CPP2PY_PYTHON_LIB_DEST_ROOT@ CACHE PATH "Python module directory relative to install directory")
+set(CPP2PY_PYTHON_MODULE_EXT @CPP2PY_PYTHON_MODULE_EXT@ CACHE FILEPATH "Extension of compiled Python modules")
+set(CPP2PY_MODULE_DIR @CMAKE_INSTALL_PREFIX@/@CPP2PY_PYTHON_LIB_DEST_ROOT@ CACHE PATH "The Cpp2Py Python module directory")
 set(CPP2PY_PYTHON_NUMPY_VERSION_LT_17 @PYTHON_NUMPY_VERSION_LT_17@ CACHE BOOL "True if the Numpy version older than 1.17")
 
 # Root of the Cpp2Py installation
@@ -86,7 +86,7 @@ function(add_cpp2py_module)
     COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_MODULE_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
-  set_target_properties(${module_name} PROPERTIES SUFFIX "@PYTHON_MODULE_EXT@")
+  set_target_properties(${module_name} PROPERTIES SUFFIX "@CPP2PY_PYTHON_MODULE_EXT@")
   target_link_libraries(${module_name} cpp2py::cpp2py)
 
   # We expose only the modules init function in the dynamic symbol table
