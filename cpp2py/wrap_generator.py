@@ -106,7 +106,7 @@ class cfunction:
       ## Analyse signature.
       self.args, self.namespace = [], ''
       if isinstance(signature, str) : # it is a string, we analyse it to get the rtype, and args
-        signature = re.sub('operator\(\s*\)','__operator_call',signature) # temp. replacement, to make the regex easier
+        signature = re.sub(r"operator\(\s*\)","__operator_call",signature) # temp. replacement, to make the regex easier
         m = re.match(r"\s*(.*?)\s*\((.*)\)",signature)
         self.rtype, args = m.group(1).strip() or None, m.group(2).strip()
         # extract the c_name if present
