@@ -92,8 +92,11 @@ if(Python_SOABI)
 else()
   set(CPP2PY_PYTHON_MODULE_EXT .so CACHE STRING "Python module extension")
 endif()
-string(REGEX REPLACE "/.*/lib" "lib" PYTHON_LIB_DEST_ROOT ${Python_SITEARCH})
-set(CPP2PY_PYTHON_LIB_DEST_ROOT ${PYTHON_LIB_DEST_ROOT} CACHE PATH "Python library destination")
+if(BUILD_DEBIAN_PACKAGE)
+  set(CPP2PY_PYTHON_LIB_DEST_ROOT lib/python${Python_VERSION_MAJOR}/dist-packages CACHE PATH "Python library destination")
+else()
+  set(CPP2PY_PYTHON_LIB_DEST_ROOT lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages CACHE PATH "Python library destination")
+endif()
 
 # output the python variables
 message(STATUS "Python_INCLUDE_DIRS: " ${Python_INCLUDE_DIRS})
