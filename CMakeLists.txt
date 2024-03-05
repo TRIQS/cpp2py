@@ -117,9 +117,13 @@ if(Python_NumPy_VERSION VERSION_GREATER "1.8.0")
   set_property(TARGET python_and_numpy PROPERTY INTERFACE_COMPILE_DEFINITIONS NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION)
 endif()
 
+# Provide GNU Installation directories
+include(GNUInstallDirs)
+
 #--------------------------------------------------------
 #   Build cpp2py
 #--------------------------------------------------------
+
 add_subdirectory(bin)
 add_subdirectory(cmake)
 add_subdirectory(c++/cpp2py)
