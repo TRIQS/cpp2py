@@ -25,7 +25,7 @@ MESSAGE(STATUS "Found Cpp2PyConfig.cmake with version ${CPP2PY_VERSION}, hash = 
 
 # Mac specific
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
- set(CMAKE_INSTALL_NAME_DIR "@CMAKE_INSTALL_PREFIX@/lib")
+ set(CMAKE_INSTALL_NAME_DIR "@CMAKE_INSTALL_FULL_LIBDIR@")
  set(CMAKE_MACOSX_RPATH 1) # new for cmake 3.x
 endif()
 
@@ -47,7 +47,7 @@ set_property(TARGET c++2cxx PROPERTY IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/b
 find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
 # include the exported targets of this project
-include(@CMAKE_INSTALL_PREFIX@/lib/cmake/Cpp2Py/Cpp2PyTargets.cmake)
+include(@CMAKE_INSTALL_FULL_LIBDIR@/cmake/Cpp2Py/Cpp2PyTargets.cmake)
 
 ###################################################################################
 #
