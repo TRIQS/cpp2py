@@ -59,6 +59,11 @@ function(add_cpp2py_module)
     $<$<PLATFORM_ID:Linux>:-fvisibility-inlines-hidden>
   )
 
+  # Disable notes about C++ ABI changes when using gcc
+  target_compile_options(${module_name} PRIVATE
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-psabi>
+  )
+
   set_target_properties(${module_name}
     PROPERTIES
     PREFIX ""  #eliminate the lib in front of the module name
