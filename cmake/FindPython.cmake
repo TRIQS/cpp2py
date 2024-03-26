@@ -118,7 +118,7 @@ ENDFUNCTION(EXEC_PYTHON_SCRIPT)
  #
  # libraries which must be linked in when embedding
  #
- EXEC_PYTHON_SCRIPT("import sysconfig; print((str(sysconfig.get_config_var('LOCALMODLIBS')) + ' ' + str(sysconfig.get_config_var('LIBS'))).strip())"
+ EXEC_PYTHON_SCRIPT("import sysconfig; print((str(sysconfig.get_config_var('LIBS')) + ' ' + str(sysconfig.get_config_var('BASEMODLIBS'))).strip())"
   PYTHON_EXTRA_LIBS)
  message(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}")
  mark_as_advanced(PYTHON_EXTRA_LIBS)
