@@ -242,10 +242,13 @@ class pyfunction:
         return self
 
     def _generate_doc(self) :
-        if len(self.overloads) == 1 : #only one overload
-            s = "\n".join([f._generate_doc() for f in self.overloads])
-        else :
-            s = "\n".join([self.doc, "\n"] + [f._generate_doc() for f in self.overloads])
+        doc_list = [f for f in self.overloads if f.doc]
+        if not doc_list : # no doc string is present
+            doc_list.append(self.overloads[0])
+        elif len(doc_list) > 1 : # several doc strings
+            print(f"Warning: Several doc strings for the overloaded function/method {self.py_name}")
+            print(f"     --> Only the doc string for {self.py_name}{doc_list[0]._get_signature()} will be used")
+        s = doc_list[0]._generate_doc() + "\n"
         s=s.replace('@{','').replace('@}','')
         return s
 
