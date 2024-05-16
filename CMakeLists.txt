@@ -4,7 +4,7 @@ if(POLICY CMP0144)
   cmake_policy(SET CMP0144 NEW)
 endif()
 
-project(CPP2PY VERSION 2.0.0 LANGUAGES C CXX)
+project(CPP2PY VERSION 2.0.0 LANGUAGES CXX)
 
 #--------------------------------------------------------
 #   Basic setup
