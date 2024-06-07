@@ -66,7 +66,7 @@ set(LIBCLANG_LOCATION "${LIBCLANG_LOCATION}" CACHE STRING "Location of the libcl
 #--------------------------------------------------------
 message(STATUS "-------- Python detection -------------")
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 
 # check required python packages
 function(exec_python_command command_str output_var_name)
@@ -108,7 +108,7 @@ message(STATUS "Python modules install path: ${CMAKE_INSTALL_PREFIX}/${CPP2PY_PY
 # define the python_and_numpy interface target
 add_library(python_and_numpy INTERFACE)
 add_library(cpp2py::python_and_numpy ALIAS python_and_numpy)
-target_link_libraries(python_and_numpy INTERFACE Python::Python Python::NumPy)
+target_link_libraries(python_and_numpy INTERFACE Python::Module Python::NumPy)
 install(TARGETS python_and_numpy EXPORT Cpp2PyTargets)
 
 # set numpy related macros (C API changed with v1.7.0)
