@@ -786,7 +786,7 @@ static PyObject* ${c.py_type}___reduce__ (PyObject *self, PyObject *args, PyObje
   try {
     cpp2py::regular_type_if_view_else_type_t<${c.c_type}> result;
     auto r = reconstructor{args};
-    result.serialize(r,0);// make sure reconstructor is a friend as boost::serialization::access
+    result.deserialize(r);
     return convert_to_python(std::move(result));
    }
    CATCH_AND_RETURN("in boost unserialization of object ${c.py_type}",NULL);

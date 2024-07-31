@@ -73,12 +73,12 @@ namespace cpp2py {
     }
 
     public:
-    template <typename T> reductor &operator&(T &x) {
+    template <typename T> reductor &operator&(T const &x) {
       elem.push_back(convert_to_python(x));
       return *this;
     }
-    template <typename T> PyObject *apply_to(T &x) {
-      x.serialize(*this, 0);
+    template <typename T> PyObject *apply_to(T const &x) {
+      x.serialize(*this);
       return as_tuple();
     }
   };
@@ -103,7 +103,7 @@ namespace cpp2py {
     static T py2c(PyObject *ob) {
       T res;
       auto r = reconstructor{ob};
-      res.serialize(r, 0);
+      res.serialize(r);
       return res;
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) { return true; }
