@@ -79,7 +79,7 @@ namespace cpp2py {
       return *this;
     }
     template <typename T> PyObject *apply_to(T &x) {
-      x.serialize(*this, 0);
+      x.serialize(*this);
       return as_tuple();
     }
   };
@@ -104,7 +104,7 @@ namespace cpp2py {
     static T py2c(PyObject *ob) {
       T res;
       auto r = reconstructor{ob};
-      res.serialize(r, 0);
+      res.serialize(r);
       return res;
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) { return true; }
