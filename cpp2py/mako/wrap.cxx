@@ -594,7 +594,7 @@ template <> struct py_converter<${en.c_name}> {
       PyErr_Fetch(&ptype, &err, &ptraceback);
       // catch here all non defined errors and print instead generic warning
       if (err == NULL) {
-        errors[${n_overload}] = pyref{PyUnicode_FromString("unkown error check converter")};
+        errors[${n_overload}] = pyref::string("unkown error check converter");
       } else {
         errors[${n_overload}] = pyref{err};
       }
@@ -1039,10 +1039,10 @@ PyObject* ${c.py_type}___iter__(PyObject *self) {
   static const char * ens = "${repr( [ (en.c_name_absolute, en.c_namespace, en.values) for en in module.enums] )}";
   static const char * inclu = "${repr( module.include_list)}";
 
-  PyDict_SetItemString(d, "classes", pyref(PyUnicode_FromString(cls)));
-  PyDict_SetItemString(d, "enums", pyref(PyUnicode_FromString(ens)));
-  PyDict_SetItemString(d, "module_name", pyref(PyUnicode_FromString("${module.full_name}")));
-  PyDict_SetItemString(d, "includes", pyref(PyUnicode_FromString(inclu)));
+  PyDict_SetItemString(d, "classes", pyref::string(cls));
+  PyDict_SetItemString(d, "enums", pyref::string(ens));
+  PyDict_SetItemString(d, "module_name", pyref::string("${module.full_name}"));
+  PyDict_SetItemString(d, "includes", pyref::string(inclu));
 
   return d;
  }
