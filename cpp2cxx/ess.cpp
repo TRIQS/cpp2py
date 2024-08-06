@@ -16,45 +16,44 @@
 //
 // Authors: Olivier Parcollet, Nils Wentzell
 
-
 #include <string>
 #include <tuple>
 
 namespace concept {
-class C {
- public:
- double attempt();
- double accept();
- void reject();
-};
-}
+  class C {
+    public:
+    double attempt();
+    double accept();
+    void reject();
+  };
+} // namespace concept
 
-namespace CTINT { 
+namespace CTINT {
 
-struct A {
+  struct A {
 
- /// doc of A
- int i = 3;
+    /// doc of A
+    int i = 3;
 
- double x = 2;
- double r = 2;
- double t = 2;
- double g = 2;
- double h = 2;
- double ru = 2;
- double xxx = 2;
+    double x   = 2;
+    double r   = 2;
+    double t   = 2;
+    double g   = 2;
+    double h   = 2;
+    double ru  = 2;
+    double xxx = 2;
 
- double zzzz;
-};
+    double zzzz;
+  };
 
-template <typename T> struct B {
+  template <typename T> struct B {
 
- /// doc of A
- int ik = 3;
+    /// doc of A
+    int ik = 3;
 
- std::string x;
+    std::string x;
 
- T y;
-};
+    T y;
+  };
 
-}
+} // namespace CTINT

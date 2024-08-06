@@ -46,7 +46,7 @@ namespace cpp2py {
     arr->base = base;
     assert(arr->flags == (arr->flags & ~NPY_OWNDATA));
 #else
-    int r     = PyArray_SetBaseObject(arr, base);
+    int r = PyArray_SetBaseObject(arr, base);
     //EXPECTS(r == 0);
     //EXPECTS(PyArray_FLAGS(arr) == (PyArray_FLAGS(arr) & ~NPY_ARRAY_OWNDATA));
 #endif

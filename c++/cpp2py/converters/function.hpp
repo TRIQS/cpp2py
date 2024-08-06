@@ -31,12 +31,24 @@ namespace cpp2py {
 
   template <int N> struct _make_index_seq;
   template <int N> using make_index_seq = typename _make_index_seq<N>::type;
-  template <> struct _make_index_seq<0> { using type = index_seq<>; };
-  template <> struct _make_index_seq<1> { using type = index_seq<0>; };
-  template <> struct _make_index_seq<2> { using type = index_seq<0, 1>; };
-  template <> struct _make_index_seq<3> { using type = index_seq<0, 1, 2>; };
-  template <> struct _make_index_seq<4> { using type = index_seq<0, 1, 2, 3>; };
-  template <> struct _make_index_seq<5> { using type = index_seq<0, 1, 2, 3, 4>; };
+  template <> struct _make_index_seq<0> {
+    using type = index_seq<>;
+  };
+  template <> struct _make_index_seq<1> {
+    using type = index_seq<0>;
+  };
+  template <> struct _make_index_seq<2> {
+    using type = index_seq<0, 1>;
+  };
+  template <> struct _make_index_seq<3> {
+    using type = index_seq<0, 1, 2>;
+  };
+  template <> struct _make_index_seq<4> {
+    using type = index_seq<0, 1, 2, 3>;
+  };
+  template <> struct _make_index_seq<5> {
+    using type = index_seq<0, 1, 2, 3, 4>;
+  };
 
   // details
   template <bool B> struct _bool {};
@@ -207,7 +219,7 @@ namespace cpp2py {
       auto l       = [py_fnt](T... x) mutable -> R { // py_fnt is a pyref, it will keep the ref and manage the ref counting...
         pyref ret = PyObject_CallFunctionObjArgs(py_fnt, (PyObject *)pyref(convert_to_python(x))..., NULL);
         if (not py_converter<R>::is_convertible(ret, false)) {
-                CPP2PY_RUNTIME_ERROR << "\n Cannot convert function result " << to_string(ret) << " from python to C++";
+          CPP2PY_RUNTIME_ERROR << "\n Cannot convert function result " << to_string(ret) << " from python to C++";
         }
         return py_converter<R>::py2c(ret);
       };

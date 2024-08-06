@@ -56,12 +56,16 @@ namespace cpp2py {
   template <typename T> auto make_clone(T const &x) { return _make_clone<T>::invoke(x); }
 
   // regular type traits
-  template <typename T> void _nop(T...){};
+  template <typename T> void _nop(T...) {};
   template <typename T, typename Enable = void> struct has_regular : std::false_type {};
   template <typename T> struct has_regular<T, decltype(_nop(std::declval<typename T::regular_type>()))> : std::true_type {};
   template <typename T, bool HasRegular = has_regular<T>::value> struct _regular_type_if_view_else_type_t;
-  template <typename T> struct _regular_type_if_view_else_type_t<T, false> { using type = T; };
-  template <typename T> struct _regular_type_if_view_else_type_t<T, true> { using type = typename T::regular_type; };
+  template <typename T> struct _regular_type_if_view_else_type_t<T, false> {
+    using type = T;
+  };
+  template <typename T> struct _regular_type_if_view_else_type_t<T, true> {
+    using type = typename T::regular_type;
+  };
   template <typename A> using regular_type_if_view_else_type_t = typename _regular_type_if_view_else_type_t<std::decay_t<A>>::type;
 
   //---------------------  py_converters -----------------------------
