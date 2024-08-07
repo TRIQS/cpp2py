@@ -1109,6 +1109,8 @@ template <typename T> std::function<PyObject *(PyObject *, std::string)> make_py
 extern "C" __attribute__((visibility("default"))) PyObject* PyInit_${module.name}(void)
 {
 
+  if (not cpp2py::check_python_version("${module.name}")) return NULL;
+
 // import numpy iff 'numpy/arrayobject.h' included
 #ifdef Py_ARRAYOBJECT_H
     import_array();

@@ -19,6 +19,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <iostream>
 #include "./exceptions.hpp"
 #include "./pyref.hpp"
 #include <time.h>
@@ -109,5 +110,12 @@ namespace cpp2py {
     }
     static bool is_convertible(PyObject *ob, bool raise_exception) { return true; }
   };
+
+  // Check python version.
+  // The version passed here is the version of libpython used to compile the module
+  // as the module includes this file.
+  // MUST be in cpp. do NOT put this function in hpp.
+  bool check_python_version(const char *module_name = nullptr, long version_hex = PY_VERSION_HEX, long version_major = PY_MAJOR_VERSION,
+                                   long version_minor = PY_MINOR_VERSION, long version_micro = PY_MICRO_VERSION);
 
 } // namespace cpp2py
