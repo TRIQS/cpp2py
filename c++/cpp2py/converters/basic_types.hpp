@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <numpy/arrayobject.h>
 #include "../py_converter.hpp"
+#include "./complex.hpp"
 
 namespace cpp2py {
 
