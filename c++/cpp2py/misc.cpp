@@ -52,7 +52,6 @@ namespace cpp2py {
     //  are identical.
     auto sys            = pyref::module("sys");
     auto rt_version_hex = PyLong_AsLong(sys.attr("hexversion"));
-    std::cerr << rt_version_hex << " = ? " << version_hex;
     if (rt_version_hex != version_hex) {
       auto rt_version = sys.attr("version_info");
       out << "\n\n  Can not load the c2py module "                                        //
