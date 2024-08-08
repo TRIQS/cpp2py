@@ -19,10 +19,8 @@
 #pragma once
 #include <array>
 #include <tuple>
-#include <numeric>
-
+#include "../py_converter.hpp"
 #include "../traits.hpp"
-#include "../pyref.hpp"
 
 namespace cpp2py {
 

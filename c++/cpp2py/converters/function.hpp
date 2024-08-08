@@ -18,7 +18,8 @@
 
 #pragma once
 #include <functional>
-#include "../pyref.hpp"
+#include "../py_converter.hpp"
+#include "../misc.hpp"
 
 namespace cpp2py {
 

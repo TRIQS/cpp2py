@@ -17,12 +17,9 @@
 // Authors: Olivier Parcollet, Nils Wentzell
 
 #pragma once
-#include "../pyref.hpp"
-#include "./complex.hpp"
-
 #include <cstddef>
-
 #include <numpy/arrayobject.h>
+#include "../py_converter.hpp"
 
 namespace cpp2py {
 

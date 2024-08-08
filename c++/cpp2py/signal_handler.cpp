@@ -21,48 +21,48 @@
 #include <string.h>
 #include <vector>
 #include <iostream>
-namespace cpp2py {
-  namespace signal_handler {
 
-    namespace {
+namespace cpp2py::signal_handler {
 
-      std::vector<int> signals_list;
-      bool initialized = false;
+  namespace {
 
-      void slot(int signal) {
-        std::cerr << "TRIQS : Received signal " << signal << std::endl;
-        signals_list.push_back(signal);
-      }
-    } // namespace
+    std::vector<int> signals_list;
+    bool initialized = false;
 
-    void start() {
-      if (initialized) return;
-      static struct sigaction action;
-      memset(&action, 0, sizeof(action));
-      action.sa_handler = slot;
-      sigaction(SIGINT, &action, NULL);
-      sigaction(SIGTERM, &action, NULL);
-      sigaction(SIGXCPU, &action, NULL);
-      sigaction(SIGQUIT, &action, NULL);
-      sigaction(SIGUSR1, &action, NULL);
-      sigaction(SIGUSR2, &action, NULL);
-      sigaction(SIGSTOP, &action, NULL);
-      initialized = true;
+    void slot(int signal) {
+      std::cerr << "TRIQS : Received signal " << signal << std::endl;
+      signals_list.push_back(signal);
     }
+  } // namespace
 
-    void stop() {
-      signals_list.clear();
-      initialized = false;
-    }
+  void start() {
+    if (initialized) return;
+    static struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = slot;
+    sigaction(SIGINT, &action, NULL);
+    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGXCPU, &action, NULL);
+    sigaction(SIGQUIT, &action, NULL);
+    sigaction(SIGUSR1, &action, NULL);
+    sigaction(SIGUSR2, &action, NULL);
+    sigaction(SIGSTOP, &action, NULL);
+    initialized = true;
+  }
 
-    bool received(bool pop_) {
-      //if (!initialized) start();
-      bool r = signals_list.size() != 0;
-      if (r && pop_) pop();
-      return r;
-    }
+  void stop() {
+    signals_list.clear();
+    initialized = false;
+  }
 
-    int last() { return signals_list.back(); }
-    void pop() { return signals_list.pop_back(); }
-  } // namespace signal_handler
-} // namespace cpp2py
+  bool received(bool pop_) {
+    //if (!initialized) start();
+    bool r = signals_list.size() != 0;
+    if (r && pop_) pop();
+    return r;
+  }
+
+  int last() { return signals_list.back(); }
+  void pop() { return signals_list.pop_back(); }
+
+} // namespace cpp2py::signal_handler

@@ -18,8 +18,8 @@
 
 #pragma once
 #include <set>
+#include "../py_converter.hpp"
 #include "../traits.hpp"
-#include "../pyref.hpp"
 
 namespace cpp2py {
 

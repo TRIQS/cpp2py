@@ -19,9 +19,9 @@
 #pragma once
 #include <tuple>
 #include <variant>
-
+#include "../py_converter.hpp"
+#include "../exceptions.hpp"
 #include "../traits.hpp"
-#include "../pyref.hpp"
 
 namespace cpp2py {
 

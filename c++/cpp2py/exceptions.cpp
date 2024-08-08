@@ -16,9 +16,8 @@
 //
 // Authors: Olivier Parcollet, Nils Wentzell
 
-#include "cpp2py/exceptions.hpp"
-//#include <mpi.h>
 #include <sstream>
+#include "cpp2py/exceptions.hpp"
 
 #ifndef CPP2PY_TRACE_MAX_FRAMES
 #define CPP2PY_TRACE_MAX_FRAMES 50
@@ -37,7 +36,6 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <algorithm>
 #include <iterator>
 
 namespace cpp2py {

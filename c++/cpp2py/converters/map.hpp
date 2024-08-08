@@ -19,7 +19,7 @@
 #pragma once
 #include <map>
 #include "../traits.hpp"
-#include "../pyref.hpp"
+#include "../py_converter.hpp"
 
 namespace cpp2py {
 

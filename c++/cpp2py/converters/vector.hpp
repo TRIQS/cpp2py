@@ -21,9 +21,8 @@
 #include <string>
 #include <cstddef>
 #include <numpy/arrayobject.h>
-
+#include "../py_converter.hpp"
 #include "../traits.hpp"
-#include "../pyref.hpp"
 #include "../macros.hpp"
 #include "../numpy_proxy.hpp"
 

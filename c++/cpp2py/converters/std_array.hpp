@@ -18,7 +18,7 @@
 
 #pragma once
 #include <array>
-#include "../pyref.hpp"
+#include "../py_converter.hpp"
 
 namespace cpp2py {
 

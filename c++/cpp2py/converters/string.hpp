@@ -17,7 +17,8 @@
 // Authors: Olivier Parcollet, Nils Wentzell
 
 #pragma once
-#include "../pyref.hpp"
+#include <string>
+#include "../py_converter.hpp"
 
 namespace cpp2py {
 

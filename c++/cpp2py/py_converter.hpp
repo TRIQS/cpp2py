@@ -18,14 +18,10 @@
 
 #pragma once
 #include <Python.h>
-#include "structmember.h"
 
-#include "./get_module.hpp"
-#include "./macros.hpp"
 #include "./pyref.hpp"
 
 #include <string>
-#include <complex>
 #include <map>
 #include <memory>
 #include <typeindex>
