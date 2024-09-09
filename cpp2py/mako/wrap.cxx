@@ -1,8 +1,9 @@
-#include<array>
-#include<complex>
-#include<string>
-#include<iostream> //for std::cout...
-#include<cstddef>
+#include <array>
+#include <complex>
+#include <csignal>
+#include <cstddef>
+#include <iostream> //for std::cout...
+#include <string>
 using dcomplex = std::complex<double>;
 
 // C.f. https://numpy.org/doc/1.21/reference/c-api/array.html#importing-the-api
