@@ -345,7 +345,7 @@ class class_:
            - "tuple" : reduce it to a tuple of smaller objects, using the
               boost serialization compatible template in C++, and the converters of the smaller objects.
            - "h5" : serialize via a string, made by
-              triqs::serialize/triqs::deserialize.
+              h5::serialize/h5::deserialize.
               Requires hdf5 >1.8.9.
            - "repr" : serialize via a string produced by python repr, reconstructed by eval.
 
