@@ -39,6 +39,8 @@ else()
     find_library(LIBCLANG_LOCATION
       NAMES
         clang
+        clang-20
+        clang-19
         clang-18
         clang-17
         clang-16
