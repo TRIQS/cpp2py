@@ -29,3 +29,10 @@
 #include "./cpp2py/py_converter.hpp"
 #include "./cpp2py/misc.hpp"
 #include "./cpp2py/converters/basic_types.hpp"
+
+// Remove error on gcc complaining that the specialization
+// happens after the first instantiation
+#ifdef C2PY_INCLUDED
+#include "./cpp2py/converters/std_array.hpp"
+#endif
+
