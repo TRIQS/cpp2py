@@ -112,7 +112,7 @@ def get_method_qualification(node):
     It is just after a ) if it exists (a type can not end with a ) )
     """
     s = ' '.join(get_tokens(node))
-    for pat in ["const\s*&*", "&+", "noexcept"]:
+    for pat in [r"const\s*&*", "&+", "noexcept"]:
         m = re.search(r"\) (%s)" % pat, s)
         if m: return m.group(1).strip()
     return ''

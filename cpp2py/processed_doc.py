@@ -52,19 +52,19 @@ def replace_latex(s, escape_slash=False):
      
     """
     if not s: return s
-    any_math_char = 'A-Za-z0-9{}\[\],;|\(\)=./\/+-_^\''  # any math character
+    any_math_char = r'A-Za-z0-9{}\[\],;|\(\)=./\/+-_^\''  # any math character
     # matches all expressions starting and ending with any math char, with possibly whitespaces in between
-    pattern_1 = '\$([' + any_math_char + '][' + any_math_char + ' ]*[' + any_math_char + ']+)\$'
+    pattern_1 = r'\$([' + any_math_char + '][' + any_math_char + ' ]*[' + any_math_char + r']+)\$'
     # matches any single math char
-    pattern_2 = '\$([' + any_math_char + '])\$'
+    pattern_2 = r'\$([' + any_math_char + r'])\$'
     # out of line formula
-    text = re.sub('\$' + pattern_1 + '\$', r'\n\n.. math::\n\t\t\1\n\n..\n', s)
-    text = re.sub('\$' + pattern_2 + '\$', r'\n\n.. math::\n\t\t\1\n\n..\n', text)
+    text = re.sub(r'\$' + pattern_1 + r'\$', r'\n\n.. math::\n\t\t\1\n\n..\n', s)
+    text = re.sub(r'\$' + pattern_2 + r'\$', r'\n\n.. math::\n\t\t\1\n\n..\n', text)
     # inline formula
     text = re.sub(pattern_1, r':math:`\1`', text)
     text = re.sub(pattern_2, r':math:`\1`', text)
     # to create a hyperlink
-    text = re.sub('\[\[([A-Za-z0-9{}\(,\)=./\/+-_]+)\]\]', r':ref:`\1`', text)
+    text = re.sub(r'\[\[([A-Za-z0-9{}\(,\)=./\/+-_]+)\]\]', r':ref:`\1`', text)
 
     if escape_slash: text = text.encode('string_escape')
 
