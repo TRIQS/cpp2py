@@ -39,6 +39,9 @@ else()
     find_library(LIBCLANG_LOCATION
       NAMES
         clang
+        clang-23
+        clang-22
+        clang-21
         clang-20
         clang-19
         clang-18
@@ -72,6 +75,11 @@ else()
     find_program(CLANG_COMPILER
       NAMES
         clang++
+        clang++-23
+        clang++-22
+        clang++-21
+        clang++-20
+        clang++-19
         clang++-18
         clang++-17
         clang++-16
