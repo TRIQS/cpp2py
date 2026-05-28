@@ -86,7 +86,7 @@ function(add_cpp2py_module)
   set(wrap_name ${CMAKE_CURRENT_BINARY_DIR}/${module_dir}/${module_name}_wrap.cxx)   # path to the wrapping code
 
   add_custom_command(OUTPUT ${wrap_name} DEPENDS ${desc_name} ${header_dependencies}
-    COMMAND PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_MODULE_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/python:${CPP2PY_MODULE_DIR}:${CPP2PY_ADD_MODULE_ADDITIONAL_PYTHONPATH}:$ENV{PYTHONPATH} ${CPP2PY_PYTHON_EXECUTABLE} ${desc_name} ${wrap_name})
 
   add_library(${module_name} MODULE ${wrap_name})
   set_target_properties(${module_name} PROPERTIES SUFFIX "@CPP2PY_PYTHON_MODULE_EXT@")
